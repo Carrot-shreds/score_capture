@@ -1,18 +1,19 @@
 import copy
 import os
+import shutil
 import sys
 import time
 from copy import deepcopy
-from pickletools import uint8
 from typing import Optional
 
+import PySide6.QtCore
 import win32gui, win32con, win32print
 import numpy as np
 import cv2
 import pyautogui
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QCloseEvent, QColor
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QCheckBox
 from PySide6 import QtGui, QtCore
 import pyqtgraph
 from loguru import logger as log
@@ -44,8 +45,6 @@ class UI(QMainWindow, Ui_MainWindow):
         self.window_locate: Optional[WindowLocate] = None
         self.window_preview: Optional[WindowPreview] = None
 
-        self.comboBox_log_level.currentTextChanged.connect(self.change_log_level)
-
         self.spinBox_region = [self.spinBox_region_x, self.spinBox_region_y,
                                self.spinBox_region_width, self.spinBox_region_height]
         self.console = self.textEdit_console
@@ -62,13 +61,20 @@ class UI(QMainWindow, Ui_MainWindow):
         self.spinBox_region_width.setMaximum(self.data.SCREEN_SIZE[0])
         self.spinBox_region_height.setMaximum(self.data.SCREEN_SIZE[1])
 
-        # 绑定按钮响应函数
+        # 绑定响应函数
         self.pushButton_select_path.clicked.connect(self.select_path)
+        self.pushButton_select_folder.clicked.connect(self.select_folder)
+        self.pushButton_open_folder.clicked.connect(self.open_folder)
+        # 侧边栏
         self.pushButton_locate.clicked.connect(lambda: WindowLocate(self))
         self.pushButton_preview.clicked.connect(lambda: WindowPreview(self))
         self.pushButton_capture.clicked.connect(self.toggle_capture)
         self.pushButton_stitch.clicked.connect(self.start_stitch)
         self.pushButton_reclip.clicked.connect(self.start_reclip)
+        # 实时切换
+        self.comboBox_log_level.currentTextChanged.connect(self.change_log_level)
+        self.checkBox_always_on_top.checkStateChanged.connect(
+            lambda: self.set_always_on_top(bool(self.checkBox_always_on_top.checkState().value)))
 
         self.init_data()
 
@@ -83,7 +89,7 @@ class UI(QMainWindow, Ui_MainWindow):
                 self.data.ini_file = self.data.exe_path + s + "config.ini"
                 self.data.score_save_path = self.data.exe_path + s + "output" + s
         # region
-        self.data.region.set([self.frameGeometry().x(), self.frameGeometry().y(),
+        self.data.region.set([int(self.frameGeometry().x()/2), int(self.frameGeometry().y()/2),
                               self.frameGeometry().width(), int(self.frameGeometry().height() / 3)])
 
         # 读取配置文件
@@ -100,6 +106,8 @@ class UI(QMainWindow, Ui_MainWindow):
         self.logThread.signalForText.connect(self.output_log_to_ui)
         sys.stderr = self.logThread
         init_log(showlog_level=self.data.log_output_level)
+        # 窗口设置
+        self.set_always_on_top(self.data.always_on_top)
 
         # 刷新范围显示
         self.flush_ui_display_data()
@@ -118,13 +126,21 @@ class UI(QMainWindow, Ui_MainWindow):
                 return False
             if self.data.score_title in os.listdir(self.data.score_save_path):  # 解决文件夹重名问题
                 new_title = self.get_unused_filename(self.data.score_title)
-                reply = QMessageBox.question(self, f"工作目录下已存在{self.data.score_title}文件夹",
-                                             f"将修改曲谱标题，并新建文件夹{new_title}",
-                                             QMessageBox.StandardButton.Yes,
-                                             QMessageBox.StandardButton.Cancel)
-                if reply == QMessageBox.StandardButton.Cancel:
-                    return False
-                self.data.score_title = new_title
+                messagebox = QMessageBox()
+                messagebox.setWindowTitle(f"工作目录下已存在{self.data.score_title}文件夹")
+                messagebox.setText(f"清空文件夹，或修改曲谱标题，并新建文件夹{new_title}")
+                messagebox.addButton("清空文件夹", QMessageBox.ButtonRole.YesRole)
+                messagebox.addButton("新建文件夹", QMessageBox.ButtonRole.NoRole)
+                messagebox.addButton("取消", QMessageBox.ButtonRole.NoRole)
+                messagebox.exec()
+                match messagebox.clickedButton().text():
+                    case "清空文件夹":
+                        init_log(showlog_level=self.data.log_output_level)  # 释放进程对子日志目录的占用
+                        shutil.rmtree(os.path.join(self.data.score_save_path, self.data.score_title))
+                    case "新建文件夹":
+                        self.data.score_title = new_title
+                    case "取消":
+                        return False
                 self.flush_ui_display_data()
 
             working_path = self.data.score_save_path + "\\" + self.data.score_title
@@ -169,7 +185,10 @@ class UI(QMainWindow, Ui_MainWindow):
         self.data.working_path = working_path
         init_log(sub_log_path=working_path, showlog_level=self.data.log_output_level)  # 添加子日志
 
-        self.stitch_thread.start()  # 启动截图线程
+        try:
+            self.stitch_thread.start()  # 启动截图线程
+        except Exception:
+            self.stitch_thread.signal_finished.emit()
 
     def start_reclip(self) -> None:
         def _finished() -> None:
@@ -188,7 +207,10 @@ class UI(QMainWindow, Ui_MainWindow):
         self.data.working_path = working_path
         init_log(sub_log_path=working_path, showlog_level=self.data.log_output_level)  # 添加子日志
 
-        self.reclip_thread.start()  # 启动截图线程
+        try:
+            self.reclip_thread.start()  # 启动截图线程
+        except Exception:
+            self.reclip_thread.signal_finished.emit()
 
     def output_log_to_ui(self, text: str) -> None:
         """
@@ -215,9 +237,39 @@ class UI(QMainWindow, Ui_MainWindow):
         os.chdir(self.data.score_save_path)  # 切换程序工作目录
         self.lineEdit_save_path.setText(path)
 
+    def select_folder(self) -> None:
+        """浏览并选择本地保存路径"""
+        path = QFileDialog.getExistingDirectory(self)
+        if path == "":
+            return  # 当点击取消时，目录为空
+        self.data.score_title = os.path.basename(path)
+        self.lineEdit_score_title.setText(self.data.score_title)
+
+    def open_folder(self) -> None:
+        """在资源管理器中打开目录"""
+        # 调用start “path” 系统命令
+        self.data.score_save_path = self.lineEdit_save_path.text()
+        self.data.score_title = self.lineEdit_score_title.text()
+        if self.data.score_title in os.listdir(self.data.score_save_path):
+            os.system("start " + os.path.join(self.data.score_save_path, self.data.score_title))
+        else:
+            log.warning(f"打开目录失败，{self.data.score_save_path}下不存在{self.data.score_title}文件夹")
+
+    def set_always_on_top(self, state:bool) -> None:
+        """设置窗口置顶状态"""
+        # TODO 启动时会闪一下，考虑进行优化
+        self.setVisible(False)
+        if state:
+            self.setWindowFlag(PySide6.QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
+        else:
+            self.setWindowFlag(PySide6.QtCore.Qt.WindowType.WindowStaysOnTopHint, False)
+        self.setVisible(True)
+        self.data.always_on_top = state
+
+
     def check_ui_input(self) -> bool:
         """检查ui输入数据的范围是否有效,并弹出相应的错误对话框"""
-        # TODO 目录检查
+        # TODO 目录合法检查
         # 定位设置
         x, y, w, h = self.spinBox_region
         (max_width, max_height) = self.data.SCREEN_SIZE
@@ -244,6 +296,7 @@ class UI(QMainWindow, Ui_MainWindow):
             os.chdir(self.data.score_save_path)
         self.data.score_save_format = self.comboBox_save_format.currentText()
         self.data.if_auto_manage_config = bool(self.checkBox_auto_manage_config.checkState().value)
+        self.data.always_on_top = bool(self.checkBox_always_on_top.checkState().value)
         # 定位设置
         self.data.region.set([i.value() for i in self.spinBox_region])
         # 截图设置
@@ -266,6 +319,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.comboBox_save_format.setEditText(self.data.score_save_format)
         self.comboBox_log_level.setCurrentText(self.data.log_output_level)
         self.checkBox_auto_manage_config.setChecked(self.data.if_auto_manage_config)
+        self.checkBox_always_on_top.setChecked(self.data.always_on_top)
         # 定位设置
         i = 0
         for w in self.spinBox_region:
@@ -336,6 +390,8 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
 
         self.pushButton_locate.clicked.connect(self.locate)
         self.pushButton_preview.clicked.connect(lambda: WindowPreview(self.ui))
+
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowMinimizeButtonHint, True)  # 为窗口添加最小化按钮
 
         self.show()
 
@@ -575,31 +631,35 @@ class StitchThread(QtCore.QThread):
         score_detections = ScoreDetections(path, data.score_title)
         image_files:list[str] = []
 
-        # 获取检测数据
-        log.info("开始检测图像中的线段")
-        for filename in os.listdir(path):
-            if filename.rfind("image") >= 0:
-                if filename.rfind("detected") >= 0:  # 移除检测过的图像
-                    os.remove(os.path.join(path, filename))
-                    continue
-                image_files.append(filename)
-                image_path = os.path.join(path, filename)
-                image = read_image(image_path)
-                image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-                horizontal_lines = detect_horizontal_lines(image_gray)
-                vertical_lines = detect_vertical_lines(image_gray, horizontal_lines)
-                for l in horizontal_lines:
-                    l.draw(image)
-                for l in vertical_lines:
-                    l.draw(image)
-                save_image(path + "\\" + filename.split(".")[0] + "-detected" + data.score_save_format, image)
-                score_detections.add_image(filename, horizontal_lines, vertical_lines)
-                log.debug(f"{filename}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
-        log.info("线段检测完毕，已生成对应预览图")
+        if "ScoreDetections" in os.listdir(path):
+            score_detections:ScoreDetections = ScoreDetections.load_from_file(os.path.join(path, "ScoreDetections"))
+            image_files = score_detections.get_image_filenames()
+        else:
+            # 获取检测数据
+            log.info("开始检测图像中的线段")
+            for filename in os.listdir(path):
+                if filename.rfind("image") >= 0:
+                    if filename.rfind("detected") >= 0:  # 移除检测过的图像
+                        os.remove(os.path.join(path, filename))
+                        continue
+                    image_files.append(filename)
+                    image_path = os.path.join(path, filename)
+                    image = read_image(image_path)
+                    image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+                    horizontal_lines = detect_horizontal_lines(image_gray)
+                    vertical_lines = detect_vertical_lines(image_gray, horizontal_lines)
+                    for l in horizontal_lines:
+                        l.draw(image)
+                    for l in vertical_lines:
+                        l.draw(image)
+                    save_image(path + "\\" + filename.split(".")[0] + "-detected" + data.score_save_format, image)
+                    score_detections.add_image(filename, horizontal_lines, vertical_lines)
+                    log.debug(f"{filename}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
+            log.info("线段检测完毕，已生成对应预览图")
 
         # 排序图片
         image_format = "." + image_files[0].split(".")[-1]
-        num = [int(f.split(".")[0].split("image")[-1]) for f in image_files]
+        num = [int(f.split(".")[0].split("image")[-1]) for f in image_files]  # 转换为数字后排序
         num.sort()
         image_names:list[str] = []
         for n in num:
@@ -633,10 +693,6 @@ class StitchThread(QtCore.QThread):
         log.info(f"图像拼接完毕，已生成预览图{result_file}")
 
         self.signal_finished.emit()
-
-
-
-
 
 
 class ReclipThread(QtCore.QThread):
@@ -721,8 +777,6 @@ class ReclipThread(QtCore.QThread):
             current_y += h
 
         save_image(path + "\\" + data.score_title + "-reclip" + data.score_save_format, canvas)
-
-
 
         self.signal_finished.emit()
 

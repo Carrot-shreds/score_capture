@@ -1,3 +1,4 @@
+import pickle
 import sys
 from typing import Optional, Literal, overload, Any
 
@@ -31,7 +32,7 @@ class DATA:
         self.score_title: str = "untitled"
         self.score_save_format: str = ".jpg"
         self.log_output_level = "DEBUG"
-
+        self.always_on_top: bool = True
 
         # 定位设置
         self.region:Region = Region(0,0,114,511)  # 截图范围，（x，y，w，h）
@@ -215,7 +216,7 @@ class ScoreDetections:
         self.path = path
         self.title = title
         self.images:dict[str, ImageDetection] = {
-            # "image0": ImageDetection(self.path, "image0")
+            # "image0.jpg": ImageDetection(self.path, "image0.jpg")
         }
 
     def add_image(self, filename:str,
@@ -223,13 +224,21 @@ class ScoreDetections:
         self.images[filename] = ImageDetection(self.path, filename,
                                                horizontal_lines, vertical_lines)
 
+    def get_image_filenames(self) -> list[str]:
+        """获取所有的图像名称"""
+        return [k for k in self.images.keys()]
+
     def __getitem__(self, key) -> ImageDetection:
         return self.images.get(key)
 
+    # noinspection PyTypeChecker
+    def save_to_file(self, file) -> None:
+        """保存到文件中"""
+        with open(file, "wb") as f:
+            pickle.dump(self, f)
 
-    def save_to_file(self) -> None:
-        pass
-
-    @classmethod
-    def load_from_file(cls) -> None:
-        pass
+    @staticmethod
+    def load_from_file(file):
+        """从文件中读取"""
+        with open(file, "rb") as f:
+            return pickle.load(f)

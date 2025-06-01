@@ -29,6 +29,8 @@ def build():
         "/c",
         "nuitka",
         "--standalone",
+        "--clang",
+        "--msvc=latest",
         "--enable-plugin=pyside6",
         "--remove-output",
         "--output-dir=build",
