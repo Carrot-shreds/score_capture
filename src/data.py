@@ -44,12 +44,15 @@ class DATA:
         self.if_keep_last: bool = True
         self.if_reverse_image: bool = False
 
+        # 拼接设置
+        self.stitch_method: Literal["SSIM", "MSE"] = "MSE"
+
         # 配置设置
         self.if_auto_manage_config: bool = True
 
-        # 图像识别设置
-        self.horizontal_lines_num: int = 6
-        self.bar_lines_num: int = 0
+        # # 图像识别设置
+        # self.horizontal_lines_num: int = 6
+        # self.bar_lines_num: int = 0
 
         # log config
         self.log_output_color: dict[str, str] = {  # log level与其对应的输出颜色
@@ -202,10 +205,11 @@ class ImageDetection:
 
     def get_lines_index(self,
                         direction:Literal["horizontal", "vertical"]="vertical",
+                        extern_width:int = 5,
                         reverse=False,
                         ) -> np.ndarray:
         lines = self.horizontal_lines if direction == "horizontal" else self.vertical_lines
-        points = np.concatenate([l.get_index_points(extern_width=5, reverse=reverse
+        points = np.concatenate([l.get_index_points(extern_width=extern_width, reverse=reverse
                                                     ) for l in lines])
         return points
 
@@ -229,7 +233,12 @@ class ScoreDetections:
         return [k for k in self.images.keys()]
 
     def __getitem__(self, key) -> ImageDetection:
-        return self.images.get(key)
+        if type(key) == str:
+            return self.images.get(key)
+        elif type(key) == int:
+            return self.images.get(self.get_image_filenames()[key])
+        else:
+            raise KeyError(key)
 
     # noinspection PyTypeChecker
     def save_to_file(self, file) -> None:

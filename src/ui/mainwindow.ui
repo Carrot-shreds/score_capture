@@ -458,6 +458,22 @@ Capture</string>
            </item>
            <item row="3" column="0" colspan="8">
             <layout class="QGridLayout" name="gridLayout_6">
+             <item row="1" column="3">
+              <widget class="QSpinBox" name="spinBox_bar_lines_num"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_17">
+               <property name="layoutDirection">
+                <enum>Qt::LayoutDirection::LeftToRight</enum>
+               </property>
+               <property name="text">
+                <string>拼接点算法：</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="2">
               <widget class="QLabel" name="label_18">
                <property name="layoutDirection">
@@ -471,33 +487,31 @@ Capture</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="spinBox_horizontal_lines_num"/>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_17">
-               <property name="layoutDirection">
-                <enum>Qt::LayoutDirection::LeftToRight</enum>
-               </property>
-               <property name="text">
-                <string>水平线数量：</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QSpinBox" name="spinBox_bar_lines_num"/>
-             </item>
              <item row="0" column="0" colspan="4">
               <widget class="QLabel" name="label_24">
                <property name="text">
-                <string>图像识别设置</string>
+                <string>图像拼接设置</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="comboBox_stitch_method">
+               <property name="currentText">
+                <string>MSE</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>SSIM</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>MSE</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>

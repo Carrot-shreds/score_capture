@@ -28,8 +28,6 @@ class Config:
             f"{self.data.capture_delay=}": [[float], ["Capture", "capture_delay"]],
             f"{self.data.if_keep_last=}": [[bool], ["Capture", "if_keep_last_group"]],
             f"{self.data.if_reverse_image=}": [[bool], ["Capture", "if_reverse_image"]],
-
-            f"{self.data.horizontal_lines_num=}": [[bool], ["Detect", "horizontal_lines_num"]],
         }
         self.image = {k.split("=")[0].split(".")[-1]: v for k, v in self.image.items()}  # 获取变量名作为Key
 

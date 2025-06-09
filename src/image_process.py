@@ -6,7 +6,7 @@ import cv2
 from loguru import logger as log
 from skimage.metrics import structural_similarity as compare_ssim
 
-from data import Line, DATA, TYPE_IMAGE
+from data import Line, DATA, TYPE_IMAGE, ScoreDetections, ImageDetection
 
 model = cv2.dnn_superres.DnnSuperResImpl.create()
 model.readModel("E:/dev_code/python/score_capture/src/resource/superres_model/ESPCN_x2.pb")
@@ -48,6 +48,22 @@ def detect_horizontal_lines(img: np.ndarray, coefficient:float = 2.0) -> list[Li
         log.warning("水平线检测结果为空")
     return lines
 
+def get_score_lines(horizontal_lines: list[Line]) -> list[Line]:
+    """从水平线检测结果中获取曲谱部分的横线"""
+    horizontal_lines_ys = np.asarray([line.point1[1] for line in horizontal_lines])
+    distance = horizontal_lines_ys[1:] - horizontal_lines_ys[:-1]
+    # if len(horizontal_lines) > 7 or np.std(distance) - np.average(distance, axis=0) > 0:
+    #     index: np.ndarray = np.where(distance > np.average(distance))[0] + 1
+    #     index: np.ndarray = np.sort(np.append(index, [0, len(horizontal_lines)]))
+    #     index: list = [(int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)]
+    #     index: list = [i for i in index if (i[1] - i[0]) > 3]
+    #     horizontal_lines: list[Line] = [horizontal_lines[i:j] for i, j in index][-1]
+    index = np.argwhere((distance - np.average(distance, axis=0)) / np.std(distance) > 1) + 1
+    index = np.sort(np.append(index, [0, len(horizontal_lines)]))
+    index = [(int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)]
+    index = [i for i in index if (i[1] - i[0]) > 3]
+    return [horizontal_lines[i:j] for i, j in index][-1]
+
 
 def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]] = None,
                           coefficient:float = 0.8) -> list[Line]:
@@ -65,20 +81,7 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
         log.warning("由于水平线检测结果为空，未进行竖直线检测")
         return []
 
-    horizontal_lines_ys = np.asarray([line.point1[1] for line in horizontal_lines])
-    distance = horizontal_lines_ys[1:] - horizontal_lines_ys[:-1]
-    # if len(horizontal_lines) > 7 or np.std(distance) - np.average(distance, axis=0) > 0:
-    #     index: np.ndarray = np.where(distance > np.average(distance))[0] + 1
-    #     index: np.ndarray = np.sort(np.append(index, [0, len(horizontal_lines)]))
-    #     index: list = [(int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)]
-    #     index: list = [i for i in index if (i[1] - i[0]) > 3]
-    #     horizontal_lines: list[Line] = [horizontal_lines[i:j] for i, j in index][-1]
-    index = np.argwhere((distance - np.average(distance, axis=0))/np.std(distance) > 1) + 1
-    index = np.sort(np.append(index, [0, len(horizontal_lines)]))
-    index = [(int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)]
-    index = [i for i in index if (i[1] - i[0]) > 3]
-    horizontal_lines: list[Line] = [horizontal_lines[i:j] for i, j in index][-1]
-
+    horizontal_lines = get_score_lines(horizontal_lines)  # 水平线预处理
 
     # 初步识别
     top_line_y = horizontal_lines[0].start_pixel + 2  # 线谱中最上方的那条线，-2以确保包含线宽
@@ -123,6 +126,15 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
                    ) for l in result]
     return result
 
+def get_barline_num_region(image_detection: ImageDetection) -> (int, int):
+    """获取图片上半区域中，小节数上下的区域，用以对该区域加权计算"""
+    point1_y = image_detection.vertical_lines[0].point1[1]  # 小节线的上方点y
+    point2_y = image_detection.vertical_lines[0].point2[1]
+    detect_width = abs(point2_y - point1_y)
+    detect_start = int(point1_y - detect_width / 2)
+    detect_start = detect_start if detect_start >= 0 else 0  # 防止出现负数
+    detect_end = int(point1_y + detect_width / 2)
+    return detect_start, detect_end
 
 def image_pre_process(img: TYPE_IMAGE | Image, data: DATA) -> np.ndarray:
     """图像预处理"""
@@ -161,7 +173,7 @@ def compare_image(image1: TYPE_IMAGE, image2: TYPE_IMAGE, method: Literal["SSIM"
     if method == "MSE":
         diff = np.sum((image1.flatten() - image2.flatten()) ** 2) / image1.size
     elif method == "SSIM":
-        diff = compare_ssim(image1, image2)
+        diff = compare_ssim(image1, image2, data_range=255)
     else:
         raise ValueError("错误的算法类型")
     return diff

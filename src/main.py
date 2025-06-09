@@ -13,7 +13,7 @@ import cv2
 import pyautogui
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QCloseEvent, QColor
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QCheckBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget
 from PySide6 import QtGui, QtCore
 import pyqtgraph
 from loguru import logger as log
@@ -24,7 +24,7 @@ from ui.preview import Ui_Widget_Preview
 from data import DATA, Line, TYPE_IMAGE, ScoreDetections
 from log import LogThread, init_log
 from image_process import (detect_vertical_lines, detect_horizontal_lines,
-                           save_image,read_image, image_pre_process, compare_image)
+                           save_image, read_image, image_pre_process, compare_image, get_score_lines, get_barline_num_region)
 
 __version__ = "0.0.2"
 
@@ -305,9 +305,11 @@ class UI(QMainWindow, Ui_MainWindow):
         self.data.capture_delay = self.doubleSpinBox_capture_delay.value()
         self.data.if_keep_last = bool(self.checkBox_keep_last.checkState().value)
         self.data.if_reverse_image = bool(self.checkBox_reverse_image.checkState().value)
-        # 图像识别设置
-        self.data.horizontal_lines_num = self.spinBox_horizontal_lines_num.value()
-        self.data.bar_lines_num = self.spinBox_bar_lines_num.value()
+        # 拼接设置
+        self.data.stitch_method = self.comboBox_stitch_method.currentText()
+        # # 图像识别设置
+        # self.data.horizontal_lines_num = self.spinBox_horizontal_lines_num.value()
+        # self.data.bar_lines_num = self.spinBox_bar_lines_num.value()
 
         return True
 
@@ -331,9 +333,11 @@ class UI(QMainWindow, Ui_MainWindow):
         self.doubleSpinBox_capture_delay.setValue(self.data.capture_delay)
         self.checkBox_keep_last.setChecked(self.data.if_keep_last)
         self.checkBox_reverse_image.setChecked(self.data.if_reverse_image)
-        # 图像识别设置
-        self.spinBox_horizontal_lines_num.setValue(self.data.horizontal_lines_num)
-        self.spinBox_bar_lines_num.setValue(self.data.bar_lines_num)
+        # 拼接设置
+        self.comboBox_stitch_method.setCurrentText(self.data.stitch_method)
+        # # 图像识别设置
+        # self.spinBox_horizontal_lines_num.setValue(self.data.horizontal_lines_num)
+        # self.spinBox_bar_lines_num.setValue(self.data.bar_lines_num)
 
     def get_unused_filename(self, filename: str, path: str = "") -> str:
         """
@@ -634,6 +638,7 @@ class StitchThread(QtCore.QThread):
         if "ScoreDetections" in os.listdir(path):
             score_detections:ScoreDetections = ScoreDetections.load_from_file(os.path.join(path, "ScoreDetections"))
             image_files = score_detections.get_image_filenames()
+            log.debug("成功读取缓存，跳过线段检测")
         else:
             # 获取检测数据
             log.info("开始检测图像中的线段")
@@ -655,6 +660,7 @@ class StitchThread(QtCore.QThread):
                     save_image(path + "\\" + filename.split(".")[0] + "-detected" + data.score_save_format, image)
                     score_detections.add_image(filename, horizontal_lines, vertical_lines)
                     log.debug(f"{filename}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
+            score_detections.save_to_file(os.path.join(path, "ScoreDetections"))
             log.info("线段检测完毕，已生成对应预览图")
 
         # 排序图片
@@ -669,19 +675,27 @@ class StitchThread(QtCore.QThread):
 
         # 获取mse最低时的拼接像素点
         log.info("比对图片中")
+        detect_start, detect_end = get_barline_num_region(score_detections[0])
         stitch_points:list[int] = []
         for name_index in range(len(image_names) - 1):
-            img1 = np.astype(images_gray[name_index], np.int8)  # ！！！避免差值数据溢出
-            img2 = np.astype(images_gray[name_index + 1], np.int8)
-            barline_index = score_detections[image_names[name_index]].get_lines_index(reverse=True)
-            stitch_index = []
-            for l in score_detections[image_names[name_index+1]].vertical_lines:
-                stitch_index.append(barline_index + l.start_pixel)
-            stitch_index = np.concatenate(stitch_index)
-            stitch_index = np.unique(stitch_index)  # 对索引进行去重
-            diff = [np.average(np.std(img1[:, -offset:] - img2[:, :offset])) for offset in stitch_index]  # 计算两张图像在offset区域中重叠差值的均值
-            stitch_points.append(stitch_index[np.argmin(np.asarray(diff))] + 1)  # 右侧1像素为img2的部分
-            log.debug(f"{image_names[name_index]}-{image_names[name_index + 1]}-stitch_point:{stitch_points[-1]}")
+            img1, img2 = images_gray[name_index], images_gray[name_index + 1]
+            barline_index = score_detections[image_names[name_index]].get_lines_index(reverse=True, extern_width=1)
+            stitch_index = [barline_index + l.start_pixel
+                            for l in score_detections[image_names[name_index+1]].vertical_lines]
+            stitch_index = np.unique(np.concatenate(stitch_index))  # 拼接成一维数组并进行去重
+            if data.stitch_method == "SSIM":
+                diff = [compare_image(img1[:, -offset:],  # 仅计算上方部分，以增大小节数所占比重
+                                      img2[:, :offset])*0.2 +
+                        compare_image(img1[detect_start:detect_end, -offset:],
+                                      img2[detect_start:detect_end, :offset])*0.8
+                        for offset in stitch_index]  # 计算两张图像在offset区域中重叠差值的均值
+                stitch_points.append(int(stitch_index[np.argmax(np.asarray(diff))] + 1))  # 右侧1像素为img2的部分，越大越相似
+            elif data.stitch_method == "MSE":
+                img1, img2 = np.astype(img1, np.int16), np.astype(img2, np.int16) # ！！！避免差值数据溢出
+                diff = [np.std(img1[:, -offset:] - img2[:, :offset]) for offset in stitch_index]
+                stitch_points.append(int(stitch_index[np.argmin(np.asarray(diff))] + 1))  # 同上，越小越相似
+            log.debug(f"{data.stitch_method}-{image_names[name_index]}-{image_names[name_index + 1]}"
+                      f"-stitch_point:{stitch_points[-1]}")
         log.info("图像比对完毕")
 
         # 进行拼接
