@@ -191,8 +191,23 @@ class Line:
         edge =  self.image_shape[0] if self.direction == "horizontal" else self.image_shape[1]
         index_points= np.delete(index_points, np.argwhere(index_points > edge))
         if reverse:
-            index_points = edge - index_points
+            index_points = edge - index_points  # 翻转索引值正方向
         return index_points
+
+    def move_right(self, pixel:int, image_shape:Optional[tuple[int, int]]) -> None:
+        """将线段延水平方向移动指定像素，向右为正"""
+        point1, point2 = list(self.point1), list(self.point2)
+        point1[0] += pixel
+        point2[0] += pixel
+        image_shape = image_shape if image_shape is not None else self.image_shape
+        if not(0<=point1[0]<=image_shape[1] and 0<=point2[0]<=image_shape[1]):
+            raise ValueError("move pixel out of image shape region")  # 线段移动后超出图像范围
+        self.__init__(point1=(point1[0], point1[1]),
+                      point2=(point2[0], point1[1]),
+                      thickness=self.thickness,
+                      direction=self.direction,
+                      image_shape=image_shape)
+
 
 
 class ImageDetection:

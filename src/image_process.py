@@ -126,6 +126,33 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
                    ) for l in result]
     return result
 
+def detect_all_lines_with_clip(img:np.ndarray, clip_length:int=1514) -> tuple[list[Line], list[Line]]:
+    """将图片以指定长度切片后，进行水平与竖直线段的检测"""
+    if len(img.shape) != 2:
+        log.warning("传入图像数组维度不为2，自动转换为灰度图，BGR2GRAY")
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
+
+    lines = [[],[]]
+    region:list[int] = [0, clip_length]
+    while region[1] < (img.shape[1] - clip_length):
+        if region[1] >= img.shape[1] - clip_length*2:
+            clipped_image = img[:, region[0]:img.shape[1]]  # 保证最后一组长度clip_length<length<clip_length*2
+        else:
+            clipped_image = img[:, region[0]:region[1]]
+
+        horizontal_lines = detect_horizontal_lines(clipped_image)
+        for l in horizontal_lines: l.move_right(region[0], img.shape)  # 将线段向右移动指定像素值
+        vertical_lines = detect_vertical_lines(clipped_image, horizontal_lines)
+        for l in vertical_lines: l.move_right(region[0], img.shape)
+
+        lines[0] += horizontal_lines
+        lines[1] += vertical_lines
+        region[0] += clip_length
+        region[1] += clip_length
+
+    return lines[0], lines[1]
+
+
 def get_barline_num_region(image_detection: ImageDetection) -> (int, int):
     """获取图片上半区域中，小节数上下的区域，用以对该区域加权计算"""
     point1_y = image_detection.vertical_lines[0].point1[1]  # 小节线的上方点y

@@ -24,7 +24,8 @@ from ui.preview import Ui_Widget_Preview
 from data import DATA, Line, TYPE_IMAGE, ScoreDetections
 from log import LogThread, init_log
 from image_process import (detect_vertical_lines, detect_horizontal_lines,
-                           save_image, read_image, image_pre_process, compare_image, get_score_lines, get_barline_num_region)
+                           save_image, read_image, image_pre_process, compare_image, get_score_lines,
+                           get_barline_num_region, detect_all_lines_with_clip)
 
 __version__ = "0.0.2"
 
@@ -723,7 +724,6 @@ class ReclipThread(QtCore.QThread):
 
     def run(self):
         """线程入口启动函数，重写自run方法，使用.start()调用"""
-        log.debug("ReclicpThead:started")
         data = deepcopy(self.data)
         path = data.working_path
         stitched_image_file = data.score_title+"-stitched"+data.score_save_format
@@ -742,8 +742,8 @@ class ReclipThread(QtCore.QThread):
         log.info("开始检测图像中的线段")
         image = read_image(os.path.join(path, stitched_image_file))
         image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        horizontal_lines = detect_horizontal_lines(image_gray)
-        vertical_lines = detect_vertical_lines(image_gray, horizontal_lines)
+        horizontal_lines, vertical_lines = detect_all_lines_with_clip(image_gray,
+                                                                      clip_length=data.region.width)
         for l in horizontal_lines:
             l.draw(image)
         for l in vertical_lines:
@@ -755,48 +755,55 @@ class ReclipThread(QtCore.QThread):
         # 小节线分组
         index = np.asarray([l.start_pixel for l in vertical_lines])
         distance = index[1:] - index[:-1]
+        del_index = []
         for i in np.where(distance<np.average(distance)/5)[0]:
             vertical_lines[i].set_thickness(vertical_lines[i+1].end_pixel - vertical_lines[i].start_pixel)
-            vertical_lines.pop(i+1)
+            del_index.append(i+1)
+        bar_lines = list(np.delete(vertical_lines, del_index))
         image = read_image(image_path)
         image_draw = deepcopy(image)
-        for l in vertical_lines:
+        for l in bar_lines:
             l.draw(image_draw)
         save_image(path + "\\" + data.score_title + "-detected-barlines" + data.score_save_format, image_draw)
-        log.info(f"{len(vertical_lines)}")
+        log.info(f"成功对小节线进行归类，共检测出{len(bar_lines)}组小节线,预览图像已保存")
 
         # 进行切片
-        clips = []
+        log.debug("开始进行切片操作")
+        image_clips, clip_index = [], []
         extern_pixel = 4  # 左右额外包含的像素
-        for i in range(4, len(vertical_lines)+1, 4):  # 从第四个小节开始，每四个小节
-            if i == 4:  # 第一段
-                clips.append(image[:, 0:vertical_lines[i].end_pixel + extern_pixel])
-                continue
-            # 中间段
-            if i < len(vertical_lines):
-                clips.append(image[:, vertical_lines[i-4].start_pixel - extern_pixel:
-                                      vertical_lines[i].end_pixel + extern_pixel])
-            if 1 < len(vertical_lines) - i < 4:  # 最后一段
-                clips.append(image[:, vertical_lines[i].start_pixel - extern_pixel:
-                                      vertical_lines[i].image_shape[1]])
+
+        each_line_bar_num = 4  # 每行的固定小节数
+        for i in range(len(bar_lines)):
+            if len(bar_lines) - i <= each_line_bar_num:  # 包含最后一组，随后跳出循环
+                clip_index.append([bar_lines[i].start_pixel - extern_pixel,
+                                   bar_lines[-1].end_pixel + extern_pixel])
+                break
+            elif i % 4 == 0:
+                clip_index.append([bar_lines[i].start_pixel - extern_pixel,
+                                   bar_lines[i+4].end_pixel + extern_pixel])
+        for i in clip_index:
+            image_clips.append(image[:, i[0]:i[1]])
+        log.debug("成功完成切片操作")
 
         # 拼接
-        canvas = np.ones_like(clips[np.argmax([c.size for c in clips])]).astype(np.uint8)*255
-        canvas = np.concatenate([canvas for i in range(len(clips))], axis=0)  # 将画布的高度拓展len(clips)倍
+        log.debug("开始进行拼接操作")
+        canvas = np.ones_like(image_clips[np.argmax([c.size for c in image_clips])]).astype(np.uint8)*255
+        canvas = np.concatenate([canvas for _ in range(len(image_clips))], axis=0)  # 将画布的高度拓展len(clips)倍
         current_y = 0
-        for c in clips:
+        for c in image_clips:
             h = c.shape[0]
             w = c.shape[1]
             canvas[current_y:current_y+h, 0:w, :] = c
             current_y += h
-
-        save_image(path + "\\" + data.score_title + "-reclip" + data.score_save_format, canvas)
+        save_file = path + "\\" + data.score_title + "-reclip" + data.score_save_format
+        save_image(save_file, canvas)
+        log.success(f"拼接操作成功完成，已成功保存图片到{save_file}")
 
         self.signal_finished.emit()
 
 
 
-
+@log.catch()
 def show_main_window() -> None:
     """主窗口进程函数"""
     app = QApplication(sys.argv)

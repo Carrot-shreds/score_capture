@@ -84,19 +84,18 @@ class Config:
         else:
             func_args = []
 
-        match args[0]:
-            case bool():
-                return self.str_to_bool(data)
-            case float():
-                return self.str_to_digit(data)
-            case str():
-                if func_args:
-                    return self.if_str_in_range(data, func_args)
-                else:
-                    return data
-            case _:
+        data_type = args[0]
+        if data_type == bool:
+            return self.str_to_bool(data)
+        elif data_type == float:
+            return self.str_to_digit(data)
+        elif data_type == str:
+            if func_args:
+                return self.if_str_in_range(data, func_args)
+            else:
                 return data
-
+        else:
+            return data
 
     @staticmethod
     def str_to_bool(string: str) -> bool:
