@@ -742,8 +742,12 @@ class ReclipThread(QtCore.QThread):
         log.info("开始检测图像中的线段")
         image = read_image(os.path.join(path, stitched_image_file))
         image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        if "ScoreDetections" in os.listdir(path):
+            clip_length = ScoreDetections.load_from_file(os.path.join(path, "ScoreDetections"))[0].image_shape[1]
+        else:
+            clip_length = int(data.SCREEN_SIZE[0]*0.8)
         horizontal_lines, vertical_lines = detect_all_lines_with_clip(image_gray,
-                                                                      clip_length=data.region.width)
+                                                                      clip_length=clip_length)
         for l in horizontal_lines:
             l.draw(image)
         for l in vertical_lines:
@@ -774,13 +778,15 @@ class ReclipThread(QtCore.QThread):
 
         each_line_bar_num = 4  # 每行的固定小节数
         for i in range(len(bar_lines)):
-            if len(bar_lines) - i <= each_line_bar_num:  # 包含最后一组，随后跳出循环
+            if len(bar_lines) - i <= each_line_bar_num:  # 包含最后一组余数，随后跳出循环
                 clip_index.append([bar_lines[i].start_pixel - extern_pixel,
                                    bar_lines[-1].end_pixel + extern_pixel])
                 break
-            elif i % 4 == 0:
+            elif i % each_line_bar_num == 0:
                 clip_index.append([bar_lines[i].start_pixel - extern_pixel,
-                                   bar_lines[i+4].end_pixel + extern_pixel])
+                                   bar_lines[i+each_line_bar_num].end_pixel + extern_pixel])
+                if i == len(bar_lines) - 1 - each_line_bar_num:
+                    break
         for i in clip_index:
             image_clips.append(image[:, i[0]:i[1]])
         log.debug("成功完成切片操作")

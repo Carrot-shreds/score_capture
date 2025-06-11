@@ -142,7 +142,10 @@ def detect_all_lines_with_clip(img:np.ndarray, clip_length:int=1514) -> tuple[li
 
         horizontal_lines = detect_horizontal_lines(clipped_image)
         for l in horizontal_lines: l.move_right(region[0], img.shape)  # 将线段向右移动指定像素值
-        vertical_lines = detect_vertical_lines(clipped_image, horizontal_lines)
+        try:
+            vertical_lines = detect_vertical_lines(clipped_image, horizontal_lines)
+        except IndexError:
+            vertical_lines = []
         for l in vertical_lines: l.move_right(region[0], img.shape)
 
         lines[0] += horizontal_lines

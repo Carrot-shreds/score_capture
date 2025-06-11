@@ -203,7 +203,7 @@ class Line:
         if not(0<=point1[0]<=image_shape[1] and 0<=point2[0]<=image_shape[1]):
             raise ValueError("move pixel out of image shape region")  # 线段移动后超出图像范围
         self.__init__(point1=(point1[0], point1[1]),
-                      point2=(point2[0], point1[1]),
+                      point2=(point2[0], point2[1]),
                       thickness=self.thickness,
                       direction=self.direction,
                       image_shape=image_shape)
@@ -217,6 +217,7 @@ class ImageDetection:
         self.filename = filename
         self.horizontal_lines = horizontal_lines
         self.vertical_lines = vertical_lines
+        self.image_shape = self.horizontal_lines[0].image_shape
 
     def get_lines_index(self,
                         direction:Literal["horizontal", "vertical"]="vertical",
