@@ -458,8 +458,62 @@ Capture</string>
            </item>
            <item row="3" column="0" colspan="8">
             <layout class="QGridLayout" name="gridLayout_6">
+             <item row="1" column="1">
+              <widget class="QComboBox" name="comboBox_stitch_method">
+               <property name="currentText">
+                <string>SSIM</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>SSIM</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>MSE</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="2">
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>图像拼接设置</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="3">
-              <widget class="QSpinBox" name="spinBox_bar_lines_num"/>
+              <widget class="QComboBox" name="comboBox_reclip_method">
+               <property name="currentText">
+                <string>固定小节</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>固定小节</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>限制宽度</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="label_18">
+               <property name="layoutDirection">
+                <enum>Qt::LayoutDirection::LeftToRight</enum>
+               </property>
+               <property name="text">
+                <string>分割模式：</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_17">
@@ -474,44 +528,49 @@ Capture</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="2">
-              <widget class="QLabel" name="label_18">
+             <item row="1" column="4">
+              <widget class="QLabel" name="label_19">
                <property name="layoutDirection">
                 <enum>Qt::LayoutDirection::LeftToRight</enum>
                </property>
                <property name="text">
-                <string>总小节数：</string>
+                <string>切片对齐：</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                </property>
               </widget>
              </item>
-             <item row="0" column="0" colspan="4">
-              <widget class="QLabel" name="label_24">
+             <item row="1" column="5">
+              <widget class="QComboBox" name="comboBox_clip_align">
+               <property name="currentText">
+                <string>居中</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>居左</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>居中</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>居右</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="2" colspan="4">
+              <widget class="QLabel" name="label_25">
                <property name="text">
-                <string>图像拼接设置</string>
+                <string>重分割设置</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="comboBox_stitch_method">
-               <property name="currentText">
-                <string>MSE</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>SSIM</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>MSE</string>
-                </property>
-               </item>
               </widget>
              </item>
             </layout>

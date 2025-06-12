@@ -47,6 +47,11 @@ class DATA:
         # 拼接设置
         self.stitch_method: Literal["SSIM", "MSE"] = "MSE"
 
+        # 分割设置
+        self.reclip_method: int = 1  # 0:每行固定小节数 1:填充每行最大长度
+        # 样式设置
+        self.clip_align: int = 0  # 每行切片位置 0：靠左，1：居中，2：靠右
+
         # 配置设置
         self.if_auto_manage_config: bool = True
 

@@ -27,7 +27,7 @@ from image_process import (detect_vertical_lines, detect_horizontal_lines,
                            save_image, read_image, image_pre_process, compare_image, get_score_lines,
                            get_barline_num_region, detect_all_lines_with_clip)
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 class UI(QMainWindow, Ui_MainWindow):
     """
@@ -311,6 +311,9 @@ class UI(QMainWindow, Ui_MainWindow):
         # # 图像识别设置
         # self.data.horizontal_lines_num = self.spinBox_horizontal_lines_num.value()
         # self.data.bar_lines_num = self.spinBox_bar_lines_num.value()
+        # 重分割设置
+        self.data.reclip_method = self.comboBox_reclip_method.currentIndex()
+        self.data.clip_align = self.comboBox_clip_align.currentIndex()
 
         return True
 
@@ -339,6 +342,9 @@ class UI(QMainWindow, Ui_MainWindow):
         # # 图像识别设置
         # self.spinBox_horizontal_lines_num.setValue(self.data.horizontal_lines_num)
         # self.spinBox_bar_lines_num.setValue(self.data.bar_lines_num)
+        # 重分割设置
+        self.comboBox_reclip_method.setCurrentIndex(self.data.reclip_method)
+        self.comboBox_clip_align.setCurrentIndex(self.data.clip_align)
 
     def get_unused_filename(self, filename: str, path: str = "") -> str:
         """
@@ -775,31 +781,51 @@ class ReclipThread(QtCore.QThread):
         log.debug("开始进行切片操作")
         image_clips, clip_index = [], []
         extern_pixel = 4  # 左右额外包含的像素
-
-        each_line_bar_num = 4  # 每行的固定小节数
-        for i in range(len(bar_lines)):
-            if len(bar_lines) - i <= each_line_bar_num:  # 包含最后一组余数，随后跳出循环
-                clip_index.append([bar_lines[i].start_pixel - extern_pixel,
-                                   bar_lines[-1].end_pixel + extern_pixel])
-                break
-            elif i % each_line_bar_num == 0:
-                clip_index.append([bar_lines[i].start_pixel - extern_pixel,
-                                   bar_lines[i+each_line_bar_num].end_pixel + extern_pixel])
-                if i == len(bar_lines) - 1 - each_line_bar_num:
+        if data.reclip_method == 0:  # 每行固定小节数
+            each_line_bar_num = 4  # 每行的固定小节数
+            for i in range(len(bar_lines)):
+                if len(bar_lines) - i <= each_line_bar_num:  # 包含最后一组余数，随后跳出循环
+                    clip_index.append([bar_lines[i].start_pixel - extern_pixel,
+                                       bar_lines[-1].end_pixel + extern_pixel])
                     break
+                elif i % each_line_bar_num == 0:
+                    clip_index.append([bar_lines[i].start_pixel - extern_pixel,
+                                       bar_lines[i+each_line_bar_num].end_pixel + extern_pixel])
+                    if i == len(bar_lines) - 1 - each_line_bar_num:
+                        break
+        elif data.reclip_method == 1:  # 填充每行最大长度
+            bar_lines_index = np.asarray([i.start_pixel for i in bar_lines])
+            max_length = bar_lines[4].end_pixel - bar_lines[0].start_pixel  # 使用前四小节的总长度作为限制长度
+            result_index = [bar_lines_index[0]]
+            for i in range(bar_lines_index.size):
+                if bar_lines_index[i]-result_index[-1] >= max_length:
+                    result_index.append(bar_lines_index[i-1])  # 取i-1,不超过最大长度的部分
+            result_index = np.concatenate([np.where(bar_lines_index==i)[0] for i in result_index])  # 图片索引转lines索引
+            if result_index[-1] != bar_lines_index.size-1:
+                result_index = np.append(result_index, bar_lines_index.size-1)  # 添加入最后一组
+            clip_index = [[bar_lines[result_index[i]].start_pixel - extern_pixel,
+                           bar_lines[result_index[i+1]].end_pixel + extern_pixel]
+                          for i in range(result_index.size-1)]
         for i in clip_index:
             image_clips.append(image[:, i[0]:i[1]])
         log.debug("成功完成切片操作")
 
         # 拼接
         log.debug("开始进行拼接操作")
-        canvas = np.ones_like(image_clips[np.argmax([c.size for c in image_clips])]).astype(np.uint8)*255
+        canvas = np.ones_like(image_clips[np.argmax([c.size for c in image_clips])]).astype(np.uint8)*255  # 白色画布
         canvas = np.concatenate([canvas for _ in range(len(image_clips))], axis=0)  # 将画布的高度拓展len(clips)倍
         current_y = 0
+        canvas_width = canvas.shape[1]
         for c in image_clips:
             h = c.shape[0]
             w = c.shape[1]
-            canvas[current_y:current_y+h, 0:w, :] = c
+            if data.clip_align == 0:  # 靠左
+                canvas[current_y:current_y+h, 0:w, :] = c
+            elif data.clip_align == 1:  # 居中
+                space = int((canvas_width-w)/2)
+                canvas[current_y:current_y+h, space:w+space, :] = c
+            elif data.clip_align == 2:  # 靠右
+                canvas[current_y:current_y+h, canvas_width-w:canvas_width, :] = c
             current_y += h
         save_file = path + "\\" + data.score_title + "-reclip" + data.score_save_format
         save_image(save_file, canvas)
