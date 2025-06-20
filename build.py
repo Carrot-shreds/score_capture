@@ -29,11 +29,13 @@ def build():
         "/c",
         "nuitka",
         "--standalone",
+        #"--disable-console",
         "--clang",
         "--msvc=latest",
         "--enable-plugin=pyside6",
         "--remove-output",
         "--output-dir=build",
+        "--report=build/build_report.xml",
         "--output-filename=score_capture.exe",
         "--include-module=" + ",".join([os.path.split(i)[-1].split(".")[0] for i in files if not i.count("main.py")]),
         [i for i in files if i.count("main.py")][0]

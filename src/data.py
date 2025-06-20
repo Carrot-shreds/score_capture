@@ -23,8 +23,8 @@ class DATA:
         self.exe_path = sys.argv[0]
         self.ini_file = self.exe_path + "\\config.ini"
 
-        self.SCREEN_SIZE: (int, int) = pyautogui.size()  # （width，height）
-        self.WINDOW_GEOMETRY: (int, int, int, int) = window_region  # 主窗口几何属性（x,y,宽，高）
+        self.SCREEN_SIZE: tuple[int, int] = pyautogui.size()  # （width，height）
+        self.WINDOW_GEOMETRY: tuple[int, int, int, int] = window_region  # 主窗口几何属性（x,y,宽，高）
 
         # 全局设置
         self.score_save_path: str = self.exe_path + "\\output"  # 保存文件夹目录
@@ -101,7 +101,7 @@ class Region:
     def set_from_geometry(self, geo:QRect) -> None:
         self.set(self.geometry_to_region(geo))
 
-    def tuple(self) -> tuple[int, int, int, int]:
+    def get_tuple(self) -> tuple[int, int, int, int]:
         """获取列表形式"""
         return self.x, self.y, self.width, self.height
 
@@ -118,16 +118,16 @@ class Region:
                 return self.height
         raise IndexError("region index out of range, must in [0-3]")
 
-    def array(self) -> np.ndarray:
+    def get_array(self) -> np.ndarray:
         """获取数组形式"""
-        return np.asarray(self.tuple())
+        return np.asarray(self.get_tuple())
 
     def region_to_geometry(self) -> QRect:
         """四元组（x,y_sin,宽,高） -> x,y加上offset -> 高度减去标题栏的30px -> [x,y,宽,高]"""
         return QRect(self.x, self.y, self.width, self.height)
 
     @staticmethod
-    def geometry_to_region(geometry: QRect) -> (int, int, int, int):
+    def geometry_to_region(geometry: QRect) -> tuple[int, int, int, int]:
         """转换QRect为（x,y,w,h）四元组"""
         return np.asarray((geometry.x(), geometry.y(),
                            geometry.width(), geometry.height()))

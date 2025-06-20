@@ -58,17 +58,23 @@ def get_score_lines(horizontal_lines: list[Line]) -> list[Line]:
     #     index: list = [(int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)]
     #     index: list = [i for i in index if (i[1] - i[0]) > 3]
     #     horizontal_lines: list[Line] = [horizontal_lines[i:j] for i, j in index][-1]
-    index = np.argwhere((distance - np.average(distance, axis=0)) / np.std(distance) > 1) + 1
+    index = np.argwhere((distance - np.average(distance, axis=0)) / np.std(distance) > 2) + 1
     index = np.sort(np.append(index, [0, len(horizontal_lines)]))
     index = [(int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)]
     index = [i for i in index if (i[1] - i[0]) > 3]
-    return [horizontal_lines[i:j] for i, j in index][-1]
+
+    try:
+        result = [horizontal_lines[i:j] for i, j in index][-1]
+    except IndexError:
+        log.warning("水平线检测结果中未找到曲谱部分的横线")
+        return []
+    return result
 
 
 def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]] = None,
                           coefficient:float = 0.8) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有竖直线段(黑色背景图中的白色线)"""
-    # TODO 未检测到线段时的异常处理
+    # TODO 异常处理
     if len(img.shape) != 2:
         log.warning("传入图像数组维度不为2，自动转换为灰度图，BGR2GRAY")
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
@@ -82,6 +88,9 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
         return []
 
     horizontal_lines = get_score_lines(horizontal_lines)  # 水平线预处理
+    if not horizontal_lines:
+        log.warning("曲谱部分的水平线检测结果为空，无法进行竖直线检测")
+        return []
 
     # 初步识别
     top_line_y = horizontal_lines[0].start_pixel + 2  # 线谱中最上方的那条线，-2以确保包含线宽
@@ -114,6 +123,56 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
     del_index:list[int] = [std_y.index(i) for i in std_y if  i > 35]
     bar_lines: np.ndarray = np.delete(bar_lines, del_index)
 
+
+    # 结构化存储结果
+    index:np.ndarray = np.where(np.asarray(bar_lines[1:] - bar_lines[:-1]) != 1)[0] + 1
+    index:np.ndarray = np.sort(np.append(index, [0, len(bar_lines)]))
+    index_region:list[tuple[int, int]] = [(int(index[i]), int(index[i + 1])
+                                           ) for i in range(np.shape(index)[0] - 1)]
+    result:list = [bar_lines[i:j] for i, j in index_region]
+    try:
+        result = [Line((l[0], top_line_y), (l[0], bottom_line_y),
+                    thickness=len(l), direction="vertical", image_shape=img.shape
+                    ) for l in result]
+    except IndexError:
+        log.warning("竖直线检测结果中未找到曲谱部分的竖直线")
+        return []
+    return result
+
+def detect_vertical_blanks(img: np.ndarray, horizontal_lines: Optional[list[Line]] = None,
+                          coefficient:float = 0.8) -> list[Line]:
+    """img为灰度图(二维数组)，识别并返回所有竖直线段(黑色背景图中的白色线)"""
+    # TODO 未检测到线段时的异常处理
+    if len(img.shape) != 2:
+        log.warning("传入图像数组维度不为2，自动转换为灰度图，BGR2GRAY")
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
+    if np.average(img) > 128:
+        img = 255 - img  # 将图像反相为黑底图
+
+    if horizontal_lines is None:
+        horizontal_lines: list[Line] = detect_horizontal_lines(img)
+    if not horizontal_lines:
+        log.warning("由于水平线检测结果为空，未进行竖直线检测")
+        return []
+
+    horizontal_lines = get_score_lines(horizontal_lines)  # 水平线预处理
+
+    # 初步识别
+    top_line_y = horizontal_lines[0].start_pixel + 2  # 线谱中最上方的那条线，-2以确保包含线宽
+    bottom_line_y = horizontal_lines[-1].end_pixel - 2  # 最下方的那条线
+    edge_y: int = img.shape[0] - 2  # 图像底部边缘的坐标
+    sum_columns: np.ndarray = img[top_line_y:bottom_line_y].sum(axis=0)  # 线谱中的和
+    sum_columns_ex: np.ndarray = img[top_line_y:edge_y].sum(axis=0)  # 延伸到底部区域的和
+    sum_columns: np.ndarray = np.asarray(  # 将小于均值的值置为0，以仅保留突出的数据影响
+        [0 if s > np.average(sum_columns) else s for s in sum_columns])
+    sum_columns_ex: np.ndarray = np.asarray(  # 同上
+        [0 if s > np.average(sum_columns_ex) else s for s in sum_columns_ex])
+    bar_lines: np.ndarray = np.where(  # 确保竖直线段没有超出线谱范围
+        (sum_columns / sum_columns.shape[0] - sum_columns_ex / sum_columns_ex.shape[0] * 1) >= 0)[0]
+
+    # std_y:list[int] = [np.std(img[top_line_y:bottom_line_y, i], axis=0) for i in bar_lines]
+    # del_index:list[int] = [std_y.index(i) for i in std_y if  i > 35]
+    # bar_lines: np.ndarray = np.delete(bar_lines, del_index)
 
     # 结构化存储结果
     index:np.ndarray = np.where(np.asarray(bar_lines[1:] - bar_lines[:-1]) != 1)[0] + 1
@@ -156,7 +215,7 @@ def detect_all_lines_with_clip(img:np.ndarray, clip_length:int=1514) -> tuple[li
     return lines[0], lines[1]
 
 
-def get_barline_num_region(image_detection: ImageDetection) -> (int, int):
+def get_barline_num_region(image_detection: ImageDetection) -> tuple[int, int]:
     """获取图片上半区域中，小节数上下的区域，用以对该区域加权计算"""
     point1_y = image_detection.vertical_lines[0].point1[1]  # 小节线的上方点y
     point2_y = image_detection.vertical_lines[0].point2[1]

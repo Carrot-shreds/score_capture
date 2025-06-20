@@ -13,21 +13,22 @@ import cv2
 import pyautogui
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QCloseEvent, QColor
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QInputDialog
 from PySide6 import QtGui, QtCore
 import pyqtgraph
 from loguru import logger as log
 
-from ui.locate import Ui_Dialog_locate
-from ui.mainwindow import Ui_MainWindow
-from ui.preview import Ui_Widget_Preview
+from ui.locate_ui import Ui_Dialog_locate
+from ui.mainwindow_ui import Ui_MainWindow
+from ui.preview_ui import Ui_Widget_Preview
 from data import DATA, Line, TYPE_IMAGE, ScoreDetections
 from log import LogThread, init_log
 from image_process import (detect_vertical_lines, detect_horizontal_lines,
                            save_image, read_image, image_pre_process, compare_image, get_score_lines,
                            get_barline_num_region, detect_all_lines_with_clip)
+from utilities import is_valid_filename
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 class UI(QMainWindow, Ui_MainWindow):
     """
@@ -66,6 +67,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.pushButton_select_path.clicked.connect(self.select_path)
         self.pushButton_select_folder.clicked.connect(self.select_folder)
         self.pushButton_open_folder.clicked.connect(self.open_folder)
+        self.pushButton_rename_folder.clicked.connect(self.rename_folder)
         # 侧边栏
         self.pushButton_locate.clicked.connect(lambda: WindowLocate(self))
         self.pushButton_preview.clicked.connect(lambda: WindowPreview(self))
@@ -133,16 +135,19 @@ class UI(QMainWindow, Ui_MainWindow):
                 messagebox.addButton("清空文件夹", QMessageBox.ButtonRole.YesRole)
                 messagebox.addButton("新建文件夹", QMessageBox.ButtonRole.NoRole)
                 messagebox.addButton("取消", QMessageBox.ButtonRole.NoRole)
+                messagebox.setWindowFlag(PySide6.QtCore.Qt.WindowType.WindowStaysOnTopHint, True)  # 设为置顶，必要
                 messagebox.exec()
                 match messagebox.clickedButton().text():
                     case "清空文件夹":
                         init_log(showlog_level=self.data.log_output_level)  # 释放进程对子日志目录的占用
                         shutil.rmtree(os.path.join(self.data.score_save_path, self.data.score_title))
+                        log.success(f"已清空文件夹{self.data.score_title}")
                     case "新建文件夹":
                         self.data.score_title = new_title
-                    case "取消":
-                        return False
+                        self.flush_ui_display_data()
+                        log.success(f"已新建文件夹{new_title}")
                 self.flush_ui_display_data()
+                return False
 
             working_path = self.data.score_save_path + "\\" + self.data.score_title
             os.mkdir(working_path)
@@ -156,6 +161,8 @@ class UI(QMainWindow, Ui_MainWindow):
 
         def _finished() -> None:
             self.pushButton_capture.setDisabled(False)  # 复位按钮状态
+            self.capture_thread.wait()  # 等待线程结束
+            self.capture_thread.exit()  # 退出线程
             self.capture_thread = CaptureThread(self.data)  # 创建新的线程，以供下次调用
 
         self.capture_thread.signal_finished.connect(_finished)
@@ -171,6 +178,8 @@ class UI(QMainWindow, Ui_MainWindow):
     def start_stitch(self) -> None:
         """启动图像拼接线程"""
         def _finished() -> None:
+            self.stitch_thread.wait()  # 等待线程结束
+            self.stitch_thread.exit()  # 退出线程
             self.stitch_thread = StitchThread(self.data) # 创建新的线程，以供下次调用
 
         if self.stitch_thread.is_working:
@@ -193,6 +202,8 @@ class UI(QMainWindow, Ui_MainWindow):
 
     def start_reclip(self) -> None:
         def _finished() -> None:
+            self.reclip_thread.wait()  # 等待线程结束
+            self.reclip_thread.exit()  # 退出线程
             self.reclip_thread = ReclipThread(self.data)
 
         if self.reclip_thread.is_working:
@@ -234,31 +245,74 @@ class UI(QMainWindow, Ui_MainWindow):
         path = QFileDialog.getExistingDirectory(self)
         if path == "":
             return  # 当点击取消时，目录为空
-        self.data.score_save_path = path
-        os.chdir(self.data.score_save_path)  # 切换程序工作目录
+        if not os.path.isdir(path) or not os.path.exists(path):
+            QMessageBox.warning(self, "选择失败", "路径不合法或不存在，请重新选择",
+                                QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            return
         self.lineEdit_save_path.setText(path)
+        self.data.score_save_path = path  # 更新数据
+        os.chdir(self.data.score_save_path)  # 切换程序工作目录
 
     def select_folder(self) -> None:
-        """浏览并选择本地保存路径"""
-        path = QFileDialog.getExistingDirectory(self)
+        """浏览并选择曲谱目录"""
+        if not self.update_data_from_ui():  # 更新数据:
+            return
+        path = QFileDialog.getExistingDirectory(self, dir=self.data.score_save_path)
         if path == "":
             return  # 当点击取消时，目录为空
-        self.data.score_title = os.path.basename(path)
-        self.lineEdit_score_title.setText(self.data.score_title)
+        if not os.path.isdir(path) or not os.path.exists(path):
+            QMessageBox.warning(self, "选择失败", "路径不合法或不存在，请重新选择",
+                                QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            return
+        self.lineEdit_score_title.setText(os.path.basename(path))
+        self.data.score_title = self.lineEdit_score_title.text()  # 更新数据
+        if os.path.isdir(path):  # 如果目录存在
+            init_log(sub_log_path=self.data.score_save_path, 
+                     showlog_level=self.data.log_output_level)  # 重设子日志，释放旧目录
 
     def open_folder(self) -> None:
         """在资源管理器中打开目录"""
-        # 调用start “path” 系统命令
-        self.data.score_save_path = self.lineEdit_save_path.text()
-        self.data.score_title = self.lineEdit_score_title.text()
+        if not self.update_data_from_ui():  # 更新数据
+            return
         if self.data.score_title in os.listdir(self.data.score_save_path):
-            os.system("start " + os.path.join(self.data.score_save_path, self.data.score_title))
+            os.startfile(os.path.join(self.data.score_save_path, self.data.score_title))  # 使用startfile函数以兼容空格
         else:
             log.warning(f"打开目录失败，{self.data.score_save_path}下不存在{self.data.score_title}文件夹")
 
+    def rename_folder(self) -> None:
+        """重命名当前曲谱名及工作目录"""
+        if not self.update_data_from_ui():  # 更新数据
+            return
+        old_title = self.data.score_title
+        new_title, ok = QInputDialog.getText(self, "重命名当前曲谱工作目录及其中的文件",
+                                              "请输入新的名称：", text=old_title)
+        if new_title == "" or not ok:
+            return
+        if not is_valid_filename(new_title):
+            QMessageBox.warning(self, "重命名失败", "文件名不合法",
+                                QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            return
+        self.lineEdit_score_title.setText(new_title)  # 更新ui显示
+
+        if os.path.isdir(os.path.join(self.data.score_save_path, old_title)):  # 重命名目录
+            init_log(showlog_level=self.data.log_output_level)  # 释放旧目录的日志占用
+            os.rename(os.path.join(self.data.score_save_path, old_title),
+                      os.path.join(self.data.score_save_path, new_title))
+            init_log(sub_log_path=os.path.join(self.data.score_save_path, new_title),
+                     showlog_level=self.data.log_output_level)  # 重设子日志
+            log.success(f"已将目录{old_title}重命名为{new_title}")
+            for f in os.listdir(os.path.join(self.data.score_save_path, new_title)):
+                if old_title in f:  # 重命名目录下,文件中的标题部分
+                    os.rename(os.path.join(self.data.score_save_path, new_title, f),
+                              os.path.join(self.data.score_save_path, new_title, f.replace(old_title, new_title)))
+                    log.debug(f"已将文件{f}重命名为{f.replace(old_title, new_title)}")
+        else:
+            log.warning(f"重命名失败，{self.data.score_save_path}下不存在{old_title}文件夹，仅更新曲谱标题")
+            return
+        
     def set_always_on_top(self, state:bool) -> None:
         """设置窗口置顶状态"""
-        # TODO 启动时会闪一下，考虑进行优化
+        # TODO 启动及切换状态时会闪一下，考虑进行优化
         self.setVisible(False)
         if state:
             self.setWindowFlag(PySide6.QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
@@ -267,10 +321,17 @@ class UI(QMainWindow, Ui_MainWindow):
         self.setVisible(True)
         self.data.always_on_top = state
 
-
     def check_ui_input(self) -> bool:
         """检查ui输入数据的范围是否有效,并弹出相应的错误对话框"""
-        # TODO 目录合法检查
+        # 目录合法检查
+        if not is_valid_filename(self.lineEdit_score_title.text()):
+            QMessageBox.warning(self, "曲谱标题错误", "曲谱标题不合法，请重新输入",
+                                QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            return False
+        if not os.path.isdir(self.lineEdit_save_path.text()):
+            QMessageBox.warning(self, "保存路径错误", "保存路径不合法，请重新选择",
+                                QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
+            return False
         # 定位设置
         x, y, w, h = self.spinBox_region
         (max_width, max_height) = self.data.SCREEN_SIZE
@@ -390,6 +451,9 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         if not self.ui.update_data_from_ui():  # 检查并更新region范围
             return
         if self.ui.window_locate is not None:
+            self.ui.window_locate.setGeometry(
+                self.data.region.region_to_geometry())  # 重设窗口位置
+            self.ui.window_locate.showNormal()  # 从最小化恢复窗口显示
             self.ui.window_locate.activateWindow()  # 切换窗口焦点
             return
         self.ui.window_locate = self  # 赋值给主窗口，否则不显示
@@ -456,6 +520,7 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         if not self.ui.update_data_from_ui():  # 检查并更新region范围
             return
         if self.ui.window_preview is not None:
+            self.ui.window_preview.showNormal()  # 从最小化恢复窗口显示
             self.ui.window_preview.activateWindow()  # 切换窗口焦点
             self.ui.window_preview.preview_region()
             return
@@ -491,8 +556,8 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         if not self.ui.update_data_from_ui():  # 检查并更新region范围
             return
         print(self.data.region)
-        log.info(self.data.region.tuple())
-        img = image_pre_process(pyautogui.screenshot(region=self.data.region.tuple()), self.data)
+        log.info(self.data.region.get_tuple())
+        img = image_pre_process(pyautogui.screenshot(region=self.data.region.get_tuple()), self.data)
         save_image("preview.png", img)
         self.data.image_preview = img
         self.show_image(self.data.image_preview)
@@ -543,8 +608,8 @@ class CaptureThread(QtCore.QThread):
         self.is_working: bool = False  # 主进程是否正在工作
         self.signal_stop: bool = False  # 中止线程信号
 
-    def run(self) -> None:
-        """线程入口启动函数，重写自run方法，使用.start()调用"""
+    def main(self) -> None:
+        """截图主函数"""
         data: DATA = copy.deepcopy(self.data)  # 使用深拷贝，以保证data在执行中不变
         temp_list: list[np.ndarray] = []
         image_list: list[np.ndarray] = []
@@ -553,10 +618,12 @@ class CaptureThread(QtCore.QThread):
         total_count: int = -1  # 总截图张数
         time.sleep(0.5)  # 略微延时
         while True:  # 图片截取主循环
-            temp_list.append(image_pre_process(pyautogui.screenshot(region=data.region.tuple()), data))
+            temp_list.append(image_pre_process(
+                pyautogui.screenshot(region=data.region.get_tuple()), data))
             temp_count += 1
             total_count += 1
-            save_image(data.working_path + f"capture{total_count}{data.score_save_format}", temp_list[temp_count])
+            save_image(data.working_path +
+                       f"capture{total_count}{data.score_save_format}", temp_list[temp_count])
             if total_count == 0:
                 log.info("===开始截图===")
             if temp_count == 0:  # 不过第一张图象不进行对比
@@ -565,7 +632,8 @@ class CaptureThread(QtCore.QThread):
 
             # 将temp图像与上一张进行对比
             diff = compare_image(cv2.cvtColor(temp_list[temp_count], cv2.COLOR_RGB2GRAY),  # 转换为灰度图
-                                 cv2.cvtColor(temp_list[temp_count - 1], cv2.COLOR_RGB2GRAY),
+                                 cv2.cvtColor(
+                                     temp_list[temp_count - 1], cv2.COLOR_RGB2GRAY),
                                  data.compare_method)  # 指定算法
             # 与阈值相比较
             if data.compare_method == "SSIM":
@@ -577,9 +645,11 @@ class CaptureThread(QtCore.QThread):
                 return
             # 输出diff至log
             if is_different:
-                log.info(f"{data.compare_method}-{str(total_count - 1)}-{str(total_count)}={str(round(diff, 5))}")
+                log.info(
+                    f"{data.compare_method}-{str(total_count - 1)}-{str(total_count)}={str(round(diff, 5))}")
             else:
-                log.debug(f"{data.compare_method}-{str(total_count - 1)}-{str(total_count)}={str(round(diff, 5))}")
+                log.debug(
+                    f"{data.compare_method}-{str(total_count - 1)}-{str(total_count)}={str(round(diff, 5))}")
             # 保存去重后的图像
             if is_different or (self.signal_stop and data.if_keep_last):  # 对最后一组进行保留
                 if len(temp_list) > 2:  # 只保留缓存图像为三张以上的情况，以消除抖动
@@ -600,6 +670,16 @@ class CaptureThread(QtCore.QThread):
                 self.signal_finished.emit()
                 return
             time.sleep(data.capture_delay)  # 延时
+
+
+    def run(self) -> None:
+        """线程入口启动函数，重写自run方法，使用.start()调用"""
+        try:
+            self.main()  # 调用主函数
+        except Exception as e:
+            log.error(f"截图线程异常：{e}")
+        finally:  # 确保线程结束时发出信号
+            self.signal_finished.emit() 
 
 
 
@@ -635,15 +715,16 @@ class StitchThread(QtCore.QThread):
         self.data: DATA = data
         self.is_working: bool = False  # 主进程是否正在工作
 
-    def run(self):
-        """线程入口启动函数，重写自run方法，使用.start()调用"""
+    def main(self) -> None:
+        """stitch主函数"""
         data = deepcopy(self.data)
         path = data.working_path
         score_detections = ScoreDetections(path, data.score_title)
-        image_files:list[str] = []
+        image_files: list[str] = []
 
         if "ScoreDetections" in os.listdir(path):
-            score_detections:ScoreDetections = ScoreDetections.load_from_file(os.path.join(path, "ScoreDetections"))
+            score_detections: ScoreDetections = ScoreDetections.load_from_file(
+                os.path.join(path, "ScoreDetections"))
             image_files = score_detections.get_image_filenames()
             log.debug("成功读取缓存，跳过线段检测")
         else:
@@ -664,56 +745,77 @@ class StitchThread(QtCore.QThread):
                         l.draw(image)
                     for l in vertical_lines:
                         l.draw(image)
-                    save_image(path + "\\" + filename.split(".")[0] + "-detected" + data.score_save_format, image)
+                    save_image(path + "\\" + filename.split(".")[0] +
+                                "-detected" + data.score_save_format, image)
                     score_detections.add_image(filename, horizontal_lines, vertical_lines)
-                    log.debug(f"{filename}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
+                    log.debug(
+                        f"{filename}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
             score_detections.save_to_file(os.path.join(path, "ScoreDetections"))
             log.info("线段检测完毕，已生成对应预览图")
 
         # 排序图片
         image_format = "." + image_files[0].split(".")[-1]
-        num = [int(f.split(".")[0].split("image")[-1]) for f in image_files]  # 转换为数字后排序
+        num = [int(f.split(".")[0].split("image")[-1])
+               for f in image_files]  # 转换为数字后排序
         num.sort()
-        image_names:list[str] = []
+        image_names: list[str] = []
         for n in num:
             image_names.append("image"+str(n)+image_format)
-        images = [read_image((os.path.join(path, i))) for i in image_names]  # 读取图片
+        images = [read_image((os.path.join(path, i)))
+                  for i in image_names]  # 读取图片
         images_gray = [cv2.cvtColor(i, cv2.COLOR_RGB2GRAY) for i in images]
 
         # 获取mse最低时的拼接像素点
         log.info("比对图片中")
         detect_start, detect_end = get_barline_num_region(score_detections[0])
-        stitch_points:list[int] = []
+        stitch_points: list[int] = []
         for name_index in range(len(image_names) - 1):
             img1, img2 = images_gray[name_index], images_gray[name_index + 1]
-            barline_index = score_detections[image_names[name_index]].get_lines_index(reverse=True, extern_width=1)
+            barline_index = score_detections[image_names[name_index]].get_lines_index(
+                reverse=True, extern_width=1)
             stitch_index = [barline_index + l.start_pixel
                             for l in score_detections[image_names[name_index+1]].vertical_lines]
-            stitch_index = np.unique(np.concatenate(stitch_index))  # 拼接成一维数组并进行去重
+            stitch_index = np.unique(
+                np.concatenate(stitch_index))  # 拼接成一维数组并进行去重
             if data.stitch_method == "SSIM":
                 diff = [compare_image(img1[:, -offset:],  # 仅计算上方部分，以增大小节数所占比重
                                       img2[:, :offset])*0.2 +
                         compare_image(img1[detect_start:detect_end, -offset:],
                                       img2[detect_start:detect_end, :offset])*0.8
                         for offset in stitch_index]  # 计算两张图像在offset区域中重叠差值的均值
-                stitch_points.append(int(stitch_index[np.argmax(np.asarray(diff))] + 1))  # 右侧1像素为img2的部分，越大越相似
+                # 右侧1像素为img2的部分，越大越相似
+                stitch_points.append(int(stitch_index[np.argmax(np.asarray(diff))] + 1))
             elif data.stitch_method == "MSE":
-                img1, img2 = np.astype(img1, np.int16), np.astype(img2, np.int16) # ！！！避免差值数据溢出
-                diff = [np.std(img1[:, -offset:] - img2[:, :offset]) for offset in stitch_index]
-                stitch_points.append(int(stitch_index[np.argmin(np.asarray(diff))] + 1))  # 同上，越小越相似
+                img1, img2 = np.astype(img1, np.int16), np.astype(img2, np.int16)  # ！！！避免差值数据溢出
+                diff = [np.std(img1[:, -offset:] - img2[:, :offset])
+                        for offset in stitch_index]
+                stitch_points.append(
+                    # 同上，越小越相似
+                    int(stitch_index[np.argmin(np.asarray(diff))] + 1))
             log.debug(f"{data.stitch_method}-{image_names[name_index]}-{image_names[name_index + 1]}"
                       f"-stitch_point:{stitch_points[-1]}")
         log.info("图像比对完毕")
 
         # 进行拼接
         log.info("图像拼接中")
-        images = [images[0]] + [images[i+1][:, stitch_points[i]:] for i in range(len(images)-1)]
+        images = [images[0]] + [images[i+1][:, stitch_points[i]:] 
+                                for i in range(len(images)-1)]
         final_image = np.concatenate(images, axis=1)  # 延水平方向拼接
-        result_file = data.working_path+data.score_title+"-stitched"+data.score_save_format
+        result_file = data.working_path+data.score_title + "-stitched" + data.score_save_format
         save_image(result_file, final_image)
         log.info(f"图像拼接完毕，已生成预览图{result_file}")
 
         self.signal_finished.emit()
+        return
+
+    def run(self):
+        """线程入口启动函数，重写自run方法，使用.start()调用"""
+        try:
+            self.main()  # 调用主函数
+        except Exception as e:
+            log.error(f"拼接线程运行异常: {e}")
+        finally:
+            self.signal_finished.emit()  # 确保线程结束时发出信号
 
 
 class ReclipThread(QtCore.QThread):
@@ -728,12 +830,12 @@ class ReclipThread(QtCore.QThread):
         self.data: DATA = data
         self.is_working: bool = False  # 主进程是否正在工作
 
-    def run(self):
-        """线程入口启动函数，重写自run方法，使用.start()调用"""
+    def main(self) -> None:
+        """重分割主函数"""
         data = deepcopy(self.data)
         path = data.working_path
         stitched_image_file = data.score_title+"-stitched"+data.score_save_format
-        stitched_detected_image_file = data.score_title+"-stitched"+"-detected"+data.score_save_format
+        stitched_detected_image_file = data.score_title+"-stitched-detected"+data.score_save_format
         image_path = os.path.join(path, stitched_image_file)
 
         if stitched_image_file not in os.listdir(path):
@@ -744,12 +846,13 @@ class ReclipThread(QtCore.QThread):
             os.remove(os.path.join(path, stitched_detected_image_file))
 
         # 获取检测数据
-        vertical_lines:list[Line] = []
+        vertical_lines: list[Line] = []
         log.info("开始检测图像中的线段")
         image = read_image(os.path.join(path, stitched_image_file))
         image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         if "ScoreDetections" in os.listdir(path):
-            clip_length = ScoreDetections.load_from_file(os.path.join(path, "ScoreDetections"))[0].image_shape[1]
+            clip_length = ScoreDetections.load_from_file(
+                os.path.join(path, "ScoreDetections"))[0].image_shape[1]
         else:
             clip_length = int(data.SCREEN_SIZE[0]*0.8)
         horizontal_lines, vertical_lines = detect_all_lines_with_clip(image_gray,
@@ -759,28 +862,31 @@ class ReclipThread(QtCore.QThread):
         for l in vertical_lines:
             l.draw(image)
         save_image(os.path.join(path, stitched_detected_image_file), image)
-        log.debug(f"horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
+        log.debug(
+            f"horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
         log.info("线段检测完毕，已生成对应预览图")
 
         # 小节线分组
         index = np.asarray([l.start_pixel for l in vertical_lines])
         distance = index[1:] - index[:-1]
         del_index = []
-        for i in np.where(distance<np.average(distance)/5)[0]:
-            vertical_lines[i].set_thickness(vertical_lines[i+1].end_pixel - vertical_lines[i].start_pixel)
+        for i in np.where(distance < np.average(distance)/5)[0]:
+            vertical_lines[i].set_thickness(
+                vertical_lines[i+1].end_pixel - vertical_lines[i].start_pixel)
             del_index.append(i+1)
         bar_lines = list(np.delete(vertical_lines, del_index))
         image = read_image(image_path)
         image_draw = deepcopy(image)
         for l in bar_lines:
             l.draw(image_draw)
-        save_image(path + "\\" + data.score_title + "-detected-barlines" + data.score_save_format, image_draw)
+        save_image(path + "\\" + data.score_title +
+                   "-detected-barlines" + data.score_save_format, image_draw)
         log.info(f"成功对小节线进行归类，共检测出{len(bar_lines)}组小节线,预览图像已保存")
 
         # 进行切片
         log.debug("开始进行切片操作")
         image_clips, clip_index = [], []
-        extern_pixel = 4  # 左右额外包含的像素
+        extern_pixel = 4  # 切片左右额外包含的像素
         if data.reclip_method == 0:  # 每行固定小节数
             each_line_bar_num = 4  # 每行的固定小节数
             for i in range(len(bar_lines)):
@@ -799,24 +905,31 @@ class ReclipThread(QtCore.QThread):
             result_index = [bar_lines_index[0]]
             for i in range(bar_lines_index.size):
                 if bar_lines_index[i]-result_index[-1] >= max_length:
-                    result_index.append(bar_lines_index[i-1])  # 取i-1,不超过最大长度的部分
-            result_index = np.concatenate([np.where(bar_lines_index==i)[0] for i in result_index])  # 图片索引转lines索引
+                    # 取i-1,不超过最大长度的部分
+                    result_index.append(bar_lines_index[i-1])
+            result_index = np.concatenate(  # 图片索引转lines索引
+                [np.where(bar_lines_index == i)[0] for i in result_index])
             if result_index[-1] != bar_lines_index.size-1:
                 result_index = np.append(result_index, bar_lines_index.size-1)  # 添加入最后一组
             clip_index = [[bar_lines[result_index[i]].start_pixel - extern_pixel,
                            bar_lines[result_index[i+1]].end_pixel + extern_pixel]
                           for i in range(result_index.size-1)]
         for i in clip_index:
-            image_clips.append(image[:, i[0]:i[1]])
+            clip_start = max(0, i[0])  # 确保起始位置不小于0
+            clip_end = min(image.shape[1], i[1])  # 确保结束位置不大于图片宽度
+            image_clips.append(image[:, clip_start:clip_end, :])  # 切片
         log.debug("成功完成切片操作")
 
         # 拼接
         log.debug("开始进行拼接操作")
-        canvas = np.ones_like(image_clips[np.argmax([c.size for c in image_clips])]).astype(np.uint8)*255  # 白色画布
+        canvas = np.ones_like(image_clips[np.argmax(
+            [c.size for c in image_clips])]).astype(np.uint8)*255  # 白色画布
         canvas = np.concatenate([canvas for _ in range(len(image_clips))], axis=0)  # 将画布的高度拓展len(clips)倍
         current_y = 0
         canvas_width = canvas.shape[1]
         for c in image_clips:
+            if c.shape[1] != canvas_width:
+                c = cv2.resize(c, (canvas_width, c.shape[0]), cv2.INTER_CUBIC)
             h = c.shape[0]
             w = c.shape[1]
             if data.clip_align == 0:  # 靠左
@@ -825,13 +938,21 @@ class ReclipThread(QtCore.QThread):
                 space = int((canvas_width-w)/2)
                 canvas[current_y:current_y+h, space:w+space, :] = c
             elif data.clip_align == 2:  # 靠右
-                canvas[current_y:current_y+h, canvas_width-w:canvas_width, :] = c
+                canvas[current_y:current_y+h,
+                       canvas_width-w:canvas_width, :] = c
             current_y += h
         save_file = path + "\\" + data.score_title + "-reclip" + data.score_save_format
         save_image(save_file, canvas)
         log.success(f"拼接操作成功完成，已成功保存图片到{save_file}")
 
-        self.signal_finished.emit()
+    def run(self) -> None:
+        """线程入口启动函数，重写自run方法，使用.start()调用"""
+        try:
+            self.main()
+        except Exception as e:
+            log.error(f"重分割线程运行异常：{e}")
+        finally:  # 确保线程结束时发出信号
+            self.signal_finished.emit()
 
 
 
