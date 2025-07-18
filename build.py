@@ -5,7 +5,7 @@ import sys
 
 from loguru import logger as log
 
-import main
+from src import __version__ as version
 
 
 def build():
@@ -44,7 +44,7 @@ def build():
 
     subprocess.run(command)
 
-    folder_name = f"score_capture-{main.__version__}-build-" + datetime.datetime.now().strftime("%y%m%d_%H%M")
+    folder_name = f"score_capture-{version}-build-" + datetime.datetime.now().strftime("%y%m%d_%H%M")
     if "main.dist" in os.listdir(os.getcwd() + "\\build\\"):
         os.rename(os.getcwd() + "\\build\\main.dist", os.getcwd() + f"\\build\\{folder_name}")
     log.info("output: " + os.getcwd() + f"\\build\\{folder_name}")

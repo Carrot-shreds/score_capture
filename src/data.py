@@ -1,4 +1,5 @@
 import pickle
+import json
 import sys
 from typing import Optional, Literal, overload, Any
 
@@ -9,6 +10,7 @@ from PySide6.QtCore import QRect
 import pyautogui
 
 from config import Config
+from utilities import order_filenames
 
 TYPE_IMAGE = np.ndarray | cv2.UMat | np.ndarray[Any, np.dtype]
 
@@ -45,7 +47,12 @@ class DATA:
         self.if_reverse_image: bool = False
 
         # 拼接设置
-        self.stitch_method: Literal["SSIM", "MSE"] = "MSE"
+        self.stitch_method: Literal["SSIM", "MSE", "DIRECT"] = "MSE"
+        self.stitch_direction: Literal["horizontal", "vertical"] = "horizontal"
+
+        # 检测算法设置
+        self.detect_coefficient_horizontal: float = 0.5
+        self.detect_coefficient_vertical: float = 0.9
 
         # 分割设置
         self.reclip_method: int = 1  # 0:每行固定小节数 1:填充每行最大长度
@@ -78,6 +85,7 @@ class DATA:
         }
 
         self.config = Config(self)
+
 
 class Region:
     """
@@ -122,8 +130,11 @@ class Region:
         """获取数组形式"""
         return np.asarray(self.get_tuple())
 
-    def region_to_geometry(self) -> QRect:
-        """四元组（x,y_sin,宽,高） -> x,y加上offset -> 高度减去标题栏的30px -> [x,y,宽,高]"""
+    def region_to_geometry(self, without_title_frame=False) -> QRect:
+        """四元组（x,y_sin,宽,高）转换为QRect对象"""
+        if without_title_frame:
+            self.height -= 30  # 减去标题栏高度
+            self.y -= 1  # 减去1px阴影
         return QRect(self.x, self.y, self.width, self.height)
 
     @staticmethod
@@ -131,6 +142,7 @@ class Region:
         """转换QRect为（x,y,w,h）四元组"""
         return np.asarray((geometry.x(), geometry.y(),
                            geometry.width(), geometry.height()))
+
 
 class Line:
     """线段类，存储起始线段的坐标，以及在对应方向上的厚度"""
@@ -159,7 +171,6 @@ class Line:
         if self.direction == "vertical":
             self.start_pixel = self.point1[0]
             self.end_pixel = self.point1[0] + self.thickness - 1
-
 
     def draw(self, img: TYPE_IMAGE, color: tuple[int, int, int] = (0, 255, 0)) -> None:
         """
@@ -213,6 +224,80 @@ class Line:
                       direction=self.direction,
                       image_shape=image_shape)
 
+class CaptureData:
+    """
+    截图数据类，存储截图的相关比对数据
+    """
+
+    def __init__(self, data={}) -> None:
+        self.data: dict[frozenset[str, str],  # 两张图像的文件名，set不可hash，不能作为键值
+                         dict[str, float]] = data  # 对比结果，算法：数值
+
+    def add_diff(self, image1:str, image2:str, 
+                 compare_method:Literal["MSE", "SSIM"], diff:float) -> None:
+        """添加比对结果"""
+        image_couple = frozenset((image1, image2))
+        if not self.data.get(image_couple):  # 如果图像数据为空
+            self.data[image_couple] = {compare_method: diff}
+        else:
+            self.data[image_couple][compare_method] = diff
+
+    def get_image_sequence(self) -> list[str]:
+        """获取所有图像的名称列表"""
+        image_names = []
+        for k in self.data.keys():
+            image_names += list(k)
+        image_names = set(image_names)  # 去重
+        image_names = order_filenames(list(image_names))
+        return image_names
+    
+    def get_diff(self, image1:str, image2:str, 
+                 compare_method:Literal["SSIM", "MSE"]) -> float | None:
+        """获取两图片的比对结果"""
+        image_couple = frozenset([image1, image2])
+        image = self.data.get(image_couple)
+        if image:
+            diff = image.get(compare_method)
+        else:
+            diff = []
+        return diff
+    
+    def get_diff_sequence(self, compare_method:Literal["SSIM", "MSE"], 
+                          image_names: list[str]) -> list[float]:
+        if not image_names:
+            image_names = self.get_image_sequence()
+        image_names = order_filenames(image_names)
+        diff_sequence: list[float] = []
+        for n in range(len(image_names)-1):
+            image_couple = frozenset([image_names[n], image_names[n+1]])
+            img = self.data.get(image_couple)
+            if not img:
+                log.error(f"未找到{image_names[n]}|{image_names[n+1]}图像的比对信息")
+                return []
+            diff = img.get(compare_method)
+            if not diff:
+                log.error(f"未找到{image_names[n]}|{image_names[n+1]}的{compare_method}算法差异值")
+                return []
+            diff_sequence.append(diff)
+        return diff_sequence
+    
+    def save_to_file(self, file:str) -> None:
+        """保存比对数据到文件"""
+        data: dict = {}
+        for k in self.data.keys():
+            image_names = order_filenames(list(k))
+            data[f"{image_names[0]} | {image_names[1]}"] = self.data[k]  # 将键值从set转换为str
+        with open(file, "w") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        
+    @staticmethod
+    def load_from_file(file:str) -> "CaptureData":
+        """从文件中加载比对数据"""
+        with open(file, "r") as f:
+            load: dict = json.load(f)
+            data = {frozenset((k.split("|")[0].strip(), k.split("|")[1].strip())):load[k]
+                     for k in load.keys()}  # 将键值从str转换回set
+            return CaptureData(data)
 
 
 class ImageDetection:
@@ -224,16 +309,25 @@ class ImageDetection:
         self.vertical_lines = vertical_lines
         self.image_shape = self.horizontal_lines[0].image_shape
 
+    def get_lines(self, direction:Literal["horizontal", "vertical"]="vertical") -> list[Line]:
+        """获取指定方向的线段列表"""
+        if direction == "horizontal":
+            return self.horizontal_lines
+        elif direction == "vertical":
+            return self.vertical_lines
+        else:
+            raise ValueError("direction must be 'horizontal' or 'vertical'")
+
     def get_lines_index(self,
                         direction:Literal["horizontal", "vertical"]="vertical",
                         extern_width:int = 5,
                         reverse=False,
                         ) -> np.ndarray:
+        "获取指定方向的线段索引值"
         lines = self.horizontal_lines if direction == "horizontal" else self.vertical_lines
         points = np.concatenate([l.get_index_points(extern_width=extern_width, reverse=reverse
                                                     ) for l in lines])
         return points
-
 
 
 class ScoreDetections:
@@ -268,7 +362,7 @@ class ScoreDetections:
             pickle.dump(self, f)
 
     @staticmethod
-    def load_from_file(file):
+    def load_from_file(file) -> "ScoreDetections":
         """从文件中读取"""
         with open(file, "rb") as f:
             return pickle.load(f)

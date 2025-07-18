@@ -12,3 +12,4 @@
 /src/output/
 /src/ui/__pycache__/
 /src/config.ini
+/src/test.py

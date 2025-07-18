@@ -8,17 +8,14 @@ from skimage.metrics import structural_similarity as compare_ssim
 
 from data import Line, DATA, TYPE_IMAGE, ScoreDetections, ImageDetection
 
-model = cv2.dnn_superres.DnnSuperResImpl.create()
-model.readModel("E:/dev_code/python/score_capture/src/resource/superres_model/ESPCN_x2.pb")
-model.setModel("espcn", 2)
+model = 0
 
 def gama_transfer(img, threshold, power) -> np.ndarray:
     """对灰度图应用伽马转换，对灰度值除于阈值后进行幂运算，并线性映射到0-255范围"""
     img = np.power(img / threshold, power) * (np.power(255 / threshold, power) * threshold / 255)
     return np.asarray(np.round(img), np.uint8)
 
-
-def detect_horizontal_lines(img: np.ndarray, coefficient:float = 2.0) -> list[Line]:
+def detect_horizontal_lines(img: np.ndarray, coefficient:float = 0.5) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有水平线段(白色背景图中的黑色线)"""
     if len(img.shape) != 2:
         log.warning("传入图像数组维度不为2，自动转换为灰度图，BGR2GRAY")
@@ -29,7 +26,7 @@ def detect_horizontal_lines(img: np.ndarray, coefficient:float = 2.0) -> list[Li
     # slope: np.ndarray = average_row[1:] - average_row[:-1]  # 错位相减
     # slopes_slope = slope[1:] - slope[:-1]  # 斜率的斜率，鬼知道这玩意儿代表什么
     # result = slopes_slope - np.std(img, axis=1)[1:-1] / coefficient  # 消除短横线造成的抖动
-    result = [r if (r - np.average(average_row))/np.std(average_row) > 0.5 else 0 for r in average_row]  # 将小于0的值替换为0
+    result = [r if (r - np.average(average_row))/np.std(average_row) > coefficient else 0 for r in average_row]  # 将小于0的值替换为0
 
     lines: list[Line] = []
     current_y: int = 1  # result比img短2个单位，等效于从img的1像素开始
@@ -70,9 +67,8 @@ def get_score_lines(horizontal_lines: list[Line]) -> list[Line]:
         return []
     return result
 
-
 def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]] = None,
-                          coefficient:float = 0.8) -> list[Line]:
+                          coefficient:float = 0.9) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有竖直线段(黑色背景图中的白色线)"""
     # TODO 异常处理
     if len(img.shape) != 2:
@@ -83,6 +79,7 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
 
     if horizontal_lines is None:
         horizontal_lines: list[Line] = detect_horizontal_lines(img)
+        log.warning("检测竖直线时未传入水平线数据，将先以默认系数进行水平线检测")
     if not horizontal_lines:
         log.warning("由于水平线检测结果为空，未进行竖直线检测")
         return []
@@ -92,12 +89,17 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
         log.warning("曲谱部分的水平线检测结果为空，无法进行竖直线检测")
         return []
 
-    # 初步识别
+    # 识别区域
     top_line_y = horizontal_lines[0].start_pixel + 2  # 线谱中最上方的那条线，-2以确保包含线宽
     bottom_line_y = horizontal_lines[-1].end_pixel - 2  # 最下方的那条线
-    edge_y: int = img.shape[0] - 2  # 图像底部边缘的坐标
+    edge_top: int = int(top_line_y - (bottom_line_y-top_line_y)/5)  # 上方延伸区域
+    edge_bottom: int = int(bottom_line_y + (bottom_line_y-top_line_y)/5)  # 下方延伸区域
+    edge_top = edge_top if edge_top > 0 else 0  # 限制上边界
+    edge_bottom = edge_bottom if edge_bottom < img.shape[0] else img.shape[0] - 1  # 限制下边界
+
+    # 初步识别
     sum_columns: np.ndarray = img[top_line_y:bottom_line_y].sum(axis=0)  # 线谱中的和
-    sum_columns_ex: np.ndarray = img[top_line_y:edge_y].sum(axis=0)  # 延伸到底部区域的和
+    sum_columns_ex: np.ndarray = img[edge_top:edge_bottom].sum(axis=0)  # 上下延伸一定范围的区域
     sum_columns: np.ndarray = np.asarray(  # 将小于均值的值置为0，以仅保留突出的数据影响
         [0 if s < np.average([np.max(sum_columns), np.min(sum_columns)]) else s for s in sum_columns])
     sum_columns_ex: np.ndarray = np.asarray(  # 同上
@@ -119,8 +121,10 @@ def detect_vertical_lines(img: np.ndarray, horizontal_lines: Optional[list[Line]
     # if np.max(std) - np.min(std) * 2 - np.average(std, axis=0) > 0:
     #     del_index = [std.index(s) for s in std if s > np.average(std)]
     #     bar_lines = np.delete(bar_lines, del_index)
+
+    # 去除方差过大(上下不对称)的线段
     std_y:list[int] = [np.std(img[top_line_y:bottom_line_y, i], axis=0) for i in bar_lines]
-    del_index:list[int] = [std_y.index(i) for i in std_y if  i > 35]
+    del_index:list[int] = [std_y.index(i) for i in std_y if  i > 35]  # 测试经验数值
     bar_lines: np.ndarray = np.delete(bar_lines, del_index)
 
 
@@ -151,6 +155,7 @@ def detect_vertical_blanks(img: np.ndarray, horizontal_lines: Optional[list[Line
 
     if horizontal_lines is None:
         horizontal_lines: list[Line] = detect_horizontal_lines(img)
+        log.warning("检测竖直线时未传入水平线数据，将先以默认系数进行水平线检测")
     if not horizontal_lines:
         log.warning("由于水平线检测结果为空，未进行竖直线检测")
         return []
@@ -185,7 +190,8 @@ def detect_vertical_blanks(img: np.ndarray, horizontal_lines: Optional[list[Line
                    ) for l in result]
     return result
 
-def detect_all_lines_with_clip(img:np.ndarray, clip_length:int=1514) -> tuple[list[Line], list[Line]]:
+def detect_all_lines_with_clip(img:np.ndarray, clip_length:int,
+                               coefficient_horizontal:float, coefficient_vertical:float) -> tuple[list[Line], list[Line]]:
     """将图片以指定长度切片后，进行水平与竖直线段的检测"""
     if len(img.shape) != 2:
         log.warning("传入图像数组维度不为2，自动转换为灰度图，BGR2GRAY")
@@ -199,10 +205,10 @@ def detect_all_lines_with_clip(img:np.ndarray, clip_length:int=1514) -> tuple[li
         else:
             clipped_image = img[:, region[0]:region[1]]
 
-        horizontal_lines = detect_horizontal_lines(clipped_image)
+        horizontal_lines = detect_horizontal_lines(clipped_image, coefficient_horizontal)
         for l in horizontal_lines: l.move_right(region[0], img.shape)  # 将线段向右移动指定像素值
         try:
-            vertical_lines = detect_vertical_lines(clipped_image, horizontal_lines)
+            vertical_lines = detect_vertical_lines(clipped_image, horizontal_lines, coefficient_vertical)
         except IndexError:
             vertical_lines = []
         for l in vertical_lines: l.move_right(region[0], img.shape)
@@ -213,7 +219,6 @@ def detect_all_lines_with_clip(img:np.ndarray, clip_length:int=1514) -> tuple[li
         region[1] += clip_length
 
     return lines[0], lines[1]
-
 
 def get_barline_num_region(image_detection: ImageDetection) -> tuple[int, int]:
     """获取图片上半区域中，小节数上下的区域，用以对该区域加权计算"""
@@ -234,8 +239,38 @@ def image_pre_process(img: TYPE_IMAGE | Image, data: DATA) -> np.ndarray:
     return img
 
 def super_resolution(image: TYPE_IMAGE) -> TYPE_IMAGE:
+    global model
+    if not model:
+        model = cv2.dnn_superres.DnnSuperResImpl.create()
+        model.readModel(r"./resource/superres_model/ESPCN_x2.pb")
+        model.setModel("espcn", 2)
     return model.upsample(image)
 
+def clip_image(image: TYPE_IMAGE,direction:Literal["horizontal", "vertical"],
+                index:tuple[int|None, int|None]) -> TYPE_IMAGE:
+    """按指定方向和索引对图像进行切片, (1,None)表示[1:]]"""
+    if direction not in ["horizontal", "vertical"]:
+        raise ValueError("direction must be 'horizontal' or 'vertical'")
+    
+    start, end = index
+
+    try:
+        if direction == "horizontal":
+            if len(image.shape) == 2:  # 灰度图
+                return image[:, start:end]
+            elif len(image.shape) == 3:  # 彩色图
+                return image[:, start:end, :]
+            else:
+                raise ValueError("图像维度不正确，应为2或3维")
+        if direction == "vertical":
+            if len(image.shape) == 2:  # 灰度图
+                return image[start:end, :]
+            elif len(image.shape) == 3:  # 彩色图
+                return image[start:end, :, :]
+            else:
+                raise ValueError("图像维度不正确，应为2或3维")
+    except IndexError:
+        raise IndexError("切片范围超出图像范围，请检查index参数")
 
 def read_image(filepath: str, color: Literal["RGB", "BGR", "GRAY"] = "RGB") -> TYPE_IMAGE:
     """支持中文路径的cv图片读取"""
@@ -246,13 +281,11 @@ def read_image(filepath: str, color: Literal["RGB", "BGR", "GRAY"] = "RGB") -> T
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     return img
 
-
 def save_image(filepath: str, img: TYPE_IMAGE) -> None:
     """支持中文路径的cv图片存储"""
     image_format = "." + filepath.split(".")[-1]  # 获取文件格式
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     cv2.imencode(f"{image_format}", np.asarray(img))[1].tofile(filepath)
-
 
 def compare_image(image1: TYPE_IMAGE, image2: TYPE_IMAGE, method: Literal["SSIM", "MSE"] = "SSIM") -> float:
     """ 比较两图片的差异，输入图像应为灰度图
