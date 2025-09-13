@@ -389,7 +389,7 @@ Capture</string>
            </item>
            <item row="3" column="0" colspan="9">
             <layout class="QGridLayout" name="gridLayout_6">
-             <item row="4" column="9">
+             <item row="4" column="10">
               <widget class="QComboBox" name="comboBox_clip_align">
                <property name="currentText">
                 <string>居左</string>
@@ -411,7 +411,74 @@ Capture</string>
                </item>
               </widget>
              </item>
-             <item row="0" column="8" colspan="2">
+             <item row="4" column="6">
+              <widget class="QRadioButton" name="radioButton_stitch_direction_horizontal">
+               <property name="text">
+                <string>横向</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4" colspan="3">
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>图像拼接设置</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QLabel" name="label_17">
+               <property name="layoutDirection">
+                <enum>Qt::LayoutDirection::LeftToRight</enum>
+               </property>
+               <property name="text">
+                <string>拼接点算法：</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="10">
+              <widget class="QComboBox" name="comboBox_reclip_method">
+               <property name="currentText">
+                <string>固定小节</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>固定小节</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>限制宽度</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLabel" name="label_33">
+               <property name="text">
+                <string>竖直线段系数</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="label_30">
+               <property name="text">
+                <string>水平线段系数</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="9" colspan="2">
               <widget class="QLabel" name="label_25">
                <property name="text">
                 <string>重分割设置</string>
@@ -422,13 +489,86 @@ Capture</string>
               </widget>
              </item>
              <item row="4" column="4">
+              <widget class="QLabel" name="label_27">
+               <property name="text">
+                <string>拼接方向：</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="9">
+              <widget class="QLabel" name="label_18">
+               <property name="layoutDirection">
+                <enum>Qt::LayoutDirection::LeftToRight</enum>
+               </property>
+               <property name="text">
+                <string>分割模式：</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="5">
               <widget class="QRadioButton" name="radioButton_stitch_direction_vertical">
                <property name="text">
                 <string>纵向</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="4" colspan="2">
+             <item row="4" column="2">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_detect_coefficient_vertical">
+               <property name="maximum">
+                <double>65535.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="9">
+              <widget class="QLabel" name="label_19">
+               <property name="layoutDirection">
+                <enum>Qt::LayoutDirection::LeftToRight</enum>
+               </property>
+               <property name="text">
+                <string>切片对齐：</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_detect_coefficient_horizontal">
+               <property name="maximum">
+                <double>65535.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QPushButton" name="pushButton_clean_detect_data">
+               <property name="text">
+                <string>清除检测数据</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1" colspan="3">
+              <widget class="QLabel" name="label_31">
+               <property name="text">
+                <string>检测算法设置</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="5">
               <widget class="QComboBox" name="comboBox_stitch_method">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -456,136 +596,10 @@ Capture</string>
                </item>
               </widget>
              </item>
-             <item row="1" column="9">
-              <widget class="QComboBox" name="comboBox_reclip_method">
-               <property name="currentText">
-                <string>固定小节</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string>固定小节</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>限制宽度</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QLabel" name="label_17">
-               <property name="layoutDirection">
-                <enum>Qt::LayoutDirection::LeftToRight</enum>
-               </property>
+             <item row="1" column="6">
+              <widget class="QPushButton" name="pushButton_manually_stitch">
                <property name="text">
-                <string>拼接点算法：</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="8">
-              <widget class="QLabel" name="label_18">
-               <property name="layoutDirection">
-                <enum>Qt::LayoutDirection::LeftToRight</enum>
-               </property>
-               <property name="text">
-                <string>分割模式：</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="3">
-              <widget class="QLabel" name="label_27">
-               <property name="text">
-                <string>拼接方向：</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="5">
-              <widget class="QRadioButton" name="radioButton_stitch_direction_horizontal">
-               <property name="text">
-                <string>横向</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3" colspan="3">
-              <widget class="QLabel" name="label_24">
-               <property name="text">
-                <string>图像拼接设置</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="8">
-              <widget class="QLabel" name="label_19">
-               <property name="layoutDirection">
-                <enum>Qt::LayoutDirection::LeftToRight</enum>
-               </property>
-               <property name="text">
-                <string>切片对齐：</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1" colspan="2">
-              <widget class="QLabel" name="label_31">
-               <property name="text">
-                <string>检测算法设置</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="label_30">
-               <property name="text">
-                <string>水平线段系数</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QLabel" name="label_33">
-               <property name="text">
-                <string>竖直线段系数</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignmentFlag::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_detect_coefficient_horizontal">
-               <property name="maximum">
-                <double>65535.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="2">
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_detect_coefficient_vertical">
-               <property name="maximum">
-                <double>65535.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
+                <string>手动拼接</string>
                </property>
               </widget>
              </item>

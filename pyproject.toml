@@ -5,8 +5,6 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
     "loguru>=0.7.3",
-    "matplotlib==3.10.3",
-    "nuitka>=2.7.5",
     "numpy>=2.2.6",
     "opencv-contrib-python>=4.11.0.86",
     "opencv-python>=4.11.0.86",
@@ -15,4 +13,11 @@ dependencies = [
     "pyside6>=6.9.0",
     "pywin32>=310",
     "scikit-image>=0.25.2",
+]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.10.6",
+    "nuitka>=2.7.5",
+    "types-pywin32>=311.0.0.20250822",
 ]

@@ -270,18 +270,100 @@ class Ui_MainWindow(object):
         self.comboBox_clip_align.addItem("")
         self.comboBox_clip_align.setObjectName(u"comboBox_clip_align")
 
-        self.gridLayout_6.addWidget(self.comboBox_clip_align, 4, 9, 1, 1)
+        self.gridLayout_6.addWidget(self.comboBox_clip_align, 4, 10, 1, 1)
+
+        self.radioButton_stitch_direction_horizontal = QRadioButton(self.layoutWidget)
+        self.radioButton_stitch_direction_horizontal.setObjectName(u"radioButton_stitch_direction_horizontal")
+
+        self.gridLayout_6.addWidget(self.radioButton_stitch_direction_horizontal, 4, 6, 1, 1)
+
+        self.label_24 = QLabel(self.layoutWidget)
+        self.label_24.setObjectName(u"label_24")
+        self.label_24.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_6.addWidget(self.label_24, 0, 4, 1, 3)
+
+        self.label_17 = QLabel(self.layoutWidget)
+        self.label_17.setObjectName(u"label_17")
+        self.label_17.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.label_17.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_6.addWidget(self.label_17, 1, 4, 1, 1)
+
+        self.comboBox_reclip_method = QComboBox(self.layoutWidget)
+        self.comboBox_reclip_method.addItem("")
+        self.comboBox_reclip_method.addItem("")
+        self.comboBox_reclip_method.setObjectName(u"comboBox_reclip_method")
+
+        self.gridLayout_6.addWidget(self.comboBox_reclip_method, 1, 10, 1, 1)
+
+        self.label_33 = QLabel(self.layoutWidget)
+        self.label_33.setObjectName(u"label_33")
+        self.label_33.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_6.addWidget(self.label_33, 4, 1, 1, 1)
+
+        self.label_30 = QLabel(self.layoutWidget)
+        self.label_30.setObjectName(u"label_30")
+        self.label_30.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_6.addWidget(self.label_30, 1, 1, 1, 1)
 
         self.label_25 = QLabel(self.layoutWidget)
         self.label_25.setObjectName(u"label_25")
         self.label_25.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout_6.addWidget(self.label_25, 0, 8, 1, 2)
+        self.gridLayout_6.addWidget(self.label_25, 0, 9, 1, 2)
+
+        self.label_27 = QLabel(self.layoutWidget)
+        self.label_27.setObjectName(u"label_27")
+        self.label_27.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_6.addWidget(self.label_27, 4, 4, 1, 1)
+
+        self.label_18 = QLabel(self.layoutWidget)
+        self.label_18.setObjectName(u"label_18")
+        self.label_18.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.label_18.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
+
+        self.gridLayout_6.addWidget(self.label_18, 1, 9, 1, 1)
 
         self.radioButton_stitch_direction_vertical = QRadioButton(self.layoutWidget)
         self.radioButton_stitch_direction_vertical.setObjectName(u"radioButton_stitch_direction_vertical")
 
-        self.gridLayout_6.addWidget(self.radioButton_stitch_direction_vertical, 4, 4, 1, 1)
+        self.gridLayout_6.addWidget(self.radioButton_stitch_direction_vertical, 4, 5, 1, 1)
+
+        self.doubleSpinBox_detect_coefficient_vertical = QDoubleSpinBox(self.layoutWidget)
+        self.doubleSpinBox_detect_coefficient_vertical.setObjectName(u"doubleSpinBox_detect_coefficient_vertical")
+        self.doubleSpinBox_detect_coefficient_vertical.setMaximum(65535.000000000000000)
+        self.doubleSpinBox_detect_coefficient_vertical.setSingleStep(0.010000000000000)
+
+        self.gridLayout_6.addWidget(self.doubleSpinBox_detect_coefficient_vertical, 4, 2, 1, 1)
+
+        self.label_19 = QLabel(self.layoutWidget)
+        self.label_19.setObjectName(u"label_19")
+        self.label_19.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.label_19.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
+
+        self.gridLayout_6.addWidget(self.label_19, 4, 9, 1, 1)
+
+        self.doubleSpinBox_detect_coefficient_horizontal = QDoubleSpinBox(self.layoutWidget)
+        self.doubleSpinBox_detect_coefficient_horizontal.setObjectName(u"doubleSpinBox_detect_coefficient_horizontal")
+        self.doubleSpinBox_detect_coefficient_horizontal.setMaximum(65535.000000000000000)
+        self.doubleSpinBox_detect_coefficient_horizontal.setSingleStep(0.010000000000000)
+
+        self.gridLayout_6.addWidget(self.doubleSpinBox_detect_coefficient_horizontal, 1, 2, 1, 1)
+
+        self.pushButton_clean_detect_data = QPushButton(self.layoutWidget)
+        self.pushButton_clean_detect_data.setObjectName(u"pushButton_clean_detect_data")
+
+        self.gridLayout_6.addWidget(self.pushButton_clean_detect_data, 1, 3, 1, 1)
+
+        self.label_31 = QLabel(self.layoutWidget)
+        self.label_31.setObjectName(u"label_31")
+        self.label_31.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout_6.addWidget(self.label_31, 0, 1, 1, 3)
 
         self.comboBox_stitch_method = QComboBox(self.layoutWidget)
         self.comboBox_stitch_method.addItem("")
@@ -291,84 +373,12 @@ class Ui_MainWindow(object):
         sizePolicy3.setHeightForWidth(self.comboBox_stitch_method.sizePolicy().hasHeightForWidth())
         self.comboBox_stitch_method.setSizePolicy(sizePolicy3)
 
-        self.gridLayout_6.addWidget(self.comboBox_stitch_method, 1, 4, 1, 2)
+        self.gridLayout_6.addWidget(self.comboBox_stitch_method, 1, 5, 1, 1)
 
-        self.comboBox_reclip_method = QComboBox(self.layoutWidget)
-        self.comboBox_reclip_method.addItem("")
-        self.comboBox_reclip_method.addItem("")
-        self.comboBox_reclip_method.setObjectName(u"comboBox_reclip_method")
+        self.pushButton_manually_stitch = QPushButton(self.layoutWidget)
+        self.pushButton_manually_stitch.setObjectName(u"pushButton_manually_stitch")
 
-        self.gridLayout_6.addWidget(self.comboBox_reclip_method, 1, 9, 1, 1)
-
-        self.label_17 = QLabel(self.layoutWidget)
-        self.label_17.setObjectName(u"label_17")
-        self.label_17.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.label_17.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_6.addWidget(self.label_17, 1, 3, 1, 1)
-
-        self.label_18 = QLabel(self.layoutWidget)
-        self.label_18.setObjectName(u"label_18")
-        self.label_18.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.label_18.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-        self.gridLayout_6.addWidget(self.label_18, 1, 8, 1, 1)
-
-        self.label_27 = QLabel(self.layoutWidget)
-        self.label_27.setObjectName(u"label_27")
-        self.label_27.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_6.addWidget(self.label_27, 4, 3, 1, 1)
-
-        self.radioButton_stitch_direction_horizontal = QRadioButton(self.layoutWidget)
-        self.radioButton_stitch_direction_horizontal.setObjectName(u"radioButton_stitch_direction_horizontal")
-
-        self.gridLayout_6.addWidget(self.radioButton_stitch_direction_horizontal, 4, 5, 1, 1)
-
-        self.label_24 = QLabel(self.layoutWidget)
-        self.label_24.setObjectName(u"label_24")
-        self.label_24.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_6.addWidget(self.label_24, 0, 3, 1, 3)
-
-        self.label_19 = QLabel(self.layoutWidget)
-        self.label_19.setObjectName(u"label_19")
-        self.label_19.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.label_19.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
-
-        self.gridLayout_6.addWidget(self.label_19, 4, 8, 1, 1)
-
-        self.label_31 = QLabel(self.layoutWidget)
-        self.label_31.setObjectName(u"label_31")
-        self.label_31.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_6.addWidget(self.label_31, 0, 1, 1, 2)
-
-        self.label_30 = QLabel(self.layoutWidget)
-        self.label_30.setObjectName(u"label_30")
-        self.label_30.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_6.addWidget(self.label_30, 1, 1, 1, 1)
-
-        self.label_33 = QLabel(self.layoutWidget)
-        self.label_33.setObjectName(u"label_33")
-        self.label_33.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_6.addWidget(self.label_33, 4, 1, 1, 1)
-
-        self.doubleSpinBox_detect_coefficient_horizontal = QDoubleSpinBox(self.layoutWidget)
-        self.doubleSpinBox_detect_coefficient_horizontal.setObjectName(u"doubleSpinBox_detect_coefficient_horizontal")
-        self.doubleSpinBox_detect_coefficient_horizontal.setMaximum(65535.000000000000000)
-        self.doubleSpinBox_detect_coefficient_horizontal.setSingleStep(0.100000000000000)
-
-        self.gridLayout_6.addWidget(self.doubleSpinBox_detect_coefficient_horizontal, 1, 2, 1, 1)
-
-        self.doubleSpinBox_detect_coefficient_vertical = QDoubleSpinBox(self.layoutWidget)
-        self.doubleSpinBox_detect_coefficient_vertical.setObjectName(u"doubleSpinBox_detect_coefficient_vertical")
-        self.doubleSpinBox_detect_coefficient_vertical.setMaximum(65535.000000000000000)
-        self.doubleSpinBox_detect_coefficient_vertical.setSingleStep(0.100000000000000)
-
-        self.gridLayout_6.addWidget(self.doubleSpinBox_detect_coefficient_vertical, 4, 2, 1, 1)
+        self.gridLayout_6.addWidget(self.pushButton_manually_stitch, 1, 6, 1, 1)
 
 
         self.gridLayout_4.addLayout(self.gridLayout_6, 3, 0, 1, 9)
@@ -521,26 +531,28 @@ class Ui_MainWindow(object):
         self.comboBox_clip_align.setItemText(2, QCoreApplication.translate("MainWindow", u"\u5c45\u53f3", None))
 
         self.comboBox_clip_align.setCurrentText(QCoreApplication.translate("MainWindow", u"\u5c45\u5de6", None))
+        self.radioButton_stitch_direction_horizontal.setText(QCoreApplication.translate("MainWindow", u"\u6a2a\u5411", None))
+        self.label_24.setText(QCoreApplication.translate("MainWindow", u"\u56fe\u50cf\u62fc\u63a5\u8bbe\u7f6e", None))
+        self.label_17.setText(QCoreApplication.translate("MainWindow", u"\u62fc\u63a5\u70b9\u7b97\u6cd5\uff1a", None))
+        self.comboBox_reclip_method.setItemText(0, QCoreApplication.translate("MainWindow", u"\u56fa\u5b9a\u5c0f\u8282", None))
+        self.comboBox_reclip_method.setItemText(1, QCoreApplication.translate("MainWindow", u"\u9650\u5236\u5bbd\u5ea6", None))
+
+        self.comboBox_reclip_method.setCurrentText(QCoreApplication.translate("MainWindow", u"\u56fa\u5b9a\u5c0f\u8282", None))
+        self.label_33.setText(QCoreApplication.translate("MainWindow", u"\u7ad6\u76f4\u7ebf\u6bb5\u7cfb\u6570", None))
+        self.label_30.setText(QCoreApplication.translate("MainWindow", u"\u6c34\u5e73\u7ebf\u6bb5\u7cfb\u6570", None))
         self.label_25.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u5206\u5272\u8bbe\u7f6e", None))
+        self.label_27.setText(QCoreApplication.translate("MainWindow", u"\u62fc\u63a5\u65b9\u5411\uff1a", None))
+        self.label_18.setText(QCoreApplication.translate("MainWindow", u"\u5206\u5272\u6a21\u5f0f\uff1a", None))
         self.radioButton_stitch_direction_vertical.setText(QCoreApplication.translate("MainWindow", u"\u7eb5\u5411", None))
+        self.label_19.setText(QCoreApplication.translate("MainWindow", u"\u5207\u7247\u5bf9\u9f50\uff1a", None))
+        self.pushButton_clean_detect_data.setText(QCoreApplication.translate("MainWindow", u"\u6e05\u9664\u68c0\u6d4b\u6570\u636e", None))
+        self.label_31.setText(QCoreApplication.translate("MainWindow", u"\u68c0\u6d4b\u7b97\u6cd5\u8bbe\u7f6e", None))
         self.comboBox_stitch_method.setItemText(0, QCoreApplication.translate("MainWindow", u"MSE", None))
         self.comboBox_stitch_method.setItemText(1, QCoreApplication.translate("MainWindow", u"SSIM", None))
         self.comboBox_stitch_method.setItemText(2, QCoreApplication.translate("MainWindow", u"DIRECT", None))
 
         self.comboBox_stitch_method.setCurrentText(QCoreApplication.translate("MainWindow", u"MSE", None))
-        self.comboBox_reclip_method.setItemText(0, QCoreApplication.translate("MainWindow", u"\u56fa\u5b9a\u5c0f\u8282", None))
-        self.comboBox_reclip_method.setItemText(1, QCoreApplication.translate("MainWindow", u"\u9650\u5236\u5bbd\u5ea6", None))
-
-        self.comboBox_reclip_method.setCurrentText(QCoreApplication.translate("MainWindow", u"\u56fa\u5b9a\u5c0f\u8282", None))
-        self.label_17.setText(QCoreApplication.translate("MainWindow", u"\u62fc\u63a5\u70b9\u7b97\u6cd5\uff1a", None))
-        self.label_18.setText(QCoreApplication.translate("MainWindow", u"\u5206\u5272\u6a21\u5f0f\uff1a", None))
-        self.label_27.setText(QCoreApplication.translate("MainWindow", u"\u62fc\u63a5\u65b9\u5411\uff1a", None))
-        self.radioButton_stitch_direction_horizontal.setText(QCoreApplication.translate("MainWindow", u"\u6a2a\u5411", None))
-        self.label_24.setText(QCoreApplication.translate("MainWindow", u"\u56fe\u50cf\u62fc\u63a5\u8bbe\u7f6e", None))
-        self.label_19.setText(QCoreApplication.translate("MainWindow", u"\u5207\u7247\u5bf9\u9f50\uff1a", None))
-        self.label_31.setText(QCoreApplication.translate("MainWindow", u"\u68c0\u6d4b\u7b97\u6cd5\u8bbe\u7f6e", None))
-        self.label_30.setText(QCoreApplication.translate("MainWindow", u"\u6c34\u5e73\u7ebf\u6bb5\u7cfb\u6570", None))
-        self.label_33.setText(QCoreApplication.translate("MainWindow", u"\u7ad6\u76f4\u7ebf\u6bb5\u7cfb\u6570", None))
+        self.pushButton_manually_stitch.setText(QCoreApplication.translate("MainWindow", u"\u624b\u52a8\u62fc\u63a5", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"X:", None))
         self.comboBox_compare_method.setItemText(0, QCoreApplication.translate("MainWindow", u"SSIM", None))
         self.comboBox_compare_method.setItemText(1, QCoreApplication.translate("MainWindow", u"MSE", None))

@@ -1,12 +1,13 @@
 from typing import Optional
 import sys
+import typing
 
-from PySide6 import QtCore
+from PySide6.QtCore import QThread, Signal
 from loguru import logger as log
 
-class LogThread(QtCore.QThread):
+class LogThread(QThread):
     """log输出线程"""
-    signalForText = QtCore.Signal(str)
+    signalForText = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -19,9 +20,10 @@ class LogThread(QtCore.QThread):
         """什么都不用做，但是没有这个函数的声明的话pycharm调试器会报错"""
         pass
 
+@typing.no_type_check
 def init_log(showlog_level: str = "INFO", sub_log_path: Optional[str] = None) -> None:
     """
-
+    初始化日志记录器，修改日志等级和子日志路径
     :param sub_log_path: 保存的子日志的路径
     :param showlog_level: UI显示的日志等级
     """
@@ -29,7 +31,7 @@ def init_log(showlog_level: str = "INFO", sub_log_path: Optional[str] = None) ->
                    '| <cyan>{name}</cyan>:<cyan>{function}</cyan>:<yellow>{line}</yellow> - <level>{message}</level>'
     _format_show = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> ' \
                    '| <level>{message}</level>'
-    try:
+    try:  # 为logger实例添加ids属性，以存储子日志信息
         if log.ids:
             for i in log.ids:
                 log.remove(i)  # 清除所有配置

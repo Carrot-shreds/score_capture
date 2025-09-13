@@ -31,10 +31,12 @@ class Config:
         }
         self.image = {k.split("=")[0].split(".")[-1]: v for k, v in self.image.items()}  # 获取变量名作为Key
 
-    def save_config_to_ini(self, ini_file: Optional[str] = None) -> None:
+    def save_config_to_ini(self, save_file: Optional[str] = None) -> None:
         """保存data中的配置项到ini文件"""
-        if ini_file is None:
-            ini_file = self.data.ini_file
+        if save_file is None:
+            ini_file: str = self.data.ini_file
+        else:
+            ini_file: str = save_file
         new_ini = ConfigParser()
         new_ini.add_section("Config")
         new_ini.add_section("Log")
@@ -49,10 +51,12 @@ class Config:
             new_ini.write(f)
         log.info(f"成功将配置保存至{ini_file}")
 
-    def read_data_from_ini(self, ini_file: Optional[str] = None) -> None:
+    def read_data_from_ini(self, save_file: Optional[str] = None) -> None:
         """从.ini文件中导入数据"""
-        if ini_file is None:
-            ini_file = self.data.ini_file
+        if save_file is None:
+            ini_file: str = self.data.ini_file
+        else:
+            ini_file: str = save_file
 
         try:
             if not self.config_reader.read(ini_file):

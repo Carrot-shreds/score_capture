@@ -1,7 +1,7 @@
 import pickle
 import json
 import sys
-from typing import Optional, Literal, overload, Any
+from typing import Optional, Literal, Any
 
 from loguru import logger as log
 import cv2
@@ -10,10 +10,13 @@ from PySide6.QtCore import QRect
 import pyautogui
 
 from config import Config
-from utilities import order_filenames
+from utilities import order_filenames, hash_image
 
 TYPE_IMAGE = np.ndarray | cv2.UMat | np.ndarray[Any, np.dtype]
-
+LITERAL_COMPARE_METHODS = Literal["SSIM", "MSE"]
+LITERAL_DETECT_METHODS = Literal["SSIM", "MSE"]
+LITERAL_STITCH_METHODS = Literal["DIRECT", "SSIM", "MSE"]
+LITERAL_DIRECTIONS = Literal["horizontal", "vertical"]
 
 class DATA:
     """
@@ -40,19 +43,19 @@ class DATA:
         self.region:Region = Region(0,0,114,511)  # 截图范围，（x，y，w，h）
 
         # 截图设置
-        self.compare_method: Literal["SSIM", "MSE"] = "SSIM"
-        self.compare_threshold: float = 0.9
+        self.compare_method: LITERAL_COMPARE_METHODS = "SSIM"
+        self.compare_threshold: float = 0.96
         self.capture_delay: float = 0.7  # 延时时间，单位(秒/)
         self.if_keep_last: bool = True
         self.if_reverse_image: bool = False
 
         # 拼接设置
-        self.stitch_method: Literal["SSIM", "MSE", "DIRECT"] = "MSE"
-        self.stitch_direction: Literal["horizontal", "vertical"] = "horizontal"
+        self.stitch_method: LITERAL_STITCH_METHODS = "MSE"
+        self.stitch_direction: LITERAL_DIRECTIONS = "horizontal"
 
         # 检测算法设置
-        self.detect_coefficient_horizontal: float = 0.5
-        self.detect_coefficient_vertical: float = 0.9
+        self.detect_coefficient_horizontal: float = 0.7
+        self.detect_coefficient_vertical: float = 0.8
 
         # 分割设置
         self.reclip_method: int = 1  # 0:每行固定小节数 1:填充每行最大长度
@@ -75,8 +78,8 @@ class DATA:
             "ERROR": "red"
         }
 
-        self.image_preview: TYPE_IMAGE = np.ndarray([])
-        self.lines_detections: dict[str:str, str:dict[str:list[Line]]] = {  # 定义数据结构
+        self.image_preview: np.ndarray = np.ndarray([])
+        self.lines_detections: dict[str, str|dict[str, list[Line]]] = {  # 定义数据结构
             # "path": "",
             # "filename": {
             #     "horizontal_lines": list[Line],
@@ -99,7 +102,7 @@ class Region:
         self.height:int = height
 
 
-    def set(self, region:tuple[int, int, int, int] | np.ndarray) -> None:
+    def set(self, region:tuple[int, int, int, int] | np.ndarray | list[int]) -> None:
         """更新坐标值"""
         self.x = region[0]
         self.y = region[1]
@@ -140,8 +143,7 @@ class Region:
     @staticmethod
     def geometry_to_region(geometry: QRect) -> tuple[int, int, int, int]:
         """转换QRect为（x,y,w,h）四元组"""
-        return np.asarray((geometry.x(), geometry.y(),
-                           geometry.width(), geometry.height()))
+        return (geometry.x(), geometry.y(), geometry.width(), geometry.height())
 
 
 class Line:
@@ -151,14 +153,14 @@ class Line:
                  point1: tuple[int, int],
                  point2: tuple[int, int],
                  thickness: int,  # 在水平或竖直方向上的厚度，即从1开始， 不为零
-                 direction: Literal["horizontal", "vertical"],  # 线段延水平/竖直方向
-                 image_shape: tuple  # 图像的尺寸，（height， width）
+                 direction: LITERAL_DIRECTIONS,  # 线段延水平/竖直方向
+                 image_shape: tuple[int, int]  # 图像的尺寸，（height， width）
                  ) -> None:
-        self.point1 = point1
-        self.point2 = point2
-        self.thickness = thickness
-        self.direction = direction
-        self.image_shape = image_shape
+        self.point1: tuple[int, int] = point1
+        self.point2: tuple[int, int] = point2
+        self.thickness: int = thickness
+        self.direction: LITERAL_DIRECTIONS = direction
+        self.image_shape:tuple[int, int] = image_shape
         self.start_pixel: int = 0  # 在set_thickness中设置
         self.end_pixel: int = 0  # 水平或竖直方向上，起始点的坐标索引
         self.set_thickness(self.thickness)
@@ -230,11 +232,11 @@ class CaptureData:
     """
 
     def __init__(self, data={}) -> None:
-        self.data: dict[frozenset[str, str],  # 两张图像的文件名，set不可hash，不能作为键值
+        self.data: dict[frozenset[str],  # 两张图像的文件名，set不可hash，不能作为键值
                          dict[str, float]] = data  # 对比结果，算法：数值
 
     def add_diff(self, image1:str, image2:str, 
-                 compare_method:Literal["MSE", "SSIM"], diff:float) -> None:
+                 compare_method:LITERAL_COMPARE_METHODS, diff:float) -> None:
         """添加比对结果"""
         image_couple = frozenset((image1, image2))
         if not self.data.get(image_couple):  # 如果图像数据为空
@@ -252,17 +254,17 @@ class CaptureData:
         return image_names
     
     def get_diff(self, image1:str, image2:str, 
-                 compare_method:Literal["SSIM", "MSE"]) -> float | None:
+                 compare_method:LITERAL_COMPARE_METHODS) -> float | None:
         """获取两图片的比对结果"""
         image_couple = frozenset([image1, image2])
         image = self.data.get(image_couple)
         if image:
             diff = image.get(compare_method)
         else:
-            diff = []
+            diff = None
         return diff
     
-    def get_diff_sequence(self, compare_method:Literal["SSIM", "MSE"], 
+    def get_diff_sequence(self, compare_method:LITERAL_COMPARE_METHODS, 
                           image_names: list[str]) -> list[float]:
         if not image_names:
             image_names = self.get_image_sequence()
@@ -309,7 +311,7 @@ class ImageDetection:
         self.vertical_lines = vertical_lines
         self.image_shape = self.horizontal_lines[0].image_shape
 
-    def get_lines(self, direction:Literal["horizontal", "vertical"]="vertical") -> list[Line]:
+    def get_lines(self, direction:LITERAL_DIRECTIONS="vertical") -> list[Line]:
         """获取指定方向的线段列表"""
         if direction == "horizontal":
             return self.horizontal_lines
@@ -319,14 +321,14 @@ class ImageDetection:
             raise ValueError("direction must be 'horizontal' or 'vertical'")
 
     def get_lines_index(self,
-                        direction:Literal["horizontal", "vertical"]="vertical",
+                        direction:LITERAL_DIRECTIONS="vertical",
                         extern_width:int = 5,
                         reverse=False,
                         ) -> np.ndarray:
         "获取指定方向的线段索引值"
         lines = self.horizontal_lines if direction == "horizontal" else self.vertical_lines
-        points = np.concatenate([l.get_index_points(extern_width=extern_width, reverse=reverse
-                                                    ) for l in lines])
+        points = np.concatenate([line.get_index_points(extern_width=extern_width, reverse=reverse
+                                                    ) for line in lines])
         return points
 
 
@@ -348,12 +350,17 @@ class ScoreDetections:
         return [k for k in self.images.keys()]
 
     def __getitem__(self, key) -> ImageDetection:
-        if type(key) == str:
-            return self.images.get(key)
-        elif type(key) == int:
-            return self.images.get(self.get_image_filenames()[key])
+        if type(key) is str:
+            result = self.images.get(key)
+        elif type(key) is int:
+            result = self.images.get(self.get_image_filenames()[key])
         else:
-            raise KeyError(key)
+            raise TypeError(f"错误的索引类型{type(key)}")
+        
+        if result is None:
+            raise KeyError(f"未找到图像{key}的检测结果")
+        else:
+            return result
 
     # noinspection PyTypeChecker
     def save_to_file(self, file) -> None:
@@ -366,3 +373,71 @@ class ScoreDetections:
         """从文件中读取"""
         with open(file, "rb") as f:
             return pickle.load(f)
+
+class StitchData:
+    """存储拼接点数据"""
+    def __init__(self, points: list[int], images: list[np.ndarray] | None, stitch_direction) -> None:
+
+        self.stitch_direction: LITERAL_DIRECTIONS = stitch_direction
+        self.stitch_config:dict[str, str] = {
+            "stitch_direction": self.stitch_direction
+        }
+
+        self.points:list[int] = points
+        if images and self.points and len(images) != len(self.points)+1:
+            raise ValueError("图像数量必须比拼接点数量多1")
+        if images is None:
+            self.image_hashes:list[str] = ["No image hash input!" for i in range(len(self.points)+1)]
+            self.image_shapes: list[tuple[int, int]] = [(0,0) for i in range(len(self.points)+1)]
+        else:
+            self.image_hashes:list[str] = [hash_image(img) for img in images]
+            self.image_shapes: list[tuple[int, int]] = [img.shape for img in images]
+
+    def add_point(self, point:int, image:tuple[np.ndarray, np.ndarray]) -> None:
+        """添加拼接点和对应的图像"""
+        self.points.append(point)
+        self.image_hashes.append(hash_image(image[0]))
+        self.image_hashes.append(hash_image(image[1]))
+
+    def save_to_file(self, file: str) -> None:
+        """保存比对数据到文件"""
+        config: dict = self.stitch_config
+        points: dict = {i:{"stitchpoint":self.points[i],
+                         "image1": {
+                             "shape":self.image_shapes[i],
+                             "hash":self.image_hashes[i]
+                             },
+                         "image2": {
+                             "shape":self.image_shapes[i+1],
+                             "hash":self.image_hashes[i+1]
+                             },
+                         } for i in range(len(self.points))}
+        data: dict = {
+            "StitchConfig": config,
+            "StitchPoints": points
+        }
+        with open(file, "w") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+
+    @staticmethod
+    def load_from_file(file: str) -> "StitchData":
+        """从文件中加载比对数据"""
+        with open(file, "r") as f:
+            load: dict = json.load(f)
+            dict_config: dict = load["StitchConfig"]
+            dict_points: dict = load["StitchPoints"]
+            points = [dict_points[str(i)]["stitchpoint"] for i in range(len(dict_points.keys()))]
+            image_shapes = [dict_points[str(i)]["image1"]["shape"] for i in range(len(dict_points.keys()))]
+            image_shapes.append(dict_points[str(len(dict_points.keys())-1)]["image2"]["shape"])
+            image_hashes = [dict_points[str(i)]["image1"]["hash"] for i in range(len(dict_points.keys()))]
+            image_hashes.append(dict_points[str(len(dict_points.keys())-1)]["image2"]["hash"])
+            data = StitchData(points, None, stitch_direction=dict_config["stitch_direction"])
+            data.image_shapes = image_shapes
+            data.image_hashes = image_hashes
+            return data
+        
+    def __eq__(self, value: "StitchData") -> bool:
+        if self.image_hashes == value.image_hashes and self.stitch_config == value.stitch_config:
+            return True
+        else:
+            return False

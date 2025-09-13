@@ -6,29 +6,32 @@ import time
 from copy import deepcopy
 from typing import Optional
 
-import PySide6.QtCore
-import win32gui, win32con, win32print
+import win32gui
+import win32con
+import win32print
 import numpy as np
 import cv2
 import pyautogui
+import PySide6.QtCore
 from PySide6.QtCore import QRect
-from PySide6.QtGui import QCloseEvent, QColor
+from PySide6.QtGui import QCloseEvent, QColor, QTextCursor, QTextCharFormat, QBrush
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QInputDialog
-from PySide6 import QtGui, QtCore
+from PySide6 import QtCore
 import pyqtgraph
 from loguru import logger as log
 
 from ui.locate_ui import Ui_Dialog_locate
 from ui.mainwindow_ui import Ui_MainWindow
 from ui.preview_ui import Ui_Widget_Preview
-from data import DATA, CaptureData, Line, TYPE_IMAGE, ScoreDetections
+from ui.stitch_ui import Ui_Widget_Stitch
+from data import DATA, LITERAL_DIRECTIONS, CaptureData, Line, TYPE_IMAGE, ScoreDetections, StitchData
 from log import LogThread, init_log
 from image_process import (detect_vertical_lines, detect_horizontal_lines,
-                           save_image, read_image, image_pre_process, compare_image, get_score_lines,
-                           get_barline_num_region, detect_all_lines_with_clip, clip_image)
-from utilities import is_valid_filename, order_filenames, rename_files, reorder_image_files
+                           image_pre_process, compare_image,
+                           get_barline_num_region, detect_all_lines_with_clip, clip_image, stitch_images)
+from utilities import is_valid_filename, order_filenames, read_numbered_image_names, read_numbered_images, rename_files, read_image, save_image
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 class UI(QMainWindow, Ui_MainWindow):
@@ -48,7 +51,7 @@ class UI(QMainWindow, Ui_MainWindow):
         # 子窗口声明
         self.window_locate: Optional[WindowLocate] = None
         self.window_preview: Optional[WindowPreview] = None
-
+        self.window_stitch: Optional[WindowStitch] = None
         self.spinBox_region = [self.spinBox_region_x, self.spinBox_region_y,
                                self.spinBox_region_width, self.spinBox_region_height]
         self.console = self.textEdit_console
@@ -81,6 +84,9 @@ class UI(QMainWindow, Ui_MainWindow):
         # 截图设置
         self.pushButton_image_rebuild.clicked.connect(self.rebuild_images)
         self.pushButton_image_reorder.clicked.connect(self.reorder_images)
+        # 拼接设置
+        self.pushButton_clean_detect_data.clicked.connect(self.clean_detect_data)
+        self.pushButton_manually_stitch.clicked.connect(lambda: WindowStitch(self))
         # 实时切换
         self.comboBox_log_level.currentTextChanged.connect(self.change_log_level)
         self.checkBox_always_on_top.checkStateChanged.connect(
@@ -102,8 +108,8 @@ class UI(QMainWindow, Ui_MainWindow):
                 self.data.ini_file = self.data.exe_path + s + "config.ini"
                 self.data.score_save_path = self.data.exe_path + s + "output" + s
         # region
-        self.data.region.set([int(self.frameGeometry().x()/2), int(self.frameGeometry().y()/2),
-                              self.frameGeometry().width(), int(self.frameGeometry().height() / 3)])
+        self.data.region.set((int(self.frameGeometry().x()/2), int(self.frameGeometry().y()/2),
+                              self.frameGeometry().width(), int(self.frameGeometry().height() / 3)))
 
         # 读取配置文件
         self.data.config.read_data_from_ini()
@@ -174,6 +180,8 @@ class UI(QMainWindow, Ui_MainWindow):
             self.capture_thread.wait()  # 等待线程结束
             self.capture_thread.exit()  # 退出线程
             self.capture_thread = CaptureThread(self.data)  # 创建新的线程，以供下次调用
+            if self.pushButton_capture.text() == "结束截图":  # 保证出错时的按钮显示
+                self.pushButton_capture.setText("开始截图")
 
         self.capture_thread.signal_finished.connect(_finished)
         if not self.capture_thread.is_working:
@@ -193,7 +201,7 @@ class UI(QMainWindow, Ui_MainWindow):
             self.stitch_thread = StitchThread(self.data) # 创建新的线程，以供下次调用
 
         if self.stitch_thread.is_working:
-            QMessageBox.warning(self, f"警告",f"仍有拼接任务尚未完成，请稍后再试")
+            QMessageBox.warning(self, "警告","仍有拼接任务尚未完成，请稍后再试")
             return
         if not self.update_data_from_ui():
             return
@@ -224,7 +232,7 @@ class UI(QMainWindow, Ui_MainWindow):
             self.reclip_thread = ReclipThread(self.data)
 
         if self.reclip_thread.is_working:
-            QMessageBox.warning(self, f"警告",f"仍有重分割任务尚未完成，请稍后再试")
+            QMessageBox.warning(self, "警告","仍有重分割任务尚未完成，请稍后再试")
             return
         if not self.update_data_from_ui():
             return
@@ -249,16 +257,16 @@ class UI(QMainWindow, Ui_MainWindow):
         将text打印至ui中的plain text组件
         :param text:  输出的log字符
         """
-        fmt = QtGui.QTextCharFormat()
+        fmt = QTextCharFormat()
         try:
             log_level = text.split("|")[1].strip()
         except IndexError:
             log_level = "ERROR"
         color = self.data.log_output_color.get(log_level)
-        fmt.setForeground(QtGui.QBrush(QColor(color if color else "black")))  # 文字颜色,默认黑色
+        fmt.setForeground(QBrush(QColor(color if color else "black")))  # 文字颜色,默认黑色
         self.console.mergeCurrentCharFormat(fmt)
         self.console.append(text[:-1])  # 去除结尾的换行符
-        self.console.moveCursor(QtGui.QTextCursor.MoveOperation.End)  # 移动光标至末尾
+        self.console.moveCursor(QTextCursor.MoveOperation.End)  # 移动光标至末尾
 
     def select_path(self) -> None:
         """浏览并选择本地保存路径"""
@@ -340,7 +348,7 @@ class UI(QMainWindow, Ui_MainWindow):
             self.buildimage_thread = BuildImageThread(self.data)  # 创建新的线程，以供下次调用
 
         if self.buildimage_thread.is_working:
-            QMessageBox.warning(self, f"警告", f"仍有image重构建任务尚未完成，请稍后再试")
+            QMessageBox.warning(self, "警告", "仍有image重构建任务尚未完成，请稍后再试")
             return
         if not self.update_data_from_ui():
             return
@@ -363,25 +371,32 @@ class UI(QMainWindow, Ui_MainWindow):
         if not self.update_data_from_ui():
             return
         path = os.path.join(self.data.score_save_path, self.data.score_title)
-
         if not os.path.exists(path):
             log.error(f"指定路径不存在: {path}")
             return
 
-        file_names = os.listdir(path)
-        file_names = [f for f in file_names
-                    if f.rfind("image") > -1 and
-                    f.split(".")[0].split("image")[-1].isdigit()]
-        if file_names == []:
-            log.warning(f"没有找到当前工作路径下找到image相关的图像文件")
-            return
-        ordered_filenames = order_filenames(file_names)
+        old_filenames = read_numbered_image_names(path, "image", order_names=False)
+        ordered_filenames = order_filenames(old_filenames)
 
         image_format = ordered_filenames[0].split(".")[-1]
         for n in range(len(ordered_filenames)):
             ordered_filenames[n] = f"image{n}.{image_format}"
 
-        rename_files(path, file_names, ordered_filenames)
+        rename_files(path, old_filenames, ordered_filenames)
+
+    def clean_detect_data(self) -> None:
+        """清除线段检测数据"""
+        if not self.update_data_from_ui():
+            return
+        path = os.path.join(self.data.score_save_path, self.data.score_title)
+        if not os.path.exists(path):
+            log.error(f"指定路径不存在: {path}")
+            return
+        if "ScoreDetections" not in os.listdir(path):
+            log.warning(f"没有找到{path}下的ScoreDetections文件")
+            return
+        os.remove(os.path.join(path, "ScoreDetections"))
+        log.success(f"已清除{path}下的ScoreDetections文件")
         
     def set_always_on_top(self, state:bool) -> None:
         """设置窗口置顶状态"""
@@ -435,13 +450,27 @@ class UI(QMainWindow, Ui_MainWindow):
         # 定位设置
         self.data.region.set([i.value() for i in self.spinBox_region])
         # 截图设置
-        self.data.compare_method = self.comboBox_compare_method.currentText()
+        if self.comboBox_compare_method.currentText() == "SSIM":
+            self.data.compare_method = "SSIM"
+        elif self.comboBox_compare_method.currentText() == "MSE":
+            self.data.compare_method = "MSE"
+        else:
+            log.error(f"未识别的比较方法{self.comboBox_compare_method.currentText()}")
+            return False
         self.data.compare_threshold = self.doubleSpinBox_compare_threshold.value()
         self.data.capture_delay = self.doubleSpinBox_capture_delay.value()
         self.data.if_keep_last = bool(self.checkBox_keep_last.checkState().value)
         self.data.if_reverse_image = bool(self.checkBox_reverse_image.checkState().value)
         # 拼接设置
-        self.data.stitch_method = self.comboBox_stitch_method.currentText()
+        if self.comboBox_stitch_method.currentText() == "DIRECT":
+            self.data.stitch_method = "DIRECT"
+        elif self.comboBox_stitch_method.currentText() == "MSE":
+            self.data.stitch_method = "MSE"
+        elif self.comboBox_stitch_method.currentText() == "SSIM":
+            self.data.stitch_method = "SSIM"
+        else:
+            log.error(f"未识别的拼接方法{self.comboBox_stitch_method.currentText()}")
+            return False
         if self.radioButton_stitch_direction_horizontal.isChecked():
             self.data.stitch_direction = "horizontal"
         else:
@@ -481,11 +510,11 @@ class UI(QMainWindow, Ui_MainWindow):
         # 拼接设置
         self.comboBox_stitch_method.setCurrentText(self.data.stitch_method)
         if self.data.stitch_direction == "horizontal":
-            self.radioButton_stitch_direction_horizontal.setChecked(1)
-            self.radioButton_stitch_direction_vertical.setChecked(0)
+            self.radioButton_stitch_direction_horizontal.setChecked(True)
+            self.radioButton_stitch_direction_vertical.setChecked(False)
         elif self.data.stitch_direction == "vertical":
-            self.radioButton_stitch_direction_horizontal.setChecked(0)
-            self.radioButton_stitch_direction_vertical.setChecked(1)
+            self.radioButton_stitch_direction_horizontal.setChecked(False)
+            self.radioButton_stitch_direction_vertical.setChecked(True)
         # 检测算法设置
         self.doubleSpinBox_detect_coefficient_horizontal.setValue(self.data.detect_coefficient_horizontal)
         self.doubleSpinBox_detect_coefficient_vertical.setValue(self.data.detect_coefficient_vertical)
@@ -526,6 +555,12 @@ class UI(QMainWindow, Ui_MainWindow):
         """重写窗口关闭事件，进行关闭前的后处理"""
         self.update_data_from_ui()
         self.data.config.save_config_to_ini()
+        
+        # 关闭其他窗口
+        self.window_locate.close() if self.window_locate is not None else None
+        self.window_preview.close() if self.window_preview is not None else None
+        self.window_stitch.close() if self.window_stitch is not None else None
+
         event.accept()
 
 
@@ -596,7 +631,8 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         :param event: 窗口关闭事件
         """
         self.ui.window_locate = None
-        event.accept()  # 关闭窗口
+        if event is not None:
+            event.accept()  # 关闭窗口
 
 
 class WindowPreview(QWidget, Ui_Widget_Preview):
@@ -626,7 +662,9 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         self.setupUi(self)
 
         self.pushButton_clear_lines.clicked.connect(lambda: self.show_image(self.data.image_preview))
-        self.pushButton_reverse_image.clicked.connect(lambda: self.show_image(255 - self.graphicsView.image))
+        self.pushButton_reverse_image.clicked.connect(lambda: self.show_image(255 - self.graphicsView.image 
+                                                                              if self.graphicsView.image is not None
+                                                                                else self.data.image_preview))
         self.pushButton_update_image.clicked.connect(self.preview_region)
         self.pushButton_detect_lines.clicked.connect(self.show_lines_detected_image)
 
@@ -659,6 +697,8 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
 
     def show_lines_detected_image(self):
         """显示预览图片的直线检测结果"""
+        if not self.ui.update_data_from_ui():
+            return
         img = copy.deepcopy(self.data.image_preview)
         # img = copy.deepcopy(self.data.image_preview)
         grey_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -666,7 +706,7 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         if self.comboBox.currentText() == "仅水平线":
             lines = detect_horizontal_lines(grey_img, self.data.detect_coefficient_horizontal)
         elif self.comboBox.currentText() == "仅竖直线":
-            lines = detect_vertical_lines(grey_img, self.data.detect_coefficient_vertical)
+            lines = detect_vertical_lines(grey_img, coefficient=self.data.detect_coefficient_vertical)
         elif self.comboBox.currentText() == "所有线段":
             lines = detect_horizontal_lines(grey_img, self.data.detect_coefficient_horizontal)
             lines += detect_vertical_lines(grey_img, lines, self.data.detect_coefficient_vertical)
@@ -681,7 +721,185 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         :param event: 窗口关闭事件
         """
         self.ui.window_preview = None
-        event.accept()  # 关闭窗口
+        if event is not None:
+            event.accept()  # 关闭窗口
+
+
+class WindowStitch(QWidget, Ui_Widget_Stitch):
+    """
+    拼接窗口，继承自QDialog，手动调整拼接点并实时显示stitched图像
+    """
+
+    def __init__(self, ui: UI):
+        self.ui: UI = ui
+        if not self.ui.update_data_from_ui():  # 检查并更新数据
+            return
+        self.data: DATA = self.ui.data
+        if self.ui.window_stitch is not None:
+            self.ui.window_stitch.showNormal()  # 从最小化恢复窗口显示
+            self.ui.window_stitch.activateWindow()  # 切换窗口焦点
+            return
+        self.ui.window_stitch = self  # 赋值给主窗口，否则不显示
+
+        self.path: str = os.path.join(self.data.score_save_path, self.data.score_title)
+        self.image_names: list[str] 
+        self.images: list[np.ndarray] 
+        self.stitched_image: np.ndarray
+        self.stitched_image_length = lambda: self.stitched_image.shape[1] if self.stitch_direction == "horizontal" else self.stitched_image.shape[0]
+        self.stitchData_filename:str
+        self.stitchData: StitchData
+        self.stitch_points: list[int] 
+        self.stitch_direction: LITERAL_DIRECTIONS
+        self.show_region: tuple[int, int]
+
+        # 在setupUi()前完成对pyqt_graph的配置
+        if np.average(self.data.image_preview) < 128:  # 当图片亮度均值偏小时，设置背景为白色
+            pyqtgraph.setConfigOption("background", "w")  # 默认背景为黑色
+            pyqtgraph.setConfigOption("foreground", "w")  # 统一前景色
+        pyqtgraph.setConfigOption(
+            "imageAxisOrder", "row-major")  # 设置图像显示以行为主（横置）
+
+        super().__init__()
+        self.setupUi(self)
+
+        self.spinBox_stitch_points_index.valueChanged.connect(self.change_point_index)
+        self.spinBox_stitch_points_value.valueChanged.connect(self.change_point_value)
+
+        self.pushButton_open_file.clicked.connect(self.open_file)
+        self.pushButton_save_file.clicked.connect(self.save_file)
+        self.pushButton_save_image.clicked.connect(self.save_image)
+
+        self.imageView = self.graphWidget
+        self.viewbox = self.imageView.getView()
+        # self.graphicsView.ui.histogram.hide()  # 显示直方图，隐藏菜单按钮，ROI
+        self.imageView.ui.menuBtn.hide()
+        self.imageView.ui.roiBtn.hide()
+
+        self.resize(int(self.data.SCREEN_SIZE[0] * 0.5),
+                     int(self.data.SCREEN_SIZE[1] * 0.3))
+        self.move(int(self.data.SCREEN_SIZE[0] * 0.1),
+                     int(self.data.SCREEN_SIZE[1] * 0.1))
+        self.show()
+
+        if os.path.exists(self.path) and "StitchData.json" in os.listdir(self.path):
+            self.load_stitch_points(os.path.join(self.path, "StitchData.json"))
+            self.flush_stitch_preview()
+        else:
+            log.warning(f"未在{self.path}下发现StitchData.json文件，请先进行一次拼接操作")
+
+    def image_length(self, index: int = 0) -> int:
+        """返回指定index的image的宽度或高度"""
+        if self.stitch_direction == "horizontal":
+            return self.images[index].shape[1]
+        elif self.stitch_direction == "vertical":
+            return self.images[index].shape[0]
+        return 0
+
+    def open_file(self) -> None:
+        if not self.ui.update_data_from_ui():  # 更新数据:
+            return
+        self.data = self.ui.data
+        filename = QFileDialog.getOpenFileName(
+            self, 
+            dir=os.path.join(self.ui.data.score_save_path, self.ui.data.score_title) 
+            if os.path.exists(os.path.join(self.ui.data.score_save_path, self.ui.data.score_title))
+            else self.ui.data.score_save_path, 
+            filter="JSON files (*.json *.JSON)")[0]
+        if filename == "":
+            return  # 当点击取消时，目录为空
+        
+        self.load_stitch_points(filename)
+        log.info("成功打开文件:"+filename)
+        self.flush_stitch_preview()
+
+    def load_stitch_points(self, file: str) -> None:
+        if file == "" or not os.path.exists(file):
+            log.error("不存在文件:"+file)
+            return
+        if os.path.dirname(file) != self.path:
+            init_log(sub_log_path=os.path.dirname(file),
+                     showlog_level=self.ui.data.log_output_level)  # 添加子日志
+        self.path = os.path.dirname(file)
+        self.image_names = read_numbered_image_names(self.path, "image")
+        if self.image_names == []:
+            log.error("打开文件失败:"+file)
+            return
+        self.images = read_numbered_images(self.path, "image", self.image_names)
+        self.stitchData = StitchData.load_from_file(file)
+        self.stitchData_filename = file
+        self.stitch_points = self.stitchData.points
+        self.stitch_direction = self.data.stitch_direction
+        if self.stitch_direction == "horizontal":  # 默认显示图片范围
+            self.show_region = (0, int(self.viewbox.width()))  
+        elif self.stitch_direction == "vertical":
+            self.show_region = (0, int(self.viewbox.height()))
+        log.info(f"成功加载拼接点数据，共{len(self.images)}张图片，{len(self.stitch_points)}个拼接点")
+        log.debug([(n, self.stitch_points[n]) for n in range(len(self.stitch_points))])
+        # 限制输入框范围
+        self.spinBox_stitch_points_index.setMaximum(len(self.stitch_points)-1)
+        self.spinBox_stitch_points_index.setValue(0)
+        self.change_point_index()
+
+    def save_file(self) -> None:
+        name = f"StitchData_{time.strftime('%Y-%m-%d_%H-%M-%S')}.json"
+        self.stitchData.save_to_file(os.path.join(self.path, name))
+        log.success(f"已保存拼接点数据至{os.path.join(self.path, name)}")
+    
+    def save_image(self) -> None:
+        if not os.path.exists(self.path):
+            log.error(f"指定路径不存在: {self.path}")
+            return
+        name = f"{self.data.score_title}-stitched{self.data.score_save_format}"
+        save_image(os.path.join(self.path, name), self.stitched_image)
+        log.success(f"已保存拼接预览图像至{os.path.join(self.path,name)}")
+
+    def show_image(self, img: np.ndarray) -> None:
+        """在graph中显示传入的图片"""
+        self.imageView.setImage(img)
+        # 设置显示样式
+        if self.stitch_direction == "horizontal":
+            #
+            self.viewbox.setAspectLocked(False)
+            # 
+            self.viewbox.setMouseEnabled(x=True, y=False)
+            self.viewbox.setLimits(xMin=0, xMax=img.shape[1])
+            # y轴自动适应缩放
+            self.viewbox.enableAutoRange(axis='y', enable=True)
+            self.viewbox.setAutoVisible(y=True)
+            self.viewbox.setAutoPan(y=True)  # 不写这个会导致移动缩放闪烁bug
+            self.viewbox.setXRange(self.show_region[0], self.show_region[1] ,padding=0)
+        elif self.stitch_direction == "vertical":
+            pass
+
+    def flush_stitch_preview(self) -> None:
+        self.stitched_image = stitch_images(self.images, self.stitch_points, self.stitch_direction)
+        point_position: int = self.image_length(0)
+        point_position += sum([self.image_length(i) - self.stitch_points[i] for i in range(self.spinBox_stitch_points_index.value())])
+        if point_position not in range(self.show_region[0], self.show_region[1]):
+            blank = int(self.viewbox.width()/2) if self.stitch_direction == "horizontal" else int(self.viewbox.height()/2)
+            self.show_region = (max(0, point_position-blank), min(point_position+blank, self.stitched_image_length()))
+        self.show_image(self.stitched_image)
+
+    def change_point_index(self) -> None:
+        # 以下三行代码不能调换先后顺序
+        self.spinBox_stitch_points_value.setMaximum(self.image_length(self.spinBox_stitch_points_index.value()+1))
+        self.spinBox_stitch_points_value.setValue(self.stitch_points[self.spinBox_stitch_points_index.value()])
+        self.spinBox_stitch_points_value.setMinimum(1)
+        self.flush_stitch_preview()
+
+    def change_point_value(self) -> None:
+        self.stitch_points[self.spinBox_stitch_points_index.value()] = self.spinBox_stitch_points_value.value()
+        self.stitchData.points[self.spinBox_stitch_points_index.value()] = self.spinBox_stitch_points_value.value()
+        self.flush_stitch_preview()
+
+    def closeEvent(self, event: Optional[QCloseEvent]) -> None:
+        """
+        重写窗口关闭事件
+        :param event: 窗口关闭事件
+        """
+        self.ui.window_stitch = None
+        if event is not None:
+            event.accept()  # 关闭窗口
 
 
 class BuildImageThread(QtCore.QThread):
@@ -705,19 +923,13 @@ class BuildImageThread(QtCore.QThread):
             return
 
         # 获取capture图像文件名列表
-        file_names = os.listdir(path)
-        file_names = [f for f in file_names
-                      if f.rfind("capture") > -1 and
-                      f.split(".")[0].split("capture")[-1].isdigit()]
+        file_names = read_numbered_image_names(path, "capture")
         if file_names == []:
-            log.warning(f"没有找到当前工作路径下找到capture相关的图像文件")
             self.signal_finished.emit()
             return
-        file_names = order_filenames(file_names)
 
         # 清除旧的image文件
-        image_files = [f for f in os.listdir(path) if f.rfind("image") > -1 and
-                       f.split(".")[0].split("image")[-1].isdigit()]
+        image_files = read_numbered_image_names(path, "image")
         for f in image_files:
             os.remove(os.path.join(path, f))
 
@@ -770,7 +982,7 @@ class BuildImageThread(QtCore.QThread):
         capture_sequnce = [i for i in capture_sequnce if len(i) > 2]
         image_count = 0
         for sequnce in capture_sequnce:
-            image = np.average([i.astype(np.uint16)  # 转换为uint16，避免求和数据溢出
+            image = np.average([np.asarray(i).astype(np.uint16)  # 转换为uint16，避免求和数据溢出
                                 for i in sequnce[1:-1]],  # 不要首尾两张
                                axis=0  # 保留图片形状
                                ).astype(np.uint8)  # 转换回图片格式
@@ -884,96 +1096,6 @@ class CaptureThread(QtCore.QThread):
         finally:  # 确保线程结束时发出信号
             self.signal_finished.emit() 
 
-
-class DetectThread(QtCore.QThread):
-    """
-    截图主进程
-    """
-    # 处理完毕信号
-
-    signal_finished = QtCore.Signal()
-
-    def __init__(self, data: DATA) -> None:
-        super().__init__()
-        self.data: DATA = data
-        self.is_working: bool = False  # 主进程是否正在工作
-        self.signal_stop: bool = False  # 中止线程信号
-
-    def run(self) -> None:
-        """线程入口启动函数，重写自run方法，使用.start()调用"""
-        data: DATA = copy.deepcopy(self.data)  # 使用深拷贝，以保证data在执行中不变
-        temp_list: list[np.ndarray] = []
-        image_list: list[np.ndarray] = []
-
-
-# class StitchCompareThread(QtCore.QThread):
-#     """
-#     图像拼接比对主进程
-#     """
-#     signal_finished = QtCore.Signal(list)  # 处理完毕信号
-
-#     def __init__(self, data: DATA, images_gray: list[np.ndarray],
-#                  score_detections: ScoreDetections, image_names: list[str], name_index_list: list[int],
-#                  detect_start: int, detect_end: int):
-#         super().__init__()
-#         self.data: DATA = data
-#         self.is_working: bool = False  # 主进程是否正在工作
-
-#         self.images_gray: list[np.ndarray] = images_gray  # 灰度图像列表
-#         self.score_detections: ScoreDetections = score_detections  # 线段检测结果
-#         self.detect_start: int = detect_start  # 检测起始行
-#         self.detect_end: int = detect_end  # 检测结束行
-#         self.image_names: list[str] = image_names  # 图像名称列表
-#         self.name_index_list: list[int] = name_index_list  # 图像名称索引列表
-
-#     def main(self) -> None:
-#         """拼接比对主函数"""
-#         images_gray: list[np.ndarray] = self.images_gray
-#         score_detections: ScoreDetections = self.score_detections
-#         detect_start, detect_end = self.detect_start, self.detect_end
-#         image_names: list[str] = self.image_names
-#         stitch_points: list[tuple[int,list[int]]] = []
-
-#         for name_index in self.name_index_list:  # 遍历图像名称索引列表
-#             img1, img2 = images_gray[name_index], images_gray[name_index + 1]
-#             barline_index = score_detections[image_names[name_index]].get_lines_index(
-#                 reverse=True, extern_width=1)
-#             stitch_index = [barline_index + l.start_pixel
-#                             for l in score_detections[image_names[name_index+1]].vertical_lines]
-#             stitch_index = np.unique(
-#                 np.concatenate(stitch_index))  # 拼接成一维数组并进行去重
-#             if self.data.stitch_method == "SSIM":
-#                 diff = [compare_image(img1[:, -offset:],  # 仅计算上方部分，以增大小节数所占比重
-#                                         img2[:, :offset])*0.2 +
-#                         compare_image(img1[detect_start:detect_end, -offset:],
-#                                         img2[detect_start:detect_end, :offset])*0.8
-#                         for offset in stitch_index]  # 计算两张图像在offset区域中重叠差值的均值
-#                 # 右侧1像素为img2的部分，越大越相似
-#                 stitch_points.append((name_index,
-#                     int(stitch_index[np.argmax(np.asarray(diff))] + 1)))
-#             elif self.data.stitch_method == "MSE":
-#                 img1, img2 = np.astype(img1, np.int16), np.astype(
-#                     img2, np.int16)  # ！！！避免差值数据溢出
-#                 diff = [np.std(img1[:, -offset:] - img2[:, :offset])
-#                         for offset in stitch_index]
-#                 stitch_points.append(  # 同上，越小越相似
-#                     (name_index,
-#                      int(stitch_index[np.argmin(np.asarray(diff))] + 1)))
-#             log.debug(f"{self.data.stitch_method}-{image_names[name_index]}-{image_names[name_index + 1]}"
-#                         f"-stitch_point:{stitch_points[-1]}")
-            
-#         self.signal_finished.emit(stitch_points)  # 发出处理完毕信号
-
-#     def run(self):
-#         """线程入口启动函数，重写自run方法，使用.start()调用"""
-#         try:
-#             self.main()  # 调用主函数
-#             self.signal_finished.emit(["bgbnblj"])  # 发出处理完毕信号
-#         except Exception as e:
-#             log.error(f"图像比对线程异常：{e}")
-#             self.signal_finished.emit([])
-            
-
 class StitchThread(QtCore.QThread):
     """
     图片拼接主进程
@@ -985,7 +1107,7 @@ class StitchThread(QtCore.QThread):
         self.data: DATA = data
         self.is_working: bool = False  # 主进程是否正在工作
 
-    # @log.catch()
+    @log.catch()
     def main(self) -> None:
         """stitch主函数"""
         data = deepcopy(self.data)
@@ -1009,13 +1131,13 @@ class StitchThread(QtCore.QThread):
                     image_files.append(filename)
                     image_path = os.path.join(path, filename)
                     image = read_image(image_path)
-                    image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+                    image_gray = np.asarray(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY))
                     horizontal_lines = detect_horizontal_lines(image_gray, data.detect_coefficient_horizontal)
                     vertical_lines = detect_vertical_lines(image_gray, horizontal_lines, data.detect_coefficient_vertical)
-                    for l in horizontal_lines:
-                        l.draw(image)
-                    for l in vertical_lines:
-                        l.draw(image)
+                    for line in horizontal_lines:
+                        line.draw(image)
+                    for line in vertical_lines:
+                        line.draw(image)
                     save_image(path + "\\" + filename.split(".")[0] +
                                 "-detected" + data.score_save_format, image)
                     score_detections.add_image(filename, horizontal_lines, vertical_lines)
@@ -1029,12 +1151,9 @@ class StitchThread(QtCore.QThread):
             log.info("线段检测完毕，已生成对应预览图")
 
         # 获取排序后的图片名称
-        image_names: list[str] = [f for f in os.listdir(path) if f.rfind("image") > -1 and
-                                  f.split(".")[0].split("image")[-1].isdigit()]
-        image_names = order_filenames(image_names)
-        images = [read_image((os.path.join(path, i)))
-                  for i in image_names]  # 读取图片
-        images_gray = [cv2.cvtColor(i, cv2.COLOR_RGB2GRAY) for i in images]
+        image_names = read_numbered_image_names(path, "image")
+        images = read_numbered_images(path, "image", image_names)
+        images_gray:list[np.ndarray] = [np.asarray(cv2.cvtColor(i, cv2.COLOR_RGB2GRAY)) for i in images]
 
         # 获取mse最低时的拼接像素点
         if data.stitch_method == "DIRECT":
@@ -1052,48 +1171,30 @@ class StitchThread(QtCore.QThread):
             # 水平拼接中，获取小节数字序号的区域，以设置权重
             if stitch_direction == "horizontal":  
                 barline_num_detect_start, barline_num_detect_end = get_barline_num_region(score_detections[0])
-            # name_index  = [n for n in range(len(image_names) - 1)]
-            # thread_count = 10  # 设置线程数量
-            # stitch_compare_threads = []  # 存储比对线程
-            # for i in range(thread_count):
-            #    # 分割图像名称索引列表
-            #    start = i * len(name_index) // thread_count
-            #    end = (i + 1) * len(name_index) // thread_count if i < thread_count - 1 else len(name_index)
-            #    # 创建比对线程
-            #    stitch_compare_threads.append(
-            #        StitchCompareThread(data, images_gray, score_detections, image_names,
-            #                            name_index[start:end], detect_start, detect_end))
-            #    stitch_compare_threads[-1].signal_finished.connect(lambda points: stitch_points.append(points))
-            #    stitch_compare_threads[-1].start()  # 启动比对线程
-            # for stitch_compare_thread in stitch_compare_threads:  # 等待所有比对线程结束
-            #    stitch_compare_thread.wait()  # 等待比对线程结束
-            #
-            # stitch_points.sort(key=lambda x: x[0])  # 按照图像索引排序
-            # stitch_points = [i[1] for i in stitch_points]  # 提取拼接点
             for name_index in range(len(image_names) - 1):
                 img1:np.ndarray = images_gray[name_index]
                 img2:np.ndarray = images_gray[name_index + 1]
-                line_index = score_detections[image_names[name_index]].get_lines_index(
-                    reverse=True, extern_width=2, direction=reference_lines_direction)
-                stitch_index:list[int] = [line_index + l.start_pixel
-                                          for l in score_detections[image_names[name_index+1]].get_lines(
-                                              direction=reference_lines_direction)]
-                stitch_index:np.ndarray = np.unique(np.concatenate(stitch_index))  # 拼接成一维数组并进行去重
                 length = img1.shape[0] if stitch_direction == "vertical" else img1.shape[1]  # 拼接方向上的长度
-                stitch_index:np.ndarray = stitch_index[stitch_index < length]  # 限定拼接索引区域范围
-                stitch_index:list[int] = list(stitch_index)
+                try:
+                    line_index = score_detections[image_names[name_index]].get_lines_index(
+                        reverse=True, extern_width=2, direction=reference_lines_direction)
+                    stitch_indexs = [line_index + line.start_pixel 
+                                    for line in score_detections[image_names[name_index+1]].get_lines(
+                                        direction=reference_lines_direction)]
+                    stitch_indexs = np.unique(np.concatenate(stitch_indexs))  # 拼接成一维数组并进行去重
+                    stitch_index:list[int] = list(stitch_indexs[stitch_indexs < length])  # 限定拼接索引区域范围
+                except ValueError:
+                    stitch_index=[]
                 if stitch_index == []:  # 当img1，img2无重合特征线时
+                    log.warning(f"{image_names[name_index]}与{image_names[name_index+1]}无重合特征线，"
+                                "将在中间区域进行比对")
                     stitch_index = [i for i in range(1,length)]  # stitch_index不能为0!!!
                     stitch_index = stitch_index[int(length*0.2):int(length*0.8)]  # 取中间3/5的区域
-                # stitch_index = [i for i in range(1,length)]
-                # stitch_index = stitch_index[int(length*0.05):int(length*0.5)]
-                # log.debug(f"stitch_index:{stitch_index}")
-                
                 if data.stitch_method == "SSIM":
                     diff = [compare_image(clip_image(img1, stitch_direction, (-offset, None)),
                                         clip_image(img2, stitch_direction, (None, offset)),
                                         "SSIM")
-                                            for offset in stitch_index if offset>7]
+                                    for offset in stitch_index if offset>7]
                     # 在水平模式中，增加小节数字序号区域的权重
                     if stitch_direction == "horizontal":
                         diff = np.asarray(diff)*0.2 + \
@@ -1117,20 +1218,16 @@ class StitchThread(QtCore.QThread):
                         f"-stitch_point:{stitch_points[-1]}")
             log.info("图像比对完毕")
 
+        # 保存拼接点数据
+        stitchData = StitchData(stitch_points, images_gray, stitch_direction)
+        stitchData.save_to_file(os.path.join(path, "StitchData.json"))
+
         # 进行拼接
         log.info("图像拼接中")
-        if data.stitch_direction == "horizontal":
-            image_clips = [images[0]] + [images[i+1][:, stitch_points[i]:] 
-                                    for i in range(len(images)-1)]
-            final_image = np.concatenate(image_clips, axis=1)  # 延水平方向拼接
-        if data.stitch_direction == "vertical":
-            image_clips = [images[0]] + [images[i+1][stitch_points[i]:, :] 
-                                    for i in range(len(images)-1)]
-            final_image = np.concatenate(image_clips, axis=0)  # 延垂直方向拼接
-
-        result_file_name = data.working_path+data.score_title + "-stitched" + data.score_save_format
-        save_image(result_file_name, final_image)
-        log.info(f"图像拼接完毕，已生成预览图{result_file_name}")
+        final_image = stitch_images(images, stitch_points, data.stitch_direction)
+        result_full_file = data.working_path+data.score_title + "-stitched" + data.score_save_format
+        save_image(result_full_file, final_image)
+        log.info(f"图像拼接完毕，已生成预览图{result_full_file}")
 
         self.signal_finished.emit()
         return
@@ -1186,35 +1283,36 @@ class ReclipThread(QtCore.QThread):
                                                                       clip_length,
                                                                       data.detect_coefficient_horizontal,
                                                                       data.detect_coefficient_vertical)
-        for l in horizontal_lines:
-            l.draw(image)
-        for l in vertical_lines:
-            l.draw(image)
+        for line in horizontal_lines:
+            line.draw(image)
+        for line in vertical_lines:
+            line.draw(image)
         save_image(os.path.join(path, stitched_detected_image_file), image)
         log.debug(
             f"horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
         log.info("线段检测完毕，已生成对应预览图")
 
         # 小节线分组
-        index = np.asarray([l.start_pixel for l in vertical_lines])
+        index = np.asarray([line.start_pixel for line in vertical_lines])
         distance = index[1:] - index[:-1]
-        del_index = []
+        del_index:list[int] = []
         for i in np.where(distance < np.average(distance)/5)[0]:
             vertical_lines[i].set_thickness(
                 vertical_lines[i+1].end_pixel - vertical_lines[i].start_pixel)
             del_index.append(i+1)
-        bar_lines = list(np.delete(vertical_lines, del_index))
+        bar_lines = list(np.delete(np.asarray(vertical_lines), del_index))
         image = read_image(image_path)
         image_draw = deepcopy(image)
-        for l in bar_lines:
-            l.draw(image_draw)
+        for line in bar_lines:
+            line.draw(image_draw)
         save_image(path + "\\" + data.score_title +
                    "-detected-barlines" + data.score_save_format, image_draw)
         log.info(f"成功对小节线进行归类，共检测出{len(bar_lines)}组小节线,预览图像已保存")
 
         # 进行切片
         log.debug("开始进行切片操作")
-        image_clips, clip_index = [], []
+        image_clips:list[np.ndarray] = []
+        clip_index:list[list[int]] = []
         extern_pixel = 4  # 切片左右额外包含的像素
         if data.reclip_method == 0:  # 每行固定小节数
             each_line_bar_num = 4  # 每行的固定小节数
@@ -1258,7 +1356,9 @@ class ReclipThread(QtCore.QThread):
         canvas_width = canvas.shape[1]
         for c in image_clips:
             if c.shape[1] != canvas_width:
-                c = cv2.resize(c, (canvas_width, c.shape[0]), cv2.INTER_CUBIC)
+                c:np.ndarray
+                c = cv2.resize(c, (canvas_width, c.shape[0]), 
+                               interpolation=cv2.INTER_CUBIC)  # 图像缩放插值方法
             h = c.shape[0]
             w = c.shape[1]
             if data.clip_align == 0:  # 靠左
@@ -1282,7 +1382,6 @@ class ReclipThread(QtCore.QThread):
             log.error(f"重分割线程运行异常：{e}")
         finally:  # 确保线程结束时发出信号
             self.signal_finished.emit()
-
 
 
 @log.catch()

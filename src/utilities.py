@@ -1,5 +1,9 @@
 import re
 import os
+import cv2
+from typing import Literal
+import numpy as np
+import hashlib
 from loguru import logger as log
 
 def is_valid_filename(filename: str) -> bool:
@@ -17,7 +21,7 @@ def order_filenames(filenames: list[str]) -> list[str]:
     对文件名进行排序，确保数字部分正确排序。
     例如：['file1.txt', 'file10.txt', 'file2.txt'] -> ['file1.txt', 'file2.txt', 'file10.txt']
     """
-    def extract_number(filename: str) -> int:
+    def extract_number(filename: str) -> int | float:
         match = re.search(r'(\d+)', filename)
         return int(match.group(0)) if match else float('inf')
 
@@ -73,4 +77,54 @@ def reorder_image_files(path: str, filename: str) -> None:
         ordered_filenames[n] = f"{filename}{n}.{image_format}"
 
     rename_files(path, file_names, ordered_filenames)
+
+def save_image(filepath: str, img: np.ndarray) -> None:
+    """支持中文路径的cv图片存储"""
+    image_format = "." + filepath.split(".")[-1]  # 获取文件格式
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.imencode(f"{image_format}", np.asarray(img))[1].tofile(filepath)
+
+
+def read_image(filepath: str, color: Literal["RGB", "BGR", "GRAY"] = "RGB") -> np.ndarray:
+    """支持中文路径的cv图片读取"""
+    img = cv2.imdecode(np.fromfile(filepath, dtype=np.uint8), -1)
+    if color == "RGB":
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    if color == "GRAY":
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    return np.asarray(img)
+
+def read_numbered_image_names(path: str, name_without_num: str, order_names:bool = True) -> list[str]:
+    """读取指定路径下按数字排序的图像文件名列表"""
+    if not os.path.exists(path):
+        log.error(f"指定路径不存在: {path}")
+        return []
+
+    file_names = os.listdir(path)
+    pattern = re.compile(
+        rf'^{name_without_num}[0-9]+\.(?i:jpg|jpeg|png|bmp|tiff)$')
+    file_names = [f for f in file_names if pattern.match(f)]
+    if file_names == []:
+        log.warning(f"没有在当前工作路径下找到{name_without_num}相关的图像文件")
+        return []
+    if order_names:
+        file_names = order_filenames(file_names)
+    return file_names
+
+def read_numbered_images(path: str, name_without_num: str, 
+                         image_file_names: list[str] | None = None) -> list[np.ndarray]:
+    """读取指定路径下按数字排序的图像列表"""
+    if image_file_names is None:
+        filenames = read_numbered_image_names(path, name_without_num)
+    else:
+        filenames = image_file_names
+    if filenames == []:
+        return []
+    return [read_image(os.path.join(path, f)) for f in filenames]
+
+def hash_image(image: np.ndarray) -> str:
+    """计算图像的MD5 hash值"""
+    image_bytes = image.tobytes()
+    return hashlib.md5(image_bytes).hexdigest()
+
 
