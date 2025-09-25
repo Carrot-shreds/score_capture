@@ -103,114 +103,6 @@ class Ui_MainWindow(object):
         self.gridLayout_3 = QGridLayout(self.layoutWidget)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout = QGridLayout()
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.label_4 = QLabel(self.layoutWidget)
-        self.label_4.setObjectName(u"label_4")
-        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout.addWidget(self.label_4, 0, 0, 1, 7)
-
-        self.pushButton_select_path = QPushButton(self.layoutWidget)
-        self.pushButton_select_path.setObjectName(u"pushButton_select_path")
-
-        self.gridLayout.addWidget(self.pushButton_select_path, 1, 6, 1, 1)
-
-        self.comboBox_save_format = QComboBox(self.layoutWidget)
-        self.comboBox_save_format.addItem("")
-        self.comboBox_save_format.addItem("")
-        self.comboBox_save_format.setObjectName(u"comboBox_save_format")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.comboBox_save_format.sizePolicy().hasHeightForWidth())
-        self.comboBox_save_format.setSizePolicy(sizePolicy1)
-        self.comboBox_save_format.setMinimumSize(QSize(55, 0))
-
-        self.gridLayout.addWidget(self.comboBox_save_format, 2, 8, 1, 1)
-
-        self.pushButton_select_folder = QPushButton(self.layoutWidget)
-        self.pushButton_select_folder.setObjectName(u"pushButton_select_folder")
-
-        self.gridLayout.addWidget(self.pushButton_select_folder, 2, 3, 1, 1)
-
-        self.checkBox_auto_manage_config = QCheckBox(self.layoutWidget)
-        self.checkBox_auto_manage_config.setObjectName(u"checkBox_auto_manage_config")
-
-        self.gridLayout.addWidget(self.checkBox_auto_manage_config, 1, 7, 1, 2)
-
-        self.checkBox_always_on_top = QCheckBox(self.layoutWidget)
-        self.checkBox_always_on_top.setObjectName(u"checkBox_always_on_top")
-
-        self.gridLayout.addWidget(self.checkBox_always_on_top, 0, 7, 1, 2)
-
-        self.label_3 = QLabel(self.layoutWidget)
-        self.label_3.setObjectName(u"label_3")
-
-        self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)
-
-        self.lineEdit_save_path = QLineEdit(self.layoutWidget)
-        self.lineEdit_save_path.setObjectName(u"lineEdit_save_path")
-
-        self.gridLayout.addWidget(self.lineEdit_save_path, 1, 1, 1, 5)
-
-        self.label_12 = QLabel(self.layoutWidget)
-        self.label_12.setObjectName(u"label_12")
-        self.label_12.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-
-        self.gridLayout.addWidget(self.label_12, 2, 5, 1, 1)
-
-        self.pushButton_open_folder = QPushButton(self.layoutWidget)
-        self.pushButton_open_folder.setObjectName(u"pushButton_open_folder")
-
-        self.gridLayout.addWidget(self.pushButton_open_folder, 2, 4, 1, 1)
-
-        self.label_5 = QLabel(self.layoutWidget)
-        self.label_5.setObjectName(u"label_5")
-
-        self.gridLayout.addWidget(self.label_5, 1, 0, 1, 1)
-
-        self.lineEdit_score_title = QLineEdit(self.layoutWidget)
-        self.lineEdit_score_title.setObjectName(u"lineEdit_score_title")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.lineEdit_score_title.sizePolicy().hasHeightForWidth())
-        self.lineEdit_score_title.setSizePolicy(sizePolicy2)
-
-        self.gridLayout.addWidget(self.lineEdit_score_title, 2, 1, 1, 1)
-
-        self.label_6 = QLabel(self.layoutWidget)
-        self.label_6.setObjectName(u"label_6")
-
-        self.gridLayout.addWidget(self.label_6, 2, 7, 1, 1)
-
-        self.comboBox_log_level = QComboBox(self.layoutWidget)
-        self.comboBox_log_level.addItem("")
-        self.comboBox_log_level.addItem("")
-        self.comboBox_log_level.addItem("")
-        self.comboBox_log_level.addItem("")
-        self.comboBox_log_level.addItem("")
-        self.comboBox_log_level.setObjectName(u"comboBox_log_level")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.comboBox_log_level.sizePolicy().hasHeightForWidth())
-        self.comboBox_log_level.setSizePolicy(sizePolicy3)
-        self.comboBox_log_level.setMinimumSize(QSize(90, 0))
-
-        self.gridLayout.addWidget(self.comboBox_log_level, 2, 6, 1, 1)
-
-        self.pushButton_rename_folder = QPushButton(self.layoutWidget)
-        self.pushButton_rename_folder.setObjectName(u"pushButton_rename_folder")
-        sizePolicy3.setHeightForWidth(self.pushButton_rename_folder.sizePolicy().hasHeightForWidth())
-        self.pushButton_rename_folder.setSizePolicy(sizePolicy3)
-
-        self.gridLayout.addWidget(self.pushButton_rename_folder, 2, 2, 1, 1)
-
-
-        self.gridLayout_3.addLayout(self.gridLayout, 0, 0, 1, 1)
-
         self.gridLayout_4 = QGridLayout()
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.label_10 = QLabel(self.layoutWidget)
@@ -221,8 +113,11 @@ class Ui_MainWindow(object):
 
         self.spinBox_region_height = QSpinBox(self.layoutWidget)
         self.spinBox_region_height.setObjectName(u"spinBox_region_height")
-        sizePolicy3.setHeightForWidth(self.spinBox_region_height.sizePolicy().hasHeightForWidth())
-        self.spinBox_region_height.setSizePolicy(sizePolicy3)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.spinBox_region_height.sizePolicy().hasHeightForWidth())
+        self.spinBox_region_height.setSizePolicy(sizePolicy1)
         self.spinBox_region_height.setMinimumSize(QSize(80, 0))
         self.spinBox_region_height.setMaximum(2000)
 
@@ -370,8 +265,8 @@ class Ui_MainWindow(object):
         self.comboBox_stitch_method.addItem("")
         self.comboBox_stitch_method.addItem("")
         self.comboBox_stitch_method.setObjectName(u"comboBox_stitch_method")
-        sizePolicy3.setHeightForWidth(self.comboBox_stitch_method.sizePolicy().hasHeightForWidth())
-        self.comboBox_stitch_method.setSizePolicy(sizePolicy3)
+        sizePolicy1.setHeightForWidth(self.comboBox_stitch_method.sizePolicy().hasHeightForWidth())
+        self.comboBox_stitch_method.setSizePolicy(sizePolicy1)
 
         self.gridLayout_6.addWidget(self.comboBox_stitch_method, 1, 5, 1, 1)
 
@@ -405,8 +300,8 @@ class Ui_MainWindow(object):
 
         self.spinBox_region_y = QSpinBox(self.layoutWidget)
         self.spinBox_region_y.setObjectName(u"spinBox_region_y")
-        sizePolicy3.setHeightForWidth(self.spinBox_region_y.sizePolicy().hasHeightForWidth())
-        self.spinBox_region_y.setSizePolicy(sizePolicy3)
+        sizePolicy1.setHeightForWidth(self.spinBox_region_y.sizePolicy().hasHeightForWidth())
+        self.spinBox_region_y.setSizePolicy(sizePolicy1)
         self.spinBox_region_y.setMinimumSize(QSize(80, 0))
         self.spinBox_region_y.setMaximum(2000)
 
@@ -431,8 +326,8 @@ class Ui_MainWindow(object):
 
         self.spinBox_region_x = QSpinBox(self.layoutWidget)
         self.spinBox_region_x.setObjectName(u"spinBox_region_x")
-        sizePolicy3.setHeightForWidth(self.spinBox_region_x.sizePolicy().hasHeightForWidth())
-        self.spinBox_region_x.setSizePolicy(sizePolicy3)
+        sizePolicy1.setHeightForWidth(self.spinBox_region_x.sizePolicy().hasHeightForWidth())
+        self.spinBox_region_x.setSizePolicy(sizePolicy1)
         self.spinBox_region_x.setMinimumSize(QSize(80, 0))
         self.spinBox_region_x.setMaximum(2000)
 
@@ -440,8 +335,8 @@ class Ui_MainWindow(object):
 
         self.spinBox_region_width = QSpinBox(self.layoutWidget)
         self.spinBox_region_width.setObjectName(u"spinBox_region_width")
-        sizePolicy3.setHeightForWidth(self.spinBox_region_width.sizePolicy().hasHeightForWidth())
-        self.spinBox_region_width.setSizePolicy(sizePolicy3)
+        sizePolicy1.setHeightForWidth(self.spinBox_region_width.sizePolicy().hasHeightForWidth())
+        self.spinBox_region_width.setSizePolicy(sizePolicy1)
         self.spinBox_region_width.setMinimumSize(QSize(80, 0))
         self.spinBox_region_width.setMaximum(2000)
 
@@ -466,6 +361,128 @@ class Ui_MainWindow(object):
 
         self.gridLayout_3.addLayout(self.gridLayout_4, 1, 0, 1, 2)
 
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.label_6 = QLabel(self.layoutWidget)
+        self.label_6.setObjectName(u"label_6")
+
+        self.gridLayout.addWidget(self.label_6, 2, 9, 1, 1)
+
+        self.comboBox_log_level = QComboBox(self.layoutWidget)
+        self.comboBox_log_level.addItem("")
+        self.comboBox_log_level.addItem("")
+        self.comboBox_log_level.addItem("")
+        self.comboBox_log_level.addItem("")
+        self.comboBox_log_level.addItem("")
+        self.comboBox_log_level.setObjectName(u"comboBox_log_level")
+        sizePolicy1.setHeightForWidth(self.comboBox_log_level.sizePolicy().hasHeightForWidth())
+        self.comboBox_log_level.setSizePolicy(sizePolicy1)
+        self.comboBox_log_level.setMinimumSize(QSize(90, 0))
+
+        self.gridLayout.addWidget(self.comboBox_log_level, 1, 8, 1, 1)
+
+        self.checkBox_auto_manage_config = QCheckBox(self.layoutWidget)
+        self.checkBox_auto_manage_config.setObjectName(u"checkBox_auto_manage_config")
+
+        self.gridLayout.addWidget(self.checkBox_auto_manage_config, 1, 9, 1, 2)
+
+        self.label_5 = QLabel(self.layoutWidget)
+        self.label_5.setObjectName(u"label_5")
+
+        self.gridLayout.addWidget(self.label_5, 1, 0, 1, 1)
+
+        self.label_12 = QLabel(self.layoutWidget)
+        self.label_12.setObjectName(u"label_12")
+        self.label_12.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+
+        self.gridLayout.addWidget(self.label_12, 1, 7, 1, 1)
+
+        self.lineEdit_save_path = QLineEdit(self.layoutWidget)
+        self.lineEdit_save_path.setObjectName(u"lineEdit_save_path")
+
+        self.gridLayout.addWidget(self.lineEdit_save_path, 1, 1, 1, 5)
+
+        self.checkBox_always_on_top = QCheckBox(self.layoutWidget)
+        self.checkBox_always_on_top.setObjectName(u"checkBox_always_on_top")
+
+        self.gridLayout.addWidget(self.checkBox_always_on_top, 0, 9, 1, 2)
+
+        self.label_3 = QLabel(self.layoutWidget)
+        self.label_3.setObjectName(u"label_3")
+
+        self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)
+
+        self.pushButton_open_folder = QPushButton(self.layoutWidget)
+        self.pushButton_open_folder.setObjectName(u"pushButton_open_folder")
+
+        self.gridLayout.addWidget(self.pushButton_open_folder, 2, 6, 1, 1)
+
+        self.pushButton_select_path = QPushButton(self.layoutWidget)
+        self.pushButton_select_path.setObjectName(u"pushButton_select_path")
+
+        self.gridLayout.addWidget(self.pushButton_select_path, 1, 6, 1, 1)
+
+        self.comboBox_capture_tool = QComboBox(self.layoutWidget)
+        self.comboBox_capture_tool.addItem("")
+        self.comboBox_capture_tool.addItem("")
+        self.comboBox_capture_tool.addItem("")
+        self.comboBox_capture_tool.setObjectName(u"comboBox_capture_tool")
+        sizePolicy1.setHeightForWidth(self.comboBox_capture_tool.sizePolicy().hasHeightForWidth())
+        self.comboBox_capture_tool.setSizePolicy(sizePolicy1)
+        self.comboBox_capture_tool.setMinimumSize(QSize(90, 0))
+
+        self.gridLayout.addWidget(self.comboBox_capture_tool, 2, 8, 1, 1)
+
+        self.label_4 = QLabel(self.layoutWidget)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.gridLayout.addWidget(self.label_4, 0, 0, 1, 9)
+
+        self.pushButton_select_folder = QPushButton(self.layoutWidget)
+        self.pushButton_select_folder.setObjectName(u"pushButton_select_folder")
+
+        self.gridLayout.addWidget(self.pushButton_select_folder, 2, 5, 1, 1)
+
+        self.comboBox_save_format = QComboBox(self.layoutWidget)
+        self.comboBox_save_format.addItem("")
+        self.comboBox_save_format.addItem("")
+        self.comboBox_save_format.setObjectName(u"comboBox_save_format")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.comboBox_save_format.sizePolicy().hasHeightForWidth())
+        self.comboBox_save_format.setSizePolicy(sizePolicy2)
+        self.comboBox_save_format.setMinimumSize(QSize(55, 0))
+
+        self.gridLayout.addWidget(self.comboBox_save_format, 2, 10, 1, 1)
+
+        self.pushButton_rename_folder = QPushButton(self.layoutWidget)
+        self.pushButton_rename_folder.setObjectName(u"pushButton_rename_folder")
+        sizePolicy1.setHeightForWidth(self.pushButton_rename_folder.sizePolicy().hasHeightForWidth())
+        self.pushButton_rename_folder.setSizePolicy(sizePolicy1)
+
+        self.gridLayout.addWidget(self.pushButton_rename_folder, 2, 4, 1, 1)
+
+        self.label_20 = QLabel(self.layoutWidget)
+        self.label_20.setObjectName(u"label_20")
+        self.label_20.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+
+        self.gridLayout.addWidget(self.label_20, 2, 7, 1, 1)
+
+        self.lineEdit_score_title = QLineEdit(self.layoutWidget)
+        self.lineEdit_score_title.setObjectName(u"lineEdit_score_title")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.lineEdit_score_title.sizePolicy().hasHeightForWidth())
+        self.lineEdit_score_title.setSizePolicy(sizePolicy3)
+
+        self.gridLayout.addWidget(self.lineEdit_score_title, 2, 1, 1, 3)
+
+
+        self.gridLayout_3.addLayout(self.gridLayout, 0, 0, 1, 2)
+
         self.splitter.addWidget(self.layoutWidget)
         self.textEdit_console = QTextEdit(self.splitter)
         self.textEdit_console.setObjectName(u"textEdit_console")
@@ -477,7 +494,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1067, 33))
+        self.menubar.setGeometry(QRect(0, 0, 1067, 21))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -499,26 +516,6 @@ class Ui_MainWindow(object):
         self.pushButton_reclip.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u5206\u5272", None))
         self.pushButton_instruction.setText(QCoreApplication.translate("MainWindow", u"\u6253\u5f00\u8bf4\u660e\u6587\u6863", None))
         self.label_author.setText(QCoreApplication.translate("MainWindow", u"Carrot shreds", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"\u5168\u5c40\u8bbe\u7f6e", None))
-        self.pushButton_select_path.setText(QCoreApplication.translate("MainWindow", u"\u6d4f\u89c8\u76ee\u5f55", None))
-        self.comboBox_save_format.setItemText(0, QCoreApplication.translate("MainWindow", u".jpg", None))
-        self.comboBox_save_format.setItemText(1, QCoreApplication.translate("MainWindow", u".png", None))
-
-        self.pushButton_select_folder.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u6587\u4ef6\u5939", None))
-        self.checkBox_auto_manage_config.setText(QCoreApplication.translate("MainWindow", u"\u81ea\u52a8\u4fdd\u5b58/\u52a0\u8f7d\u914d\u7f6e", None))
-        self.checkBox_always_on_top.setText(QCoreApplication.translate("MainWindow", u"\u7a97\u53e3\u59cb\u7ec8\u9760\u524d", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u66f2\u8c31\u6807\u9898\uff1a", None))
-        self.label_12.setText(QCoreApplication.translate("MainWindow", u"\u65e5\u5fd7\u7b49\u7ea7\uff1a", None))
-        self.pushButton_open_folder.setText(QCoreApplication.translate("MainWindow", u"\u6253\u5f00\u76ee\u5f55", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"\u5b58\u50a8\u8def\u5f84\uff1a", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"\u5b58\u50a8\u683c\u5f0f\uff1a", None))
-        self.comboBox_log_level.setItemText(0, QCoreApplication.translate("MainWindow", u"DEBUG", None))
-        self.comboBox_log_level.setItemText(1, QCoreApplication.translate("MainWindow", u"INFO", None))
-        self.comboBox_log_level.setItemText(2, QCoreApplication.translate("MainWindow", u"SUCCESS", None))
-        self.comboBox_log_level.setItemText(3, QCoreApplication.translate("MainWindow", u"WARNING", None))
-        self.comboBox_log_level.setItemText(4, QCoreApplication.translate("MainWindow", u"ERROR", None))
-
-        self.pushButton_rename_folder.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u547d\u540d", None))
         self.label_10.setText(QCoreApplication.translate("MainWindow", u"\u5b9a\u4f4d\u8bbe\u7f6e", None))
         self.checkBox_reverse_image.setText(QCoreApplication.translate("MainWindow", u"\u5bf9\u56fe\u7247\u8fdb\u884c\u53cd\u76f8", None))
         self.checkBox_keep_last.setText(QCoreApplication.translate("MainWindow", u"\u4fdd\u7559\u6700\u540e\u4e00\u7ec4\u622a\u56fe", None))
@@ -562,5 +559,30 @@ class Ui_MainWindow(object):
         self.label_15.setText(QCoreApplication.translate("MainWindow", u"\u622a\u56fe\u8bbe\u7f6e", None))
         self.pushButton_image_rebuild.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u6784\u5efaimage", None))
         self.pushButton_image_reorder.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u7f16\u53f7image", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"\u5b58\u50a8\u683c\u5f0f\uff1a", None))
+        self.comboBox_log_level.setItemText(0, QCoreApplication.translate("MainWindow", u"DEBUG", None))
+        self.comboBox_log_level.setItemText(1, QCoreApplication.translate("MainWindow", u"INFO", None))
+        self.comboBox_log_level.setItemText(2, QCoreApplication.translate("MainWindow", u"SUCCESS", None))
+        self.comboBox_log_level.setItemText(3, QCoreApplication.translate("MainWindow", u"WARNING", None))
+        self.comboBox_log_level.setItemText(4, QCoreApplication.translate("MainWindow", u"ERROR", None))
+
+        self.checkBox_auto_manage_config.setText(QCoreApplication.translate("MainWindow", u"\u81ea\u52a8\u4fdd\u5b58/\u52a0\u8f7d\u914d\u7f6e", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"\u5b58\u50a8\u8def\u5f84\uff1a", None))
+        self.label_12.setText(QCoreApplication.translate("MainWindow", u"\u65e5\u5fd7\u7b49\u7ea7\uff1a", None))
+        self.checkBox_always_on_top.setText(QCoreApplication.translate("MainWindow", u"\u7a97\u53e3\u59cb\u7ec8\u9760\u524d", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u66f2\u8c31\u6807\u9898\uff1a", None))
+        self.pushButton_open_folder.setText(QCoreApplication.translate("MainWindow", u"\u6253\u5f00\u76ee\u5f55", None))
+        self.pushButton_select_path.setText(QCoreApplication.translate("MainWindow", u"\u6d4f\u89c8\u76ee\u5f55", None))
+        self.comboBox_capture_tool.setItemText(0, QCoreApplication.translate("MainWindow", u"mss", None))
+        self.comboBox_capture_tool.setItemText(1, QCoreApplication.translate("MainWindow", u"spectacle", None))
+        self.comboBox_capture_tool.setItemText(2, QCoreApplication.translate("MainWindow", u"grim", None))
+
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"\u5168\u5c40\u8bbe\u7f6e", None))
+        self.pushButton_select_folder.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u6587\u4ef6\u5939", None))
+        self.comboBox_save_format.setItemText(0, QCoreApplication.translate("MainWindow", u".jpg", None))
+        self.comboBox_save_format.setItemText(1, QCoreApplication.translate("MainWindow", u".png", None))
+
+        self.pushButton_rename_folder.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u547d\u540d", None))
+        self.label_20.setText(QCoreApplication.translate("MainWindow", u"\u622a\u56fe\u5de5\u5177\uff1a", None))
     # retranslateUi
 

@@ -7,7 +7,6 @@ from loguru import logger as log
 import cv2
 import numpy as np
 from PySide6.QtCore import QRect
-import pyautogui
 
 from config import Config
 from utilities import order_filenames, hash_image
@@ -17,6 +16,7 @@ LITERAL_COMPARE_METHODS = Literal["SSIM", "MSE"]
 LITERAL_DETECT_METHODS = Literal["SSIM", "MSE"]
 LITERAL_STITCH_METHODS = Literal["DIRECT", "SSIM", "MSE"]
 LITERAL_DIRECTIONS = Literal["horizontal", "vertical"]
+LITERAL_CAPTURE_TOOLS = Literal["mss", "spectacle", "grim"]
 
 class DATA:
     """
@@ -28,7 +28,8 @@ class DATA:
         self.exe_path = sys.argv[0]
         self.ini_file = self.exe_path + "\\config.ini"
 
-        self.SCREEN_SIZE: tuple[int, int] = pyautogui.size()  # （width，height）
+        self.monitor_num: int = 1  # 选择的显示器编号
+        self.SCREEN_SIZE: tuple[int, int] = (1920, 1080)# （width，height）
         self.WINDOW_GEOMETRY: tuple[int, int, int, int] = window_region  # 主窗口几何属性（x,y,宽，高）
 
         # 全局设置
@@ -38,9 +39,11 @@ class DATA:
         self.score_save_format: str = ".jpg"
         self.log_output_level = "DEBUG"
         self.always_on_top: bool = True
+        self.capture_tool:LITERAL_CAPTURE_TOOLS = "mss"  # 截图工具选择
 
         # 定位设置
         self.region:Region = Region(0,0,114,511)  # 截图范围，（x，y，w，h）
+        self.region_offset: np.ndarray = np.array([0, 0, 0, 0])  # 截图范围偏移量（x,y,w,h）
 
         # 截图设置
         self.compare_method: LITERAL_COMPARE_METHODS = "SSIM"

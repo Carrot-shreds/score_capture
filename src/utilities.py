@@ -1,6 +1,10 @@
 import re
 import os
+import sys
 import cv2
+import time
+import mss
+import subprocess
 from typing import Literal
 import numpy as np
 import hashlib
@@ -127,4 +131,58 @@ def hash_image(image: np.ndarray) -> str:
     image_bytes = image.tobytes()
     return hashlib.md5(image_bytes).hexdigest()
 
+def open_folder_in_explorer(folder_path: str) -> None:
+    """在文件资源管理器中打开指定文件夹"""
+    match sys.platform:
+        case "win32":  # Windows
+            os.startfile(folder_path)
+        case "darwin":  # macOS
+            if err:=subprocess.run(['open', folder_path], capture_output=True).stderr:
+                log.error(f"无法打开文件夹: {err.decode()}")
+        case "linux":  # Linux
+            if err:=subprocess.run(['xdg-open', folder_path], capture_output=True).stderr:
+                log.error(f"无法打开文件夹: {err.decode()}")    
+        case _:
+            log.error(f"不支持的操作系统: {sys.platform}")
+        
 
+def screenshot(region:tuple[int,int,int,int], capture_tool:str="mss", monitor_num:int=1) -> np.ndarray:
+    """截取屏幕指定区域的截图"""
+    # mss在Wayland下无法使用
+    if capture_tool != "mss":
+        temp_filename: str = f"captureTEMP{time.time()}.png"
+        match capture_tool:
+            case "grim":
+                result=subprocess.run(["grim", "-o", temp_filename], capture_output=True)
+            case "spectacle":   
+                result=subprocess.run(
+                    ["spectacle","--current","--background", "--nonotify", "--fullscreen", "--output", temp_filename], 
+                    capture_output=True)
+            case _:
+                log.error(f"不支持的截图工具: {capture_tool}")
+        if result.stderr:
+            log.error(f"{capture_tool}截图失败: {result.stderr.decode()}")
+            return np.array([])
+        img = read_image(temp_filename)
+        os.remove(temp_filename)
+        img = img[region[1]:region[1]+region[3],
+                                        region[0]:region[0]+region[2]]
+        return img
+    
+    with mss.mss() as sct:
+        monitors = sct.monitors
+        if monitor_num < 1 or monitor_num >= len(monitors):
+            log.error(f"无效的显示器编号: {monitor_num}")
+            return np.array([])
+        monitor = monitors[monitor_num]
+        left, top, width, height = region
+        capture_region = {
+            "left": monitor["left"] + left,
+            "top": monitor["top"] + top,
+            "width": width,
+            "height": height
+        }
+        sct_img = sct.grab(capture_region)
+        img = np.array(sct_img)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
+        return img

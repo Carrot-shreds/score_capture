@@ -20,9 +20,10 @@ class Config:
                                                ["Log", "log_output_level"]],
 
             f"{self.data.score_save_path=}": [[str], ["Saving", "saving_path"]],
-            #f"{self.data.score_title=}": [[str], ["Saving", "score_title"]],
+            f"{self.data.score_title=}": [[str], ["Saving", "score_title"]],
             f"{self.data.score_save_format=}": [[str, [".jpg", ".png"]], ["Saving", "score_saving_format"]],
 
+            f"{self.data.capture_tool=}": [[str, ["mss", "spectacle", "grim"]], ["Capture", "capture_tool"]],
             f"{self.data.compare_method=}": [[str, ["SSIM", "MSE"]], ["Capture", "compare_method"]],
             f"{self.data.compare_threshold=}": [[float], ["Capture", "compare_threshold"]],
             f"{self.data.capture_delay=}": [[float], ["Capture", "capture_delay"]],
@@ -89,11 +90,11 @@ class Config:
             func_args = []
 
         data_type = args[0]
-        if data_type == bool:
+        if data_type is bool:
             return self.str_to_bool(data)
-        elif data_type == float:
+        elif data_type is float:
             return self.str_to_digit(data)
-        elif data_type == str:
+        elif data_type is str:
             if func_args:
                 return self.if_str_in_range(data, func_args)
             else:

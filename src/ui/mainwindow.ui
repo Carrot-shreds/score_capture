@@ -129,179 +129,6 @@ Capture</string>
        </property>
        <widget class="QWidget" name="layoutWidget">
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="0" colspan="7">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>全局设置</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="6">
-            <widget class="QPushButton" name="pushButton_select_path">
-             <property name="text">
-              <string>浏览目录</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="8">
-            <widget class="QComboBox" name="comboBox_save_format">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>55</width>
-               <height>0</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>.jpg</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>.png</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="2" column="3">
-            <widget class="QPushButton" name="pushButton_select_folder">
-             <property name="text">
-              <string>选择文件夹</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="7" colspan="2">
-            <widget class="QCheckBox" name="checkBox_auto_manage_config">
-             <property name="text">
-              <string>自动保存/加载配置</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="7" colspan="2">
-            <widget class="QCheckBox" name="checkBox_always_on_top">
-             <property name="text">
-              <string>窗口始终靠前</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>曲谱标题：</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1" colspan="5">
-            <widget class="QLineEdit" name="lineEdit_save_path"/>
-           </item>
-           <item row="2" column="5">
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>日志等级：</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="4">
-            <widget class="QPushButton" name="pushButton_open_folder">
-             <property name="text">
-              <string>打开目录</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>存储路径：</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_score_title">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="7">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>存储格式：</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="6">
-            <widget class="QComboBox" name="comboBox_log_level">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>90</width>
-               <height>0</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>DEBUG</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>INFO</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>SUCCESS</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>WARNING</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>ERROR</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QPushButton" name="pushButton_rename_folder">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>重命名</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
          <item row="1" column="0" colspan="2">
           <layout class="QGridLayout" name="gridLayout_4">
            <item row="0" column="5" colspan="4">
@@ -746,6 +573,220 @@ Capture</string>
            </item>
           </layout>
          </item>
+         <item row="0" column="0" colspan="2">
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="2" column="9">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>存储格式：</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="8">
+            <widget class="QComboBox" name="comboBox_log_level">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>0</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>DEBUG</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>INFO</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>SUCCESS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>WARNING</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>ERROR</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="9" colspan="2">
+            <widget class="QCheckBox" name="checkBox_auto_manage_config">
+             <property name="text">
+              <string>自动保存/加载配置</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>存储路径：</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="7">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>日志等级：</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" colspan="5">
+            <widget class="QLineEdit" name="lineEdit_save_path"/>
+           </item>
+           <item row="0" column="9" colspan="2">
+            <widget class="QCheckBox" name="checkBox_always_on_top">
+             <property name="text">
+              <string>窗口始终靠前</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>曲谱标题：</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="6">
+            <widget class="QPushButton" name="pushButton_open_folder">
+             <property name="text">
+              <string>打开目录</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6">
+            <widget class="QPushButton" name="pushButton_select_path">
+             <property name="text">
+              <string>浏览目录</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="8">
+            <widget class="QComboBox" name="comboBox_capture_tool">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>0</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>mss</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>spectacle</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>grim</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="9">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>全局设置</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="5">
+            <widget class="QPushButton" name="pushButton_select_folder">
+             <property name="text">
+              <string>选择文件夹</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="10">
+            <widget class="QComboBox" name="comboBox_save_format">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>55</width>
+               <height>0</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>.jpg</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>.png</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="QPushButton" name="pushButton_rename_folder">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>重命名</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="7">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>截图工具：</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" colspan="3">
+            <widget class="QLineEdit" name="lineEdit_score_title">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
         </layout>
        </widget>
        <widget class="QTextEdit" name="textEdit_console"/>
@@ -760,7 +801,7 @@ Capture</string>
      <x>0</x>
      <y>0</y>
      <width>1067</width>
-     <height>33</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

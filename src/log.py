@@ -1,6 +1,7 @@
-from typing import Optional
+import os
 import sys
 import typing
+from typing import Optional
 
 from PySide6.QtCore import QThread, Signal
 from loguru import logger as log
@@ -43,6 +44,6 @@ def init_log(showlog_level: str = "INFO", sub_log_path: Optional[str] = None) ->
                            enqueue=True))  # 主日志，保存所有DEBUG日志到程序根目录下
     log.ids.append(log.add(sys.stderr, level=showlog_level, format=_format_show))  # 显示在UI中的日志进程
     if sub_log_path is not None:
-        log.ids.append(log.add(sub_log_path + "\\log.txt", level="DEBUG", format=_format_save, encoding="UTF-8",
+        log.ids.append(log.add(os.path.join(sub_log_path,"log.txt"), level="DEBUG", format=_format_save, encoding="UTF-8",
                                enqueue=True))  # 每次工作目录中单开的子日志
 

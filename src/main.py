@@ -1,23 +1,21 @@
-import copy
 import os
-import shutil
 import sys
 import time
+import copy
+import shutil
+import subprocess
 from copy import deepcopy
 from typing import Optional
 
-import win32gui
-import win32con
-import win32print
-import numpy as np
 import cv2
-import pyautogui
+import mss
+import numpy as np
+import pyqtgraph
 import PySide6.QtCore
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QCloseEvent, QColor, QTextCursor, QTextCharFormat, QBrush
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QInputDialog
 from PySide6 import QtCore
-import pyqtgraph
 from loguru import logger as log
 
 from ui.locate_ui import Ui_Dialog_locate
@@ -29,7 +27,8 @@ from log import LogThread, init_log
 from image_process import (detect_vertical_lines, detect_horizontal_lines,
                            image_pre_process, compare_image,
                            get_barline_num_region, detect_all_lines_with_clip, clip_image, stitch_images)
-from utilities import is_valid_filename, order_filenames, read_numbered_image_names, read_numbered_images, rename_files, read_image, save_image
+from utilities import (is_valid_filename, order_filenames, read_numbered_image_names, open_folder_in_explorer,
+                        read_numbered_images, rename_files, read_image, save_image, screenshot)
 
 __version__ = "0.1.1"
 
@@ -107,6 +106,26 @@ class UI(QMainWindow, Ui_MainWindow):
                 self.data.exe_path = _file[:_file.rfind(f"{s}")]  # 执行文件所在目录
                 self.data.ini_file = self.data.exe_path + s + "config.ini"
                 self.data.score_save_path = self.data.exe_path + s + "output" + s
+        
+        # screen
+        with mss.mss() as sct:
+            monitors = sct.monitors
+            if self.data.monitor_num < 1 or self.data.monitor_num >= len(monitors):
+                log.error(f"无效的显示器编号: {self.data.monitor_num}, 使用默认显示器1")
+                self.data.monitor_num = 1
+            self.data.SCREEN_SIZE = (monitors[self.data.monitor_num]['width'],
+                monitors[self.data.monitor_num]['height'])
+
+        # capture tool
+        if os.environ.get("XDG_SESSION_TYPE") == "wayland":
+            if os.environ.get("XDG_SESSION_DESKTOP") == "KDE":
+                self.data.capture_tool = "spectacle"
+            # 使用command -v检查命令是否存在
+            elif subprocess.run(["command -v grim"], shell=True, capture_output=True).stdout:
+                self.data.capture_tool = "grim"
+        else:
+            self.data.capture_tool = "mss"
+
         # region
         self.data.region.set((int(self.frameGeometry().x()/2), int(self.frameGeometry().y()/2),
                               self.frameGeometry().width(), int(self.frameGeometry().height() / 3)))
@@ -165,9 +184,8 @@ class UI(QMainWindow, Ui_MainWindow):
                 self.flush_ui_display_data()
                 return False
 
-            working_path = self.data.score_save_path + "\\" + self.data.score_title
+            working_path = os.path.join(self.data.score_save_path, self.data.score_title)
             os.mkdir(working_path)
-            working_path += "\\"  # 当前曲谱工作文件夹
             self.data.working_path = working_path
             init_log(sub_log_path=working_path, showlog_level=self.data.log_output_level)  # 添加子日志
 
@@ -216,7 +234,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.stitch_thread.is_working = True
         self.stitch_thread.signal_finished.connect(_finished)  # 绑定结束信号
 
-        working_path = self.data.score_save_path + "\\" + self.data.score_title + "\\"
+        working_path = os.path.join(self.data.score_save_path, self.data.score_title)
         self.data.working_path = working_path
         init_log(sub_log_path=working_path, showlog_level=self.data.log_output_level)  # 添加子日志
 
@@ -243,7 +261,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.reclip_thread.is_working = True
         self.reclip_thread.signal_finished.connect(_finished)
 
-        working_path = self.data.score_save_path + "\\" + self.data.score_title + "\\"
+        working_path = os.path.join(self.data.score_save_path, self.data.score_title)
         self.data.working_path = working_path
         init_log(sub_log_path=working_path, showlog_level=self.data.log_output_level)  # 添加子日志
 
@@ -305,7 +323,7 @@ class UI(QMainWindow, Ui_MainWindow):
         if not self.update_data_from_ui():  # 更新数据
             return
         if self.data.score_title in os.listdir(self.data.score_save_path):
-            os.startfile(os.path.join(self.data.score_save_path, self.data.score_title))  # 使用startfile函数以兼容空格
+            open_folder_in_explorer(os.path.join(self.data.score_save_path, self.data.score_title))
         else:
             log.warning(f"打开目录失败，{self.data.score_save_path}下不存在{self.data.score_title}文件夹")
 
@@ -356,7 +374,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.buildimage_thread.is_working = True
         self.buildimage_thread.signal_finished.connect(_finished)  # 绑定结束信号
 
-        working_path = self.data.score_save_path + "\\" + self.data.score_title + "\\"
+        working_path = os.path.join(self.data.score_save_path, self.data.score_title)
         self.data.working_path = working_path
         init_log(sub_log_path=working_path,
                  showlog_level=self.data.log_output_level)  # 添加子日志
@@ -439,6 +457,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.data.score_title = self.lineEdit_score_title.text()
         self.data.score_save_path = self.lineEdit_save_path.text()
         self.data.log_output_level = self.comboBox_log_level.currentText()
+        self.data.capture_tool = self.comboBox_capture_tool.currentText()
         try:
             os.chdir(self.data.score_save_path)  # 切换程序工作目录
         except FileNotFoundError:
@@ -494,6 +513,7 @@ class UI(QMainWindow, Ui_MainWindow):
         self.lineEdit_save_path.setText(self.data.score_save_path)
         self.comboBox_save_format.setEditText(self.data.score_save_format)
         self.comboBox_log_level.setCurrentText(self.data.log_output_level)
+        self.comboBox_capture_tool.setCurrentText(self.data.capture_tool)
         self.checkBox_auto_manage_config.setChecked(self.data.if_auto_manage_config)
         self.checkBox_always_on_top.setChecked(self.data.always_on_top)
         # 定位设置
@@ -600,21 +620,13 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         定位范围，并更新显示
         """
         # TODO 多屏幕屏幕选择
-        # 适配windows缩放
-        hdc = win32gui.GetDC(0)  # 获取屏幕设备上下文
-        dpi = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)  # 获取水平DPI
-        win32gui.ReleaseDC(0, hdc)  # 释放资源
-        scaling = dpi / 96.0  # 计算缩放比例（96 = 100% 缩放的标准 DPI）
+        scaling = 1
 
         # 使用frameGeometry以包含标题栏尺寸
-        region = [np.ceil(i*scaling) for i in self.data.region.geometry_to_region(self.frameGeometry())]
+        region = np.asarray([np.ceil(i*scaling)
+            for i in self.data.region.geometry_to_region(self.frameGeometry())])
 
-        # TODO 适配除win11下100%和125%缩放的准确性
-        # 经测试，windows100%缩放下frameGeometry，标题栏上方会多出一个像素
-        if scaling == 1:
-            region[1] += 1  # y+1
-            region[3] -= 1  # height-1
-
+        region += self.data.region_offset  # 加上偏移值,默认为0,0,0,0
         self.data.region.set(region)
         self.ui.flush_ui_display_data()
 
@@ -685,7 +697,9 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
             return
         print(self.data.region)
         log.info(self.data.region.get_tuple())
-        img = image_pre_process(pyautogui.screenshot(region=self.data.region.get_tuple()), self.data)
+        img = image_pre_process(
+            screenshot(region=self.data.region.get_tuple(), capture_tool=self.data.capture_tool
+            ), self.data)
         save_image("preview.png", img)
         self.data.image_preview = img
         self.show_image(self.data.image_preview)
@@ -1027,11 +1041,12 @@ class CaptureThread(QtCore.QThread):
         time.sleep(0.5)  # 略微延时
         while True:  # 图片截取主循环
             temp_list.append(image_pre_process(
-                pyautogui.screenshot(region=data.region.get_tuple()), data))
+                screenshot(region=data.region.get_tuple(), capture_tool=data.capture_tool
+            ), data))
             temp_count += 1
             total_count += 1
-            save_image(data.working_path +
-                       f"capture{total_count}{data.score_save_format}", temp_list[temp_count])
+            save_filename = f"capture{total_count}{data.score_save_format}"
+            save_image(os.path.join(data.working_path, save_filename), temp_list[temp_count])
             if total_count == 0:
                 log.info("===开始截图===")
             if temp_count == 0:  # 不过第一张图象不进行对比
@@ -1073,7 +1088,8 @@ class CaptureThread(QtCore.QThread):
                                                   np.uint8)  # 转换回uint8格式
                     image_list.append(image)
                     image_count += 1
-                    save_image(data.working_path + f"image{image_count}{data.score_save_format}", image)
+                    save_filename = f"image{image_count}{data.score_save_format}"
+                    save_image(os.path.join(data.working_path, save_filename), image)
                     log.success(f"output image{image_count} from "
                                 f"capture{total_count - temp_count + 1}-{total_count - 1}")
                 temp_list.clear()  # 清除缓存
@@ -1081,7 +1097,7 @@ class CaptureThread(QtCore.QThread):
             if self.signal_stop:  # 检测信号跳出循环
                 self.signal_stop = False
                 log.success("===本次截图完成===")
-                capture_data.save_to_file(data.working_path + "CaptureData.json")
+                capture_data.save_to_file(os.path.join(data.working_path, "CaptureData.json"))
                 self.signal_finished.emit()
                 return
             time.sleep(data.capture_delay)  # 延时
@@ -1095,6 +1111,7 @@ class CaptureThread(QtCore.QThread):
             log.error(f"截图线程异常：{e}")
         finally:  # 确保线程结束时发出信号
             self.signal_finished.emit() 
+
 
 class StitchThread(QtCore.QThread):
     """
@@ -1138,8 +1155,8 @@ class StitchThread(QtCore.QThread):
                         line.draw(image)
                     for line in vertical_lines:
                         line.draw(image)
-                    save_image(path + "\\" + filename.split(".")[0] +
-                                "-detected" + data.score_save_format, image)
+                    save_filename = filename.split(".")[0] + "-detected" + data.score_save_format
+                    save_image(os.path.join(path,save_filename), image)
                     score_detections.add_image(filename, horizontal_lines, vertical_lines)
                     log.debug(
                         f"{filename}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
@@ -1225,9 +1242,9 @@ class StitchThread(QtCore.QThread):
         # 进行拼接
         log.info("图像拼接中")
         final_image = stitch_images(images, stitch_points, data.stitch_direction)
-        result_full_file = data.working_path+data.score_title + "-stitched" + data.score_save_format
-        save_image(result_full_file, final_image)
-        log.info(f"图像拼接完毕，已生成预览图{result_full_file}")
+        save_filename = data.score_title + "-stitched" + data.score_save_format
+        save_image(os.path.join(data.working_path, save_filename), final_image)
+        log.info(f"图像拼接完毕，已生成预览图{os.path.join(data.working_path, save_filename)}")
 
         self.signal_finished.emit()
         return
@@ -1305,8 +1322,8 @@ class ReclipThread(QtCore.QThread):
         image_draw = deepcopy(image)
         for line in bar_lines:
             line.draw(image_draw)
-        save_image(path + "\\" + data.score_title +
-                   "-detected-barlines" + data.score_save_format, image_draw)
+        save_filename = data.score_title + "-detected-barlines" + data.score_save_format
+        save_image(os.path.join(path, save_filename) , image_draw)
         log.info(f"成功对小节线进行归类，共检测出{len(bar_lines)}组小节线,预览图像已保存")
 
         # 进行切片
@@ -1370,9 +1387,11 @@ class ReclipThread(QtCore.QThread):
                 canvas[current_y:current_y+h,
                        canvas_width-w:canvas_width, :] = c
             current_y += h
-        save_file = path + "\\" + data.score_title + "-reclip" + data.score_save_format
-        save_image(save_file, canvas)
-        log.success(f"拼接操作成功完成，已成功保存图片到{save_file}")
+        save_filename =  data.score_title + "-reclip" + data.score_save_format
+        save_image(os.path.join(path, save_filename), canvas)
+        log.success(
+            f"拼接操作成功完成，已成功保存图片到{os.path.join(path, save_filename)}"
+        )
 
     def run(self) -> None:
         """线程入口启动函数，重写自run方法，使用.start()调用"""
