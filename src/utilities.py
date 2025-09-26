@@ -184,5 +184,5 @@ def screenshot(region:tuple[int,int,int,int], capture_tool:str="mss", monitor_nu
         }
         sct_img = sct.grab(capture_region)
         img = np.array(sct_img)
-        # img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
         return img

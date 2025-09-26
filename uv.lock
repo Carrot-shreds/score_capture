@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.13"
 resolution-markers = [
     "sys_platform == 'darwin'",
@@ -579,7 +579,6 @@ dependencies = [
 dev = [
     { name = "matplotlib" },
     { name = "nuitka" },
-    { name = "types-pywin32" },
 ]
 
 [package.metadata]
@@ -598,7 +597,6 @@ requires-dist = [
 dev = [
     { name = "matplotlib", specifier = ">=3.10.6" },
     { name = "nuitka", specifier = ">=2.7.5" },
-    { name = "types-pywin32", specifier = ">=311.0.0.20250822" },
 ]
 
 [[package]]
@@ -632,15 +630,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a1/8c/5032a5a90ccbe33009418bfa3338e4a0d243833f4152d12b3ecdf2f75ea5/tifffile-2025.5.26.tar.gz", hash = "sha256:512ad634b142a8aa7e3004f81acb81cd5b0f2ccd16979cb1ef2f01a7fd971bfc", size = 369350, upload-time = "2025-05-26T23:04:03.478Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/be/5b/6e79401acf8a2f10a702d935d940f5445ba6cef280d5bfb881a9b900d7bc/tifffile-2025.5.26-py3-none-any.whl", hash = "sha256:c316c9191c935d3a1fd7617e7af1d4367dfe2d8bd74d98d147bc21c074cc3ea9", size = 230328, upload-time = "2025-05-26T23:04:01.625Z" },
-]
-
-[[package]]
-name = "types-pywin32"
-version = "311.0.0.20250822"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8c/13/077a3c957a81663f9c0dade742196db068dbc48f43e929d75e5541d942d9/types_pywin32-311.0.0.20250822.tar.gz", hash = "sha256:ea1082e23a1ebc3f069be1d7eec911d247bf54b3f8feeef61385134b36c42c7c", size = 329485, upload-time = "2025-08-22T03:03:23.973Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/52/82a66be02d5b0615ab68fca843586a534e00c9af699d4948c7d72d404964/types_pywin32-311.0.0.20250822-py3-none-any.whl", hash = "sha256:cbcfe0d247b599efcb30e4a4db60af9473a6f5a6b4aaf6c622e962ac420da6ea", size = 392836, upload-time = "2025-08-22T03:03:22.411Z" },
 ]
 
 [[package]]

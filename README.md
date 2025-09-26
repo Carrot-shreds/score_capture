@@ -15,9 +15,10 @@ Work In Progress
 
     cd score_capture
 
-安装uv环境(如已安装可跳过)
+安装uv环境
 
-    pip install uv 
+    pip install uv 或
+    wget -qO- https://astral.sh/uv/install.sh | sh
 
 同步构建环境
 
@@ -26,10 +27,11 @@ Work In Progress
 运行程序入口
 
     uv run ./src/main.py
+    (Linux) bash main.sh
 
 获取更新
 
-    git pull https://github.com/Carrot-shreds/score_capture.git
+    git pull
 
 从源码构建exe编译
 

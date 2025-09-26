@@ -194,11 +194,11 @@ def image_pre_process(img: TYPE_IMAGE | Image, data: DATA) -> np.ndarray:
     # img = super_resolution(img)
     return img
 
-def super_resolution(image: TYPE_IMAGE) -> TYPE_IMAGE:
-    model = cv2.dnn_superres.DnnSuperResImpl.create()
-    model.readModel(r"./resource/superres_model/ESPCN_x2.pb")
-    model.setModel("espcn", 2)
-    return model.upsample(image)
+# def super_resolution(image: TYPE_IMAGE) -> TYPE_IMAGE:
+#     model = cv2.dnn_superres.DnnSuperResImpl.create()
+#     model.readModel(r"./resource/superres_model/ESPCN_x2.pb")
+#     model.setModel("espcn", 2)
+#     return model.upsample(image)
 
 def clip_image(image: np.ndarray,direction:LITERAL_DIRECTIONS,
                 index:tuple[int|None, int|None]) -> np.ndarray:

@@ -13,7 +13,7 @@ import numpy as np
 import pyqtgraph
 import PySide6.QtCore
 from PySide6.QtCore import QRect
-from PySide6.QtGui import QCloseEvent, QColor, QTextCursor, QTextCharFormat, QBrush
+from PySide6.QtGui import QCloseEvent, QColor, QTextCursor, QTextCharFormat, QBrush, QGuiApplication
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QInputDialog
 from PySide6 import QtCore
 from loguru import logger as log
@@ -30,7 +30,7 @@ from image_process import (detect_vertical_lines, detect_horizontal_lines,
 from utilities import (is_valid_filename, order_filenames, read_numbered_image_names, open_folder_in_explorer,
                         read_numbered_images, rename_files, read_image, save_image, screenshot)
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 class UI(QMainWindow, Ui_MainWindow):
@@ -597,7 +597,7 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         if self.ui.window_locate is not None:
             self.ui.window_locate.setGeometry(
                 self.data.region.region_to_geometry(  # 重设窗口位置
-                without_title_frame=True))  # 减去30px标题栏高度
+                without_title_frame=True))
             self.ui.window_locate.showNormal()  # 从最小化恢复窗口显示
             self.ui.window_locate.activateWindow()  # 切换窗口焦点
             return
@@ -622,6 +622,12 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         # TODO 多屏幕屏幕选择
         scaling = 1
 
+        if sys.platform == "win32":
+            scaling = self.ui.screen().devicePixelRatio()  # 获取缩放比例
+            self.data.region_offset = np.asarray([0,np.round(1*scaling),0,np.round(-1*scaling)])  # Win11测试结果
+        if sys.platform == "linux":
+            self.data.region_offset = np.asarray([0,0,-1,-1])  # Arch/KDE测试结果
+
         # 使用frameGeometry以包含标题栏尺寸
         region = np.asarray([np.ceil(i*scaling)
             for i in self.data.region.geometry_to_region(self.frameGeometry())])
@@ -629,6 +635,10 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         region += self.data.region_offset  # 加上偏移值,默认为0,0,0,0
         self.data.region.set(region)
         self.ui.flush_ui_display_data()
+
+        log.debug(f"screen scaling: {scaling}")
+        log.debug(f"region offset: {self.data.region_offset}")
+        log.success(f"update region: {self.data.region.get_tuple()}")
 
     def setGeometry(self, a0: QRect) -> None:
         """
@@ -686,7 +696,8 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         self.graphicsView.ui.roiBtn.hide()
 
         self.preview_region()
-        self.resize(int(self.data.image_preview.shape[1] * 1.5), int(self.data.image_preview.shape[0] * 2))
+        self.resize(min(int(self.data.image_preview.shape[1] * 1.5), self.data.SCREEN_SIZE[0]),
+            min(int(self.data.image_preview.shape[0] * 2), self.data.SCREEN_SIZE[1]))
 
         self.show()
         self.graphicsView.autoRange()  # 自动缩放图片大小
@@ -696,7 +707,7 @@ class WindowPreview(QWidget, Ui_Widget_Preview):
         if not self.ui.update_data_from_ui():  # 检查并更新region范围
             return
         print(self.data.region)
-        log.info(self.data.region.get_tuple())
+        log.debug(f"preview region: {self.data.region.get_tuple()}")
         img = image_pre_process(
             screenshot(region=self.data.region.get_tuple(), capture_tool=self.data.capture_tool
             ), self.data)
@@ -838,17 +849,22 @@ class WindowStitch(QWidget, Ui_Widget_Stitch):
         if self.image_names == []:
             log.error("打开文件失败:"+file)
             return
+
         self.images = read_numbered_images(self.path, "image", self.image_names)
         self.stitchData = StitchData.load_from_file(file)
         self.stitchData_filename = file
         self.stitch_points = self.stitchData.points
-        self.stitch_direction = self.data.stitch_direction
-        if self.stitch_direction == "horizontal":  # 默认显示图片范围
+        self.stitch_direction = self.stitchData.stitch_direction
+        # 先resize再调整显示范围
+        self.resize(min(int(self.images[0].shape[1]), self.data.SCREEN_SIZE[0]),  
+                    min(int(self.images[0].shape[0]+100), self.data.SCREEN_SIZE[1]))
+        if self.stitch_direction == "horizontal":  # 初始图片显示范围
             self.show_region = (0, int(self.viewbox.width()))  
         elif self.stitch_direction == "vertical":
             self.show_region = (0, int(self.viewbox.height()))
         log.info(f"成功加载拼接点数据，共{len(self.images)}张图片，{len(self.stitch_points)}个拼接点")
-        log.debug([(n, self.stitch_points[n]) for n in range(len(self.stitch_points))])
+        log.debug(f"Stitch Points: {[(n, self.stitch_points[n]) for n in range(len(self.stitch_points))]}")
+
         # 限制输入框范围
         self.spinBox_stitch_points_index.setMaximum(len(self.stitch_points)-1)
         self.spinBox_stitch_points_index.setValue(0)
@@ -872,9 +888,9 @@ class WindowStitch(QWidget, Ui_Widget_Stitch):
         self.imageView.setImage(img)
         # 设置显示样式
         if self.stitch_direction == "horizontal":
-            #
+            # 关闭缩放锁定
             self.viewbox.setAspectLocked(False)
-            # 
+            # 仅允许x轴缩放
             self.viewbox.setMouseEnabled(x=True, y=False)
             self.viewbox.setLimits(xMin=0, xMax=img.shape[1])
             # y轴自动适应缩放
@@ -883,7 +899,16 @@ class WindowStitch(QWidget, Ui_Widget_Stitch):
             self.viewbox.setAutoPan(y=True)  # 不写这个会导致移动缩放闪烁bug
             self.viewbox.setXRange(self.show_region[0], self.show_region[1] ,padding=0)
         elif self.stitch_direction == "vertical":
-            pass
+            # 关闭缩放锁定
+            self.viewbox.setAspectLocked(False)
+            # 仅允许y轴缩放
+            self.viewbox.setMouseEnabled(x=False, y=True)
+            self.viewbox.setLimits(yMin=0, yMax=img.shape[0])
+            # x轴自动适应缩放
+            self.viewbox.enableAutoRange(axis="x", enable=True)
+            self.viewbox.setAutoVisible(x=True)
+            self.viewbox.setAutoPan(x=True)  # 不写这个会导致移动缩放闪烁bug
+            self.viewbox.setYRange(self.show_region[0], self.show_region[1], padding=0)
 
     def flush_stitch_preview(self) -> None:
         self.stitched_image = stitch_images(self.images, self.stitch_points, self.stitch_direction)
@@ -1406,6 +1431,9 @@ class ReclipThread(QtCore.QThread):
 @log.catch()
 def show_main_window() -> None:
     """主窗口进程函数"""
+    # dps缩放设定，详见https://doc.qt.io/qtforpython-6/PySide6/QtCore/Qt.html#PySide6.QtCore.Qt.HighDpiScaleFactorRoundingPolicy
+    QGuiApplication.setHighDpiScaleFactorRoundingPolicy(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)  # default
+
     app = QApplication(sys.argv)
     window = UI(DATA(), app)
     window.show()

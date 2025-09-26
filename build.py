@@ -1,7 +1,6 @@
 import datetime
 import os
 import subprocess
-import sys
 
 from loguru import logger as log
 
@@ -37,6 +36,7 @@ def build():
         "--output-dir=build",
         "--report=build/build_report.xml",
         "--output-filename=score_capture.exe",
+        "--include-qt-plugins=platforminputcontexts",
         "--include-module=" + ",".join([os.path.split(i)[-1].split(".")[0] for i in files if not i.count("main.py")]),
         [i for i in files if i.count("main.py")][0]
     ]
