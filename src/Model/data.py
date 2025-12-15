@@ -9,8 +9,8 @@ import cv2
 import numpy as np
 from PySide6.QtCore import QRect
 
-from config import Config
-from utilities import order_filenames, hash_image
+from .config import Config
+from .utils import order_filenames, hash_image
 
 TYPE_IMAGE = np.ndarray | cv2.UMat | np.ndarray[Any, np.dtype]
 LITERAL_COMPARE_METHODS = Literal["SSIM", "MSE"]

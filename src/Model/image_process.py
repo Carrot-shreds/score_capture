@@ -6,7 +6,7 @@ import cv2
 from loguru import logger as log
 from skimage.metrics import structural_similarity as compare_ssim
 
-from data import LITERAL_COMPARE_METHODS, LITERAL_DIRECTIONS, Line, DATA, TYPE_IMAGE, ImageDetection
+from .data import LITERAL_COMPARE_METHODS, LITERAL_DIRECTIONS, Line, DATA, TYPE_IMAGE, ImageDetection
 
 def gama_transfer(img, threshold, power) -> np.ndarray:
     """对灰度图应用伽马转换，对灰度值除于阈值后进行幂运算，并线性映射到0-255范围"""

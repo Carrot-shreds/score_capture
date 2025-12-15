@@ -1,4 +1,4 @@
-/__pycache__/
+**/__pycache__/
 /.idea/
 /.vscode/
 /.venv/
@@ -8,8 +8,6 @@
 /output/
 /score_capture.code-workspace
 
-/src/__pycache__/
 /src/output/
-/src/ui/__pycache__/
 /src/config.ini
 /src/test.py

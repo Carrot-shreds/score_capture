@@ -1,41 +1,25 @@
-import os
 import sys
-import time
-import copy
-import shutil
-import subprocess
-from copy import deepcopy
 from typing import Optional
 
-import cv2
-import mss
 import numpy as np
-import pyqtgraph
-import PySide6.QtCore
-from PySide6.QtCore import QRect
-from PySide6.QtGui import QCloseEvent, QColor, QTextCursor, QTextCharFormat, QBrush, QGuiApplication
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QDialog, QWidget, QInputDialog
-from PySide6 import QtCore
 from loguru import logger as log
+from PySide6.QtCore import QRect
+from PySide6.QtGui import QCloseEvent
+from PySide6.QtWidgets import QDialog
+from PySide6 import QtCore
 
-from ui.locate_ui import Ui_Dialog_locate
-from ui.mainwindow_ui import Ui_MainWindow
-from ui.preview_ui import Ui_Widget_Preview
-from ui.stitch_ui import Ui_Widget_Stitch
-from data import DATA, LITERAL_DIRECTIONS, CaptureData, Line, TYPE_IMAGE, ScoreDetections, StitchData
-from log import LogThread, init_log
-from image_process import (detect_vertical_lines, detect_horizontal_lines,
-                           image_pre_process, compare_image,
-                           get_barline_num_region, detect_all_lines_with_clip, clip_image, stitch_images)
-from utilities import (is_valid_filename, order_filenames, read_numbered_image_names, open_folder_in_explorer,
-                        read_numbered_images, rename_files, read_image, save_image, screenshot)
+from . import MainWindow
+from view.locate_ui import Ui_Dialog_locate
+
+from Model.data import DATA
+
 
 class WindowLocate(QDialog, Ui_Dialog_locate):
     """
     定位窗口，继承自QDialog
     """
 
-    def __init__(self, ui: UI):
+    def __init__(self, ui: MainWindow.UI):
         self.ui = ui
         self.data: DATA = self.ui.data
         if not self.ui.update_data_from_ui():  # 检查并更新region范围
@@ -55,7 +39,7 @@ class WindowLocate(QDialog, Ui_Dialog_locate):
         self.setGeometry(self.data.region.region_to_geometry())
 
         self.pushButton_locate.clicked.connect(self.locate)
-        self.pushButton_preview.clicked.connect(lambda: WindowPreview(self.ui))
+        self.pushButton_preview.clicked.connect(lambda: MainWindow.WindowPreview(self.ui))
 
         self.setWindowFlag(QtCore.Qt.WindowType.WindowMinimizeButtonHint, True)  # 为窗口添加最小化按钮
 
