@@ -1,6 +1,7 @@
 import pickle
 import json
 import sys
+import os
 from typing import Optional, Literal, Any
 
 from loguru import logger as log
@@ -24,13 +25,13 @@ class DATA:
     数据初始化主要在UI.__init__()中
     """
 
-    def __init__(self, window_region=(0, 0, 0, 0)):
+    def __init__(self):
         self.exe_path = sys.argv[0]
-        self.ini_file = self.exe_path + "\\config.ini"
+        self.ini_file = os.path.join(self.exe_path, "config.ini")
 
         self.monitor_num: int = 1  # 选择的显示器编号
         self.SCREEN_SIZE: tuple[int, int] = (1920, 1080)# （width，height）
-        self.WINDOW_GEOMETRY: tuple[int, int, int, int] = window_region  # 主窗口几何属性（x,y,宽，高）
+        self.WINDOW_GEOMETRY: tuple[int, int, int, int] = (0,0,0,0)  # 主窗口几何属性（x,y,宽，高）
 
         # 全局设置
         self.score_save_path: str = self.exe_path + "\\output"  # 保存文件夹目录
@@ -79,15 +80,6 @@ class DATA:
             "SUCCESS": "green",
             "WARNING": "orange",
             "ERROR": "red"
-        }
-
-        self.image_preview: np.ndarray = np.ndarray([])
-        self.lines_detections: dict[str, str|dict[str, list[Line]]] = {  # 定义数据结构
-            # "path": "",
-            # "filename": {
-            #     "horizontal_lines": list[Line],
-            #     "vertical_lines": list[Line]
-            # }
         }
 
         self.config = Config(self)
@@ -365,7 +357,6 @@ class ScoreDetections:
         else:
             return result
 
-    # noinspection PyTypeChecker
     def save_to_file(self, file) -> None:
         """保存到文件中"""
         with open(file, "wb") as f:
@@ -444,3 +435,16 @@ class StitchData:
             return True
         else:
             return False
+
+
+def ReclipData():
+    """
+    分割数据类，存储分割的相关数据
+    """
+    pass
+
+def StyleData():
+    """
+    样式数据类，存储样式的相关数据
+    """
+    pass
