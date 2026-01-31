@@ -1,6 +1,8 @@
 import datetime
 import os
 import subprocess
+from pathlib import Path
+from shutil import rmtree
 
 from loguru import logger as log
 
@@ -28,7 +30,7 @@ def build():
         "/c",
         "nuitka",
         "--standalone",
-        #"--disable-console",
+        # "--disable-console",
         "--clang",
         "--msvc=latest",
         "--enable-plugin=pyside6",
@@ -37,16 +39,31 @@ def build():
         "--report=build/build_report.xml",
         "--output-filename=score_capture.exe",
         "--include-qt-plugins=platforminputcontexts",
-        "--include-module=" + ",".join([os.path.split(i)[-1].split(".")[0] for i in files if not i.count("main.py")]),
-        [i for i in files if i.count("main.py")][0]
+        "--include-module="
+        + ",".join(
+            ["src"]
+            # [
+            #     os.path.split(i)[-1].split(".")[0]
+            #     for i in files
+            #     if not i.count("main.py")
+            # ]
+        ),
+        [i for i in files if i.count("main.py")][0],
     ]
     log.info(command)
 
     subprocess.run(command)
+    if not (Path(".") / "build" / "main.dist" / "score_capture.exe").exists():
+        rmtree(Path(".") / "build" / "main.dist")
+        return
 
-    folder_name = f"score_capture-{version}-build-" + datetime.datetime.now().strftime("%y%m%d_%H%M")
+    folder_name = f"score_capture-{version}-build-" + datetime.datetime.now().strftime(
+        "%y%m%d_%H%M"
+    )
     if "main.dist" in os.listdir(os.getcwd() + "\\build\\"):
-        os.rename(os.getcwd() + "\\build\\main.dist", os.getcwd() + f"\\build\\{folder_name}")
+        os.rename(
+            os.getcwd() + "\\build\\main.dist", os.getcwd() + f"\\build\\{folder_name}"
+        )
     log.info("output: " + os.getcwd() + f"\\build\\{folder_name}")
     log.info("build finished")
 

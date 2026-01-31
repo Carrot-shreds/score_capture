@@ -1,13 +1,15 @@
-**/__pycache__/
-/.idea/
-/.vscode/
-/.venv/
-/build/
-/output/
-/legacy/
-/output/
-/score_capture.code-workspace
+/.*/
 
-/src/output/
-/src/config.ini
-/src/test.py
+/build/
+/score_capture.code-workspace
+/**/config.ini
+
+/**/__pycache__/
+/**/output/
+/**/legacy/
+/**/test/
+/**/test.py
+/**/log*.txt
+/src/logs
+/src/config
+/src/binding

@@ -1,13 +1,17 @@
-import os
 import sys
-import typing
-from typing import Optional
+from typing import Any, Callable, TextIO
 
-from PySide6.QtCore import QThread, Signal
 from loguru import logger as log
+from PySide6.QtCore import QThread, Signal
+
+from src.Model.Data.const import LogLevel
+from src.Model.Data.settings import LogSettings, logSettings
+from src.Model.Data.type import Singleton, TxtPath
+
 
 class LogThread(QThread):
     """log输出线程"""
+
     signalForText = Signal(str)
 
     def __init__(self, parent=None):
@@ -21,29 +25,88 @@ class LogThread(QThread):
         """什么都不用做，但是没有这个函数的声明的话pycharm调试器会报错"""
         pass
 
-@typing.no_type_check
-def init_log(showlog_level: str = "INFO", sub_log_path: Optional[str] = None) -> None:
-    """
-    初始化日志记录器，修改日志等级和子日志路径
-    :param sub_log_path: 保存的子日志的路径
-    :param showlog_level: UI显示的日志等级
-    """
-    _format_save = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> ' \
-                   '| <cyan>{name}</cyan>:<cyan>{function}</cyan>:<yellow>{line}</yellow> - <level>{message}</level>'
-    _format_show = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> ' \
-                   '| <level>{message}</level>'
-    try:  # 为logger实例添加ids属性，以存储子日志信息
-        if log.ids:
-            for i in log.ids:
-                log.remove(i)  # 清除所有配置
-            log.ids = []
-    except AttributeError:
-        log.ids = []  # 首次调用时声明变量
-    log.ids.append(log.add(sys.stdout, level=showlog_level, format=_format_show))  # 控制台输出日志
-    log.ids.append(log.add("logs.txt", level="DEBUG", format=_format_save, encoding="UTF-8",
-                           enqueue=True))  # 主日志，保存所有DEBUG日志到程序根目录下
-    log.ids.append(log.add(sys.stderr, level=showlog_level, format=_format_show))  # 显示在UI中的日志进程
-    if sub_log_path is not None:
-        log.ids.append(log.add(os.path.join(sub_log_path,"log.txt"), level="DEBUG", format=_format_save, encoding="UTF-8",
-                               enqueue=True))  # 每次工作目录中单开的子日志
 
+class stderr2loguru:
+    def write(self, text):
+        if text != "":
+            log.error(text.strip())
+
+    def flush(self) -> None:
+        pass
+
+
+@Singleton
+class LogManager:
+    def __init__(self, log_settings: LogSettings) -> None:
+        sys.stderr = stderr2loguru()
+        self.log_settings = log_settings
+        self._log_config = self.generate_config()
+        self.apply_log_config()
+
+    @property
+    def log_config(self) -> dict[str, list[dict[str, Any]]]:
+        return self._log_config
+
+    @log_config.setter
+    def log_config(self, value):
+        self._log_config = value
+        self.apply_log_config()
+
+    def generate_config(self):
+        return {
+            "handlers": [
+                {
+                    "sink": sys.stdout,
+                    "level": self.log_settings.show_level,
+                    "format": self.log_settings.show_format,
+                },
+                {
+                    "sink": self.log_settings.log_path,
+                    "rotation": self.log_settings.log_main_rotation,
+                    "retention": self.log_settings.log_main_retention,
+                    "level": self.log_settings.save_level,
+                    "format": self.log_settings.save_format,
+                    "encoding": "UTF-8",
+                    "enqueue": True,
+                },
+            ],
+        }
+
+    def add_log_config(
+        self,
+        sink: TxtPath | TextIO | LogThread,
+        filter: Callable | None = None,
+        level: LogLevel | None = None,
+        format: str | None = None,
+        config: dict | None = None,
+    ) -> None:
+        if not config:
+            config = self.log_config
+        handler = {
+            "sink": sink,
+            "level": level if level is not None else self.log_settings.save_level,
+            "format": format if level is not None else self.log_settings.save_format,
+            "filter": filter,
+        }
+        if sink is TxtPath:
+            handler["encoding"] = "UTF-8"
+            handler["enqueue"] = True
+        config["handlers"].append(handler)
+        self.log_config = config
+
+    def remove_log_config(
+        self, sink: TxtPath | TextIO | LogThread, config: dict | None = None
+    ) -> None:
+        if not config:
+            config = self.log_config
+        config["handlers"] = [h for h in config["handlers"] if h.get("sink") != sink]
+        self.log_config = config
+
+    def apply_log_config(self, config: dict | None = None) -> None:
+        if not config:
+            config = self.log_config
+        log.remove()  # Remove all log handlers added so far, including the default
+        log.configure(**config)  # type:ignore
+
+
+logManager = LogManager(logSettings)

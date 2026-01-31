@@ -1,7 +1,7 @@
 # Score Capture
 
 Capture, Detect, Stitch and Reclip score/TAB
-from online video to generate printable image.
+from scroll video to generate printable score images.
 
 Work In Progress
 
@@ -18,7 +18,7 @@ Work In Progress
 安装uv环境
 
     pip install uv 或
-    wget -qO- https://astral.sh/uv/install.sh | sh
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 
 同步构建环境
 

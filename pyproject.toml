@@ -1,21 +1,55 @@
 [project]
 name = "score-capture"
-version = "0.1.2"
-description = "Capture, Detect, Stitch and Reclip score/TAB from online video to generate printable image."
+version = "0.2.0"
+description = "Capture, Detect, Stitch and Reclip score/TAB from scroll video to generate printable score images."
 requires-python = ">=3.13"
 dependencies = [
+    "fonttools>=4.59.2",
     "loguru>=0.7.3",
     "mss>=10.1.0",
-    "numpy>=2.2.6",
-    "opencv-contrib-python>=4.11.0.86",
-    "opencv-python>=4.11.0.86",
+    "numpy>=2.4.0",
+    "numpydantic>=1.7.0",
+    "opencv-python==4.11.0.86",
+    "pathvalidate>=3.3.1",
+    "pillow>=11.2.1",
+    "pydantic>=2.12.5",
+    "pydantic-extra-types>=2.10.6",
     "pyqtgraph>=0.13.7",
     "pyside6>=6.9.0",
+    "pyside6-qtads>=4.4.0",
     "scikit-image>=0.25.2",
 ]
 
 [dependency-groups]
 dev = [
-    "matplotlib>=3.10.6",
+    "ipykernel>=7.1.0",
     "nuitka>=2.7.5",
+    "pympler>=1.1",
+]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    "src/View/ui"  # Compiled ui file
+]
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+[tool.ty.environment]
+root = ["."]
+
+[tool.pyright]
+typeCheckingMode = "standard"
+exclude = [
+    ".*/*",
+    "build/*",
+    "score_capture.code-workspace",
+    "**/*.ini",
+    "**/__pycache__/*",
+    "**/output/*",
+    "**/legacy/*",
+    "**/test/*",
+    "**/test.py",
+    "**/log*.txt",
 ]

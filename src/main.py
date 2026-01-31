@@ -1,24 +1,28 @@
 import sys
-from loguru import logger as log
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QApplication
-from PySide6 import QtCore
 
-from __init__ import __version__
-from Model.data import DATA
-from ViewModel.MainWindow import UI
+from loguru import logger as log
+from PySide6 import QtCore
+from PySide6.QtWidgets import QApplication
+
+from src import __version__
+from src.ViewModel.MainWindow import MainWindow_VM
+
 
 @log.catch()
 def show_main_window() -> None:
     """主窗口进程函数"""
     # dps缩放设定，详见https://doc.qt.io/qtforpython-6/PySide6/QtCore/Qt.html#PySide6.QtCore.Qt.HighDpiScaleFactorRoundingPolicy
-    QGuiApplication.setHighDpiScaleFactorRoundingPolicy(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)  # default
+    QApplication.setHighDpiScaleFactorRoundingPolicy(
+        QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+    )  # default
 
+    # Ignore Error - "qt.qpa.window: SetProcessDpiAwarenessContext() failed"
+    QtCore.QLoggingCategory.setFilterRules("qt.qpa.window.warning=false")
     app = QApplication(sys.argv)
-    window = UI(DATA(), app)
+    window = MainWindow_VM()
     window.show()
     window.activateWindow()
-    sys.exit(app.exec())
+    app.exec()
 
 
 if __name__ == "__main__":
