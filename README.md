@@ -7,17 +7,18 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
 [![Pydantic v2](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pydantic/pydantic/main/docs/badge/v2.json)](https://pydantic.dev)
-![GitHub Repo stars](https://img.shields.io/github/stars/carrot-shreds/score_capture)
+![GitHub Repo stars](https://img.shields.io/github/stars/carrot-shreds/score_capture)  
+
+[简体中文](README.md)  [English](/docs/README_en.md)  
 
 从滚动视频乐谱中，截取、识别、拼接并重分割，格式化生成可打印的曲谱图像。  
-[简体中文](https://github.com/Carrot-shreds/score_capture/README.md)  [English](https://github.com/Carrot-shreds/score_capture/docs/README_en.md)
 
 <details>
     <summary>界面截图</summary>
-    ![Tab Preview](docs/screenshot/preview.png)
-    ![Tab Stitch](docs/screenshot/stitch.png)
-    ![Tab Reclip](docs/screenshot/reclip.png)
-    ![Tab Settings](docs/screenshot/settings.png)
+    <image src="/docs/screenshot/preview.png"/, alt="Tab Preview">
+    <image src="/docs/screenshot/stitch.png"/, alt="Tab Stitch">
+    <image src="/docs/screenshot/reclip.png"/, alt="Tab Reclip">
+    <image src="/docs/screenshot/settings.png"/, alt="Tab Settings">
 </details>
 
 ## 特性
@@ -101,5 +102,5 @@ Python官方在3.9版本之后放弃了对于win7的支持，如果需要移植�
 
 报告错误时，请提供尽可能完整的信息，包括工作目录下的日志、log文件夹中的主日志、配置文件信息、视频链接或图片等。
 
-## [许可证](https://github.com/Carrot-shreds/score_capture/LICENSE.txt)
+## [许可证](LICENSE)
 本项目是基于GPL v3协议开源的自由软件，禁止闭源的商业售卖与二次分发.
