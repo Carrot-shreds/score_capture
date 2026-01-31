@@ -77,6 +77,9 @@ class MainWindow_VM(MainWindow_View):
         )
         self.action_open_folder.triggered.connect(self.tab_settings.open_folder)
         self.action_capture.toggled.connect(self.toggle_capture)
+        self.dialog_locate.pushButton_toggle_capture.clicked.connect(
+            self.action_capture.toggle
+        )
 
         # state bar
         self.label_version.setText("V" + __version__)
@@ -118,6 +121,7 @@ class MainWindow_VM(MainWindow_View):
             if not self.captureThread:
                 return
             self.action_capture.setDisabled(True)  # 暂时禁用按钮
+            self.dialog_locate.pushButton_toggle_capture.setDisabled(True)
             self.captureThread.stop_flag.set(True)  # 发送停止信号
             return
 
@@ -153,6 +157,8 @@ class MainWindow_VM(MainWindow_View):
             self.action_capture.setChecked(False)
             return  # break out
 
+        if not self.pathSettings.main_out_dir.exists():
+            self.pathSettings.main_out_dir.mkdir()
         self.pathSettings.working_dir.mkdir()
         self.captureThread = CaptureThread(
             self.captureSettings,
@@ -165,13 +171,26 @@ class MainWindow_VM(MainWindow_View):
             if self.previewSetting.live_preview
             else None
         )
+        self.captureThread.signalBuildImage.connect(
+            lambda path: self.dialog_locate.flash_capture_button(200, "lightgreen")
+        )
+        self.captureThread.signalCaptured.connect(
+            lambda path: self.dialog_locate.flash_capture_button(200, "lightblue")
+        )
+
         self.captureThread.finished.connect(
-            lambda: self.action_capture.setDisabled(False)
+            lambda: [
+                self.action_capture.setDisabled(False),
+                self.dialog_locate.pushButton_toggle_capture.setDisabled(False),
+                self.dialog_locate.pushButton_toggle_capture.setText("📷"),
+            ]
         )  # 复位按钮状态
         self.captureThread.destroyed.connect(
             lambda: setattr(self, "captureThread", None)
         )
+
         self.captureThread.start()  # 启动截图线程
+        self.dialog_locate.pushButton_toggle_capture.setText("📸")
 
     def closeEvent(self, event: QCloseEvent):
         self.dialog_locate.close()

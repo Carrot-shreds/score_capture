@@ -1,8 +1,10 @@
 from typing import NamedTuple, TypedDict
 
-from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtCore import QPoint, QRect, QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QMouseEvent
-from PySide6.QtWidgets import QDialog, QPushButton
+from PySide6.QtWidgets import QDialog, QPushButton, QWidget
+
+from src.Model.utils import set_window_always_on_top
 
 from .ui.DialogLocate_ui import Ui_DialogLocate
 
@@ -49,6 +51,8 @@ _CursorShape = {
 
 
 class DialogLocate_View(QDialog, Ui_DialogLocate):
+    OutMiniMode = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
@@ -59,12 +63,57 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
         self.m_drag_start_pos: QPoint | None = None
         self.m_original_geometry: QRect | None = None
         self.m_drag_edge: EdgeTuple | None = None
-        self.m_resize_margin: int = 12  # 边缘检测范围
+        self.m_resize_margin: int = 8  # 边缘检测范围
         self.setMouseTracking(True)
 
         self.pushButton_toggle_show_mode = QPushButton(self)
-        self.pushButton_toggle_show_mode.setGeometry(3, 3, 20, 20)
+        self.pushButton_toggle_show_mode.setMouseTracking(True)
+        self.pushButton_toggle_show_mode.setGeometry(15, 15, 30, 30)
         self.pushButton_toggle_show_mode.setText("—")
+        self.pushButton_toggle_show_mode.clicked.connect(self.toggle_mini_mode)
+        self.pushButton_toggle_capture = QPushButton(self)
+        self.pushButton_toggle_capture.setMouseTracking(True)
+        self.pushButton_toggle_capture.setGeometry(45, 15, 30, 30)
+        self.pushButton_toggle_capture.setText("📷")
+
+        self.widget.setStyleSheet("background:lightgray")
+        self.widget.setMouseTracking(True)
+        self.frame.setStyleSheet("background:white")
+        self.frame.setMouseTracking(True)
+
+        self.mini_mode: bool = False
+        self.minimun_size_before_mini_mode: QSize = self.minimumSize()
+        self.size_before_mini_mode: QSize = self.size()
+
+    def toggle_mini_mode(self) -> None:
+        self.mini_mode = not self.mini_mode
+        for widget in self.frame.children():
+            if isinstance(widget, QWidget):
+                widget.setVisible(not self.mini_mode)
+        if self.mini_mode:
+            self.size_before_mini_mode = self.size()
+            self.minimun_size_before_mini_mode = self.minimumSize()
+            self.pushButton_toggle_show_mode.setGeometry(8, 4, 30, 30)
+            self.pushButton_toggle_capture.setGeometry(50, 4, 30, 30)
+            self.setWindowOpacity(0.8)
+            self.setMinimumSize(90, 40)
+            self.resize(90, 40)
+            set_window_always_on_top(self, True)
+        else:
+            self.setMinimumSize(self.minimun_size_before_mini_mode)
+            self.resize(self.size_before_mini_mode)
+            self.pushButton_toggle_show_mode.setGeometry(15, 15, 30, 30)
+            self.pushButton_toggle_capture.setGeometry(45, 15, 30, 30)
+            self.OutMiniMode.emit()
+
+    def flash_capture_button(self, msec: int, color: str) -> None:
+        self.pushButton_toggle_capture.setStyleSheet(f"background-color:{color}")
+        QTimer.singleShot(
+            msec,
+            lambda: self.pushButton_toggle_capture.setStyleSheet(
+                "background-color:white"
+            ),
+        )
 
     def get_edge_at_position(self, pos) -> EdgeTuple:
         """检测鼠标位置所在的边缘"""
@@ -95,7 +144,7 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
 
         delta = event.globalPos() - self.m_drag_start_pos
 
-        if self.m_drag_edge and any(self.m_drag_edge):
+        if self.m_drag_edge and any(self.m_drag_edge) and not self.mini_mode:
             x = (
                 self.m_original_geometry.x() + delta.x()
                 if self.m_drag_edge.Left

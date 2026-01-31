@@ -44,9 +44,18 @@ class DialogLocate_VM(DialogLocate_View):
             "window_opacity", lambda v: self.setWindowOpacity(v)
         )
         self.locateSettings.add_observer_handler(
-            "window_always_on_top", lambda v: set_window_always_on_top(self, v)
+            "window_always_on_top",
+            lambda v: set_window_always_on_top(self, v) if not self.mini_mode else None,
         )
 
+        self.OutMiniMode.connect(
+            lambda: [
+                set_window_always_on_top(
+                    self, self.locateSettings.window_always_on_top
+                ),
+                self.setWindowOpacity(self.locateSettings.window_opacity),
+            ]
+        )
         self.pushButton_locate.clicked.connect(self.locate)
         self.pushButton_minimize.clicked.connect(self.showMinimized)
         self.pushButton_close.clicked.connect(self.close)

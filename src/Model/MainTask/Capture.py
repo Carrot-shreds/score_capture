@@ -22,6 +22,7 @@ def start_capture_loop(
     stop_flag: Flag,
     logger=None,
     signalBuildImage: SignalInstance | None = None,
+    signalCaptured: SignalInstance | None = None,
 ) -> None:
     if not logger:
         from loguru import logger as log
@@ -48,6 +49,8 @@ def start_capture_loop(
         total_count += 1
         save_filename = f"capture{total_count}{captureSettings.save_format}"
         save_image(working_dir / save_filename, temp_list[temp_count])
+        if signalCaptured:
+            signalCaptured.emit(working_dir / save_filename)
         if total_count == 0:
             log.info("===开始截图===")
         if temp_count == 0:  # 不过第一张图象不进行对比
@@ -121,6 +124,7 @@ def start_capture_loop(
 
 class CaptureThread(BaseTaskThread):
     signalBuildImage: Signal = Signal(Path)
+    signalCaptured: Signal = Signal(Path)
 
     def __init__(
         self,
@@ -146,4 +150,5 @@ class CaptureThread(BaseTaskThread):
             stop_flag=self.stop_flag,
             logger=logger,
             signalBuildImage=self.signalBuildImage,
+            signalCaptured=self.signalCaptured,
         )
