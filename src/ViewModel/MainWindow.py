@@ -60,7 +60,12 @@ class MainWindow_VM(MainWindow_View):
         self.dialog_locate = DialogLocate_VM(self)
 
         # tool bar
-        bind_data(self.lineEdit_score_title, self.pathSettings, "score_title")
+        bind_data(
+            self.lineEdit_score_title,
+            self.pathSettings,
+            "score_title",
+            when_finished=True,
+        )
         bind_data(
             self.perspective_combobox, self.guiSettings, "mainWindow_dock_perspective"
         )

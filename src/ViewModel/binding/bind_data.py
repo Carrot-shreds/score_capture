@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
     QLabel,
+    QLineEdit,
     QRadioButton,
     QSpinBox,
     QTextEdit,
@@ -55,6 +56,27 @@ def bind_data(
     add_binding_map(data, widget, prop, d2w)
     if not one_way:
         widget.textChanged.connect(w2d := lambda v: set_model_field(data, prop, v))
+        add_binding_map(widget, data, prop, w2d)
+
+
+@bind_data.register(QLineEdit)
+def _(
+    widget: QLineEdit,
+    data: OnValueChangeModel,
+    prop: NonEmptyStr,
+    one_way: bool = False,
+    when_finished=False,
+):
+    data.add_observer_handler(prop, d2w := lambda v: widget.setText(str(v)))
+    d2w(getattr(data, prop))  # update default data vaule
+    add_binding_map(data, widget, prop, d2w)
+    if not one_way:
+        if when_finished:
+            widget.editingFinished.connect(
+                w2d := lambda: set_model_field(data, prop, widget.text())
+            )
+        else:
+            widget.textChanged.connect(w2d := lambda v: set_model_field(data, prop, v))
         add_binding_map(widget, data, prop, w2d)
 
 

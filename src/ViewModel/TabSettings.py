@@ -38,7 +38,12 @@ class TabSettings_VM(TabSettings_View):
             self.checkBox_always_on_top, self.guiSettings, "mainWindow_always_on_top"
         )
         bind_data(self.lineEdit_save_path, self.pathSettings, "main_out_dir")
-        bind_data(self.lineEdit_score_title, self.pathSettings, "score_title")
+        bind_data(
+            self.lineEdit_score_title,
+            self.pathSettings,
+            "score_title",
+            when_finished=True,
+        )
         bind_data(self.checkBox_save_all_settings, self.configSettings, "auto_save_all")
 
         # Capture Settings
