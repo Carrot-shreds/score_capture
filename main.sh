@@ -14,4 +14,4 @@ export QT_PLUGIN_PATH="${pyside_path}/Qt/plugins:${QT_PLUGIN_PATH}"
 # solve the windows position issue on linux wayland
 export QT_QPA_PLATFORM="xcb"
 
-python src/main.py
+python main.py

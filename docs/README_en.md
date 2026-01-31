@@ -29,7 +29,7 @@ Install packages
 
 Run main entry
 
-    uv run ./src/main.py
+    uv run main.py
     (Linux) bash main.sh
 
 Get update

@@ -62,7 +62,7 @@
 
 运行程序入口
 
-    uv run ./src/main.py
+    uv run main.py
     (Linux) bash main.sh
 
 获取仓库更新

@@ -1,7 +1,9 @@
 [project]
 name = "score-capture"
 version = "0.2.0"
-description = "Capture, Detect, Stitch and Reclip score/TAB from scroll video to generate printable score images."
+description = "Capture, Detect, Stitch and Reclip music score/TAB from scroll video to generate printable images."
+readme = "README.md"
+license = {text = "GPLv3"}
 requires-python = ">=3.13"
 dependencies = [
     "fonttools>=4.59.2",

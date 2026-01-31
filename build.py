@@ -48,7 +48,7 @@ def build():
             #     if not i.count("main.py")
             # ]
         ),
-        [i for i in files if i.count("main.py")][0],
+        "main.py",
     ]
     log.info(command)
 

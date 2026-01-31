@@ -13,3 +13,5 @@
 /src/logs
 /src/config
 /src/binding
+/config/
+/logs/
