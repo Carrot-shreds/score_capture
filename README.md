@@ -40,12 +40,9 @@
 
 ## 从源码运行/开发
 
-下载解压源码zip，或使用git clone到本地
+获取源码并进去项目根目录
 
     git clone https://github.com/Carrot-shreds/score_capture.git
-
-进入到项目根目录
-
     cd score_capture
 
 安装uv环境
@@ -54,9 +51,9 @@
     或
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
-同步构建环境
+同步构建环境（默认不包含开发依赖）
 
-    uv sync --no-dev
+    uv sync
     或
     uv sync --dev
 

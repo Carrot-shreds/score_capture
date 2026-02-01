@@ -29,6 +29,10 @@ dev = [
     "pympler>=1.1",
 ]
 
+[tool.uv]
+# This prevents 'uv run' and 'uv sync' from including dev dependencies by default
+default-groups = []
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [

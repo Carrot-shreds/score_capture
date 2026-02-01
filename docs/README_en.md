@@ -7,12 +7,9 @@ from scroll video to generate printable images.
 
 ## Run/Build from source
 
-Download source or git clone
+Download source and enter project root dir
 
     git clone https://github.com/Carrot-shreds/score_capture.git
-
-Change dir
-
     cd score_capture
 
 Install uv environment (Optional)
@@ -21,9 +18,9 @@ Install uv environment (Optional)
     (or)
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
-Install packages
+Install packages (no dev dependencies by default)
 
-     uv sync --no-dev
+     uv sync
      (or)
      uv sync --dev
 
