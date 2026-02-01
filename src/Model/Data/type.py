@@ -375,8 +375,8 @@ class Line(AlwaysValidateModel):
         )  # 避免出现负数
         thickness = self.thickness + extern_width * 2
 
-        index_points = np.asarray(
-            range(p1[self.normal_direction], p1[self.normal_direction] + thickness)
+        index_points = np.arange(
+            p1[self.normal_direction], p1[self.normal_direction] + thickness
         )
         edge = (
             self.image_shape[0]

@@ -2,19 +2,19 @@ import os
 
 import cv2
 import numpy as np
-from pydantic import validate_call
+from fast_ssim import ssim
+from pydantic import PositiveInt, validate_call
 
+from src.Model.Data.const import StitchMethod
 from src.Model.Data.data import ImageData, ScoreDetections, ScoreStitchData
 from src.Model.Data.settings import (
     Direction,
-    ImageCompareMethod,
     LineDetectorSettings,
     StitchSettings,
 )
 from src.Model.Data.type import DirectoryExisting, GrayImageArray
 from src.Model.image_process import (
     clip_image,
-    compare_image,
     detect_horizontal_lines,
     detect_vertical_lines,
     get_barline_num_region,
@@ -47,13 +47,17 @@ def stitch_image_task(
     scoreDetections = ScoreDetections(directory=working_dir)
     image_filenames: list[str] = []
 
-    if (working_dir / "ScoreDetections.json").exists():
-        scoreDetections: ScoreDetections = ScoreDetections.load_from_file(
-            working_dir / "ScoreDetections.json"
-        )
-        image_filenames = scoreDetections.get_image_filenames()
-        log.debug("成功读取缓存，跳过线段检测")
-    elif stitchSettings.method != "DIRECT":
+    if (f := (working_dir / "ScoreDetections.json")).exists():
+        try:
+            scoreDetections: ScoreDetections = ScoreDetections.load_from_file(f)
+            image_filenames = scoreDetections.get_image_filenames()
+            log.debug("成功读取缓存，跳过线段检测")
+        except Exception:
+            log.warning(f"ScoreDetections load failed: {f}")
+    if (
+        stitchSettings.method != "DIRECT"
+        and scoreDetections.get_image_filenames() == []  # load failed
+    ):
         # 获取检测数据
         log.info("开始检测图像中的线段")
         for f in working_dir.glob("*image*-detected.*"):
@@ -106,87 +110,29 @@ def stitch_image_task(
         stitch_points: list[int] = []
         stitch_direction = stitchSettings.direction
         # 拼接参考线方向，与拼接方向相反
-        reference_lines_direction: Direction = stitch_direction.reverse
+        ref_line_direction: Direction = stitch_direction.reverse
         for name_index in range(len(image_names) - 1):
             img1: GrayImageArray = images_gray[name_index]
             img2: GrayImageArray = images_gray[name_index + 1]
             length = img1.shape[stitch_direction]  # 拼接方向上的长度
-            try:
-                line_index = scoreDetections[image_names[name_index]].get_lines_index(
-                    reverse=True, extern_width=2, direction=reference_lines_direction
+            stitch_index = get_stitch_index(
+                image_names[name_index],
+                image_names[name_index + 1],
+                length,
+                scoreDetections,
+                ref_line_direction,
+                log,
+            )
+            stitch_points.append(
+                get_stitch_point(
+                    img1,
+                    img2,
+                    stitch_index,
+                    stitch_direction,
+                    stitchSettings.method,
+                    scoreDetections,
                 )
-                stitch_indexs = [
-                    line_index + line.start_index
-                    for line in scoreDetections[image_names[name_index + 1]].get_lines(
-                        direction=reference_lines_direction
-                    )
-                ]
-                stitch_indexs = np.unique(
-                    np.concatenate(stitch_indexs)
-                )  # 拼接成一维数组并进行去重
-                stitch_index: list[int] = list(
-                    stitch_indexs[stitch_indexs < length]
-                )  # 限定拼接索引区域范围
-            except ValueError:
-                stitch_index = []
-            if stitch_index == []:  # 当img1，img2无重合特征线时
-                log.warning(
-                    f"{image_names[name_index]}与{image_names[name_index + 1]}无重合特征线，"
-                    "将在中间区域进行比对"
-                )
-                stitch_index = [i for i in range(1, length)]  # stitch_index不能为0!!!
-                stitch_index = stitch_index[
-                    int(length * 0.2) : int(length * 0.8)
-                ]  # 取中间3/5的区域
-            if stitchSettings.method == "SSIM":
-                diff = [
-                    compare_image(
-                        clip_image(img1, stitch_direction, (-offset, None)),
-                        clip_image(img2, stitch_direction, (None, offset)),
-                        ImageCompareMethod.SSIM,
-                    )
-                    for offset in stitch_index
-                    if offset > 7
-                ]
-                # 在水平模式中，增加小节数字序号区域的权重
-                if stitch_direction == Direction.HORIZONTAL:
-                    # 获取小节数字序号的区域，以设置权重
-                    barline_num_detect_start, barline_num_detect_end = (
-                        get_barline_num_region(scoreDetections[0])
-                    )
-                    diff = np.asarray(diff) * 0.2 + [
-                        compare_image(
-                            img1[
-                                barline_num_detect_start:barline_num_detect_end,
-                                -offset:,
-                            ],
-                            img2[
-                                barline_num_detect_start:barline_num_detect_end, :offset
-                            ],
-                            ImageCompareMethod.SSIM,
-                        )
-                        * 0.8
-                        for offset in stitch_index
-                        if offset > 7
-                    ]  # SSIM算法要求最小图像大小
-                # 右侧1像素为img2的部分，越大越相似
-                stitch_points.append(int(stitch_index[np.argmax(np.asarray(diff))] + 1))
-            elif stitchSettings.method == "MSE":
-                diff = [
-                    np.std(  # ！！！避免差值数据溢出
-                        clip_image(img1, stitch_direction, (-offset, None)).astype(
-                            np.uint16
-                        )
-                        - clip_image(img2, stitch_direction, (None, offset)).astype(
-                            np.uint16
-                        )
-                    )
-                    for offset in stitch_index
-                ]
-                stitch_points.append(
-                    # 同上，diff越小越相似
-                    int(stitch_index[np.argmin(np.asarray(diff))] + 1)
-                )
+            )
 
             log.debug(
                 f"{stitch_direction.str}:{stitchSettings.method}-"
@@ -206,6 +152,98 @@ def stitch_image_task(
     saving_filename = score_title + "-stitched" + stitchSettings.saving_format
     save_image(working_dir / saving_filename, final_image)
     log.info(f"图像拼接完毕，已生成预览图{working_dir / saving_filename}")
+
+
+@validate_call
+def get_stitch_index(
+    name_img1: str,
+    name_img2: str,
+    stitch_length: PositiveInt,
+    scoreDetections: ScoreDetections,
+    ref_line_direction: Direction,
+    log=None,
+) -> list[int]:
+    """Get stitch index area for compare computing"""
+    try:
+        line_index = scoreDetections[name_img1].get_lines_index(
+            reverse=True, extern_width=2, direction=ref_line_direction
+        )
+        stitch_indexs = [
+            line_index + line.start_index
+            for line in scoreDetections[name_img2].get_lines(
+                direction=ref_line_direction
+            )
+        ]
+        stitch_indexs = np.unique(
+            np.concatenate(stitch_indexs)
+        )  # 拼接成一维数组并进行去重
+        stitch_index: list[int] = list(
+            stitch_indexs[stitch_indexs < stitch_length]
+        )  # 限定拼接索引区域范围
+    except ValueError:
+        stitch_index = []
+    if stitch_index == []:  # 当img1，img2无重合特征线时
+        log.warning(
+            f"{name_img1}与{name_img2}无重合特征线，将在中间区域进行比对"
+        ) if log else None
+        stitch_index = [  # 取中间3/5的区域
+            i for i in range(int(stitch_length * 0.2), int(stitch_length * 0.8))
+        ]  # stitch_index不能为0!!!
+
+    return stitch_index
+
+
+@validate_call
+def get_stitch_point(
+    img1: GrayImageArray,
+    img2: GrayImageArray,
+    stitch_index: list[PositiveInt],
+    direction: Direction,
+    method: StitchMethod,
+    scoreDetections: ScoreDetections,
+    log=None,
+):
+    if method == StitchMethod.SSIM:
+        # SSIM算法要求最小图像大小
+        stitch_index = [offset for offset in stitch_index if offset > 7]
+        diff = np.empty_like(stitch_index, dtype=np.float32)
+        # 在水平模式中，增加小节数字序号区域的权重
+        if direction == Direction.HORIZONTAL:
+            # 获取小节数字序号的区域，以设置权重
+            barline_num_detect_start, barline_num_detect_end = get_barline_num_region(
+                scoreDetections[0]
+            )
+            ex_diff = diff.copy()
+
+        for i, offset in enumerate(stitch_index):
+            diff[i] = ssim(
+                clip_image(img1, direction, (-offset, None)),
+                clip_image(img2, direction, (None, offset)),
+                data_range=255,
+            )
+            if direction == Direction.HORIZONTAL:
+                ex_diff[i] = ssim(
+                    img1[
+                        barline_num_detect_start:barline_num_detect_end,
+                        -offset:,
+                    ],
+                    img2[barline_num_detect_start:barline_num_detect_end, :offset],
+                    data_range=255,
+                )
+
+        if direction == Direction.HORIZONTAL:
+            diff = diff * 0.2 + ex_diff * 0.8
+        # 右侧1像素为img2的部分，越大越相似
+        return int(stitch_index[np.argmax(diff)] + 1)
+    elif method == StitchMethod.MSE:
+        diff = np.empty_like(stitch_index)
+        for i, offset in enumerate(stitch_index):
+            diff[i] = np.std(  # ！！！避免差值数据溢出
+                clip_image(img1, direction, (-offset, None)).astype(np.uint16)
+                - clip_image(img2, direction, (None, offset)).astype(np.uint16)
+            )
+        # 同上，diff越小越相似
+        return int(stitch_index[np.argmin(diff)] + 1)
 
 
 class StitchThread(BaseTaskThread):

@@ -6,6 +6,7 @@ readme = "README.md"
 license = {text = "GPLv3"}
 requires-python = ">=3.13"
 dependencies = [
+    "fast-ssim>=1.1.0",
     "fonttools>=4.59.2",
     "loguru>=0.7.3",
     "mss>=10.1.0",
@@ -19,13 +20,12 @@ dependencies = [
     "pyqtgraph>=0.13.7",
     "pyside6>=6.9.0",
     "pyside6-qtads>=4.4.0",
-    "scikit-image>=0.25.2",
 ]
 
 [dependency-groups]
 dev = [
     "ipykernel>=7.1.0",
-    "nuitka>=2.7.5",
+    "nuitka>=2.8.10",
     "pympler>=1.1",
 ]
 
@@ -40,18 +40,3 @@ indent-width = 4
 
 [tool.ty.environment]
 root = ["."]
-
-[tool.pyright]
-typeCheckingMode = "standard"
-exclude = [
-    ".*/*",
-    "build/*",
-    "score_capture.code-workspace",
-    "**/*.ini",
-    "**/__pycache__/*",
-    "**/output/*",
-    "**/legacy/*",
-    "**/test/*",
-    "**/test.py",
-    "**/log*.txt",
-]

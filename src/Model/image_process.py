@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
+from fast_ssim import ssim
 from loguru import logger as log
 from PIL.Image import Image
 from pydantic import validate_call
-from skimage.metrics import structural_similarity as compare_ssim
 
 from src.Model.Data.const import Direction, ImageCompareMethod
 from src.Model.Data.data import ImageDetection
@@ -326,9 +326,9 @@ def compare_image(
     image1 = np.asarray(image1, np.uint8)
     image2 = np.asarray(image2, np.uint8)
     if method == "MSE":
-        diff = np.sum((image1.flatten() - image2.flatten()) ** 2) / image1.size
+        diff = np.average((image1 - image2) ** 2)
     elif method == "SSIM":
-        diff = compare_ssim(image1, image2, data_range=255)
+        diff = ssim(image1, image2, data_range=255)
     else:
         raise ValueError("错误的算法类型")
     if type(diff) is float or type(diff) is np.float64:
