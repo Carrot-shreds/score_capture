@@ -12,10 +12,10 @@ from pydantic import validate_call
 from src.Model.Data.const import Align, Direction, ReclipMethod
 from src.Model.Data.data import ReclipData, ScoreDetections, StyleData
 from src.Model.Data.settings import LineDetectorSettings, ReclipSettings
-from src.Model.Data.type import DirectoryExisting, ImageArray, Line
+from src.Model.Data.type import DirectoryExisting, FilePath, ImageArray, Line
 from src.Model.image_process import clip_image, detect_all_lines_with_clip
 from src.Model.MainTask.BaseTaskThread import BaseTaskThread
-from src.Model.utils import get_sysfonts, read_image, save_image
+from src.Model.utils import read_image, save_image
 
 
 @validate_call
@@ -23,6 +23,7 @@ def reclip_image(
     detectorSettings: LineDetectorSettings,
     reclipSettings: ReclipSettings,
     working_dir: DirectoryExisting,
+    font_path: FilePath,
     logger=None,
     style_data: StyleData | None = None,
 ) -> None:
@@ -47,7 +48,7 @@ def reclip_image(
     stitched_detected_image_filename = (
         f"{score_title}-stitched-detected.{reclipSettings.saving_format}"
     )
-    if stitched_detected_image_filename in os.listdir(working_dir):
+    if (working_dir / stitched_detected_image_filename).exists():
         os.remove(working_dir / stitched_detected_image_filename)
 
     # 获取检测数据
@@ -205,7 +206,13 @@ def reclip_image(
         style_data.save_to_file(working_dir / "StyleData.json")
 
     style_restitched_clips(
-        log, working_dir, reclipSettings, canvas, style_data, reclip_data
+        log,
+        working_dir,
+        reclipSettings,
+        canvas,
+        style_data,
+        reclip_data,
+        font_path,
     )
 
 
@@ -217,6 +224,7 @@ def style_restitched_clips(
     restitched_image: ImageArray,
     style_data: StyleData,
     reclip_data: ReclipData,
+    font_path: FilePath,
 ):
     log.debug("正在编辑样式")
     score_width = restitched_image.shape[1]
@@ -257,7 +265,6 @@ def style_restitched_clips(
         for i in range(len(cut_indexes) - 1)
     ]
 
-    font_path = get_sysfonts()[reclip_settings.font_name]
     page_num_height = int(canvas_margin_height * 0.5)
     page_num_width = int(page_num_height * 1.5)
     page_num_font = get_auto_sized_font(
@@ -333,24 +340,20 @@ def get_auto_sized_font(
     return ImageFont.truetype(font=font_path, size=font_size - step)
 
 
-def draw_auto_sized_text(
-    text: str, font_path: Path, max_width: int, max_height: int, image_draw: ImageDraw
-):
-    pass
-
-
 class ReclipThread(BaseTaskThread):
     def __init__(
         self,
         reclipSettings: ReclipSettings,
         detectorSettings: LineDetectorSettings,
         working_dir: DirectoryExisting,
+        font_path: FilePath,
         style_data: StyleData | None = None,
     ):
         super().__init__()
         self.reclipSettings: ReclipSettings = reclipSettings
         self.detectorSettings: LineDetectorSettings = detectorSettings
         self.working_dir: DirectoryExisting = working_dir
+        self.font_path = font_path
         self.style_data = style_data
 
     def main(self, logger) -> None:
@@ -358,6 +361,7 @@ class ReclipThread(BaseTaskThread):
             detectorSettings=self.detectorSettings.model_copy(deep=True),
             reclipSettings=self.reclipSettings.model_copy(deep=True),
             working_dir=self.working_dir,
+            font_path=self.font_path,
             logger=logger,
             style_data=self.style_data,
         )

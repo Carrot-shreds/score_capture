@@ -1,6 +1,5 @@
 import gc
 import time
-from copy import deepcopy
 from pathlib import Path
 from typing import Self
 
@@ -419,7 +418,7 @@ class TabStitch_VM(TabStitch_View):
         if not self.manualStitchData:
             return
 
-        image = deepcopy(self.manualStitchData.image_stitched)
+        image = self.manualStitchData.image_stitched
         if self.stitchSettings.add_mark_point:
             if self.manualStitchData.direction == Direction.HORIZONTAL:
                 point = (

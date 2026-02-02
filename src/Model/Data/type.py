@@ -109,6 +109,10 @@ type ColorImageArray = Annotated[
 type GrayImageArray = Annotated[
     np.ndarray, NDArrayValidator(Shape["* x, * y"], np.uint8)  # type:ignore
 ]
+type BinaryImageArray = Annotated[
+    np.ndarray,
+    NDArrayValidator(Shape["* x, * y"], np.uint8),  # type:ignore uint8 is faster than bool
+]
 type ImageArray = ColorImageArray | GrayImageArray
 
 # Path Management ###############################

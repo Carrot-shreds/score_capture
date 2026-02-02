@@ -7,7 +7,7 @@ from pydantic import validate_call
 
 from src.Model.Data.const import Direction, ImageCompareMethod
 from src.Model.Data.data import ImageDetection
-from src.Model.Data.type import ImageArray, Line
+from src.Model.Data.type import GrayImageArray, ImageArray, Line
 
 
 def gama_transfer(img, threshold, power) -> ImageArray:
@@ -69,6 +69,9 @@ def detect_horizontal_lines(
 def get_score_lines(horizontal_lines: list[Line]) -> list[Line]:
     """从水平线检测结果中获取曲谱部分的横线"""
     # TODO 使用聚类算法改写~
+    if len(horizontal_lines) < 3:
+        return []
+
     horizontal_lines_ys = np.asarray([line.point1[1] for line in horizontal_lines])
     distance = horizontal_lines_ys[1:] - horizontal_lines_ys[:-1]
     index = (
@@ -98,6 +101,62 @@ def detect_vertical_lines(
 ) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有竖直线段(黑色背景图中的白色线)"""
     # TODO 异常处理
+    img = _image_preprocess_for_vertical_line_detect(image)
+
+    # Check horizontal lines
+    if horizontal_lines_data is None:
+        horizontal_lines: list[Line] = detect_horizontal_lines(img)
+        log.debug("检测竖直线时未传入水平线数据，将先以默认系数进行水平线检测")
+    else:
+        horizontal_lines: list[Line] = horizontal_lines_data
+    if not horizontal_lines:
+        log.info("由于水平线检测结果为空，未进行竖直线检测")
+        return []
+    horizontal_lines = get_score_lines(horizontal_lines)  # 水平线预处理
+    if not horizontal_lines:
+        log.info("曲谱部分的水平线检测结果为空，无法进行竖直线检测")
+        return []
+
+    # 识别区域
+    top_line_y: int = horizontal_lines[0].start_index  # 线谱中最上方的那条线
+    bottom_line_y: int = horizontal_lines[-1].end_index  # 最下方的那条线
+    expand: int = int((bottom_line_y - top_line_y) / 5)
+    edge_top: int = top_line_y - expand  # 上方延伸区域
+    edge_bottom: int = bottom_line_y + expand  # 下方延伸区域
+    edge_top = edge_top if edge_top > 0 else 0  # 限制上边界
+    edge_bottom = (
+        edge_bottom if edge_bottom < (h := img.shape[0]) else h - 1
+    )  # 限制下边界
+
+    # 定义竖直方向的内核，用于连接二值化导致直线上产生的断点
+    vertical_kernel = cv2.getStructuringElement(
+        cv2.MORPH_RECT, (2, int((bottom_line_y - top_line_y) / 15))
+    )
+    # 执行形态学闭运算，先膨胀后腐蚀，以连接断点
+    img: np.ndarray = cv2.morphologyEx(img, cv2.MORPH_CLOSE, vertical_kernel)
+
+    bar_lines_indexes_group: list[np.ndarray] = _detect_bar_lines(
+        img, top_line_y, bottom_line_y, edge_top, edge_bottom, coefficient
+    )
+
+    try:
+        result = [
+            Line(
+                point1=(line[0], top_line_y),
+                point2=(line[0], bottom_line_y),
+                thickness=len(line),
+                direction=Direction.VERTICAL,
+                image_shape=(img.shape[0:2]),
+            )
+            for line in bar_lines_indexes_group
+        ]
+    except IndexError:
+        log.debug("竖直线检测结果中未找到曲谱部分的竖直线")
+        return []
+    return result
+
+
+def _image_preprocess_for_vertical_line_detect(image: ImageArray) -> GrayImageArray:
     if len(image.shape) != 2:
         log.debug("传入图像数组维度不为2，自动转换为灰度图，使用RGB2GRAY")
         img: np.ndarray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
@@ -118,56 +177,27 @@ def detect_vertical_lines(
         )
         img = 255 - img  # 再反相为黑底图
 
-    if horizontal_lines_data is None:
-        horizontal_lines: list[Line] = detect_horizontal_lines(img)
-        log.debug("检测竖直线时未传入水平线数据，将先以默认系数进行水平线检测")
-    else:
-        horizontal_lines: list[Line] = horizontal_lines_data
-    if not horizontal_lines:
-        log.info("由于水平线检测结果为空，未进行竖直线检测")
-        return []
-    horizontal_lines = get_score_lines(horizontal_lines)  # 水平线预处理
-    if not horizontal_lines:
-        log.info("曲谱部分的水平线检测结果为空，无法进行竖直线检测")
-        return []
+    return img
 
-    # 识别区域
-    top_line_y = horizontal_lines[0].start_index  # 线谱中最上方的那条线
-    bottom_line_y = horizontal_lines[-1].end_index  # 最下方的那条线
-    edge_top: int = int(top_line_y - (bottom_line_y - top_line_y) / 5)  # 上方延伸区域
-    edge_bottom: int = int(
-        bottom_line_y + (bottom_line_y - top_line_y) / 5
-    )  # 下方延伸区域
-    edge_top = edge_top if edge_top > 0 else 0  # 限制上边界
-    edge_bottom = (
-        edge_bottom if edge_bottom < img.shape[0] else img.shape[0] - 1
-    )  # 限制下边界
 
-    # 定义竖直方向的内核，用于连接二值化导致直线上产生的断点
-    vertical_kernel = cv2.getStructuringElement(
-        cv2.MORPH_RECT, (2, int((bottom_line_y - top_line_y) / 15))
-    )
-    # 执行形态学闭运算，先膨胀后腐蚀，以连接断点
-    img: np.ndarray = cv2.morphologyEx(img, cv2.MORPH_CLOSE, vertical_kernel)
-
+def _detect_bar_lines(
+    img, top_line_y, bottom_line_y, edge_top, edge_bottom, coefficient
+) -> list[np.ndarray]:
+    """Need max_value==255 binary black background image"""
     # 初步识别
-    sum_columns: np.ndarray = img[top_line_y:bottom_line_y].sum(axis=0)  # 线谱中的和
-    sum_columns_ex: np.ndarray = img[edge_top:edge_bottom].sum(
-        axis=0
-    )  # 上下延伸一定范围的区域
-    sum_columns: np.ndarray = np.asarray(  # 将小于均值的值置为0，以仅保留突出的数据影响
-        [
-            0 if s < np.average([np.max(sum_columns), np.min(sum_columns)]) else s
-            for s in sum_columns
-        ]
-    )
-    sum_columns_ex: np.ndarray = np.asarray(  # 同上
-        [
-            0 if s < np.average([np.max(sum_columns_ex), np.min(sum_columns_ex)]) else s
-            for s in sum_columns_ex
-        ]
-    )
-    bar_lines: np.ndarray = np.where(  # 确保竖直线段没有超出线谱范围
+    sum_columns: np.ndarray = np.sum(
+        img[top_line_y:bottom_line_y], axis=0
+    )  # 线谱中的和
+    sum_columns_ex: np.ndarray = np.sum(
+        img[edge_top:edge_bottom], axis=0
+    )  # 包含延申范围
+    # 将小于中点的值置为0，以仅保留突出的数据影响
+    columns_midpoint: int = (np.max(sum_columns) + np.min(sum_columns)) >> 1
+    sum_columns[np.where(sum_columns < columns_midpoint)[0]] = 0
+    columns_ex_midpoint: int = (np.max(sum_columns_ex) + np.min(sum_columns_ex)) >> 1
+    sum_columns_ex[np.where(sum_columns_ex < columns_ex_midpoint)[0]] = 0
+    # 确保竖直线段没有超出线谱范围
+    bar_lines: np.ndarray = np.where(
         (
             sum_columns / sum_columns.shape[0]
             - sum_columns_ex / sum_columns_ex.shape[0] * coefficient
@@ -176,45 +206,23 @@ def detect_vertical_lines(
     )[0]
 
     # 去除方差过大(上下不对称)的线段
-    img: np.ndarray = img[:]  # 不写这行pylance会报类型错误
-    std_y: list[int] = [
-        np.std(img[top_line_y:bottom_line_y, i], axis=0) for i in bar_lines
-    ]
-    del_index: list[int] = [std_y.index(i) for i in std_y if i > 100]  # 测试经验数值
+    std_y = np.std(img[top_line_y:bottom_line_y, bar_lines], axis=0)
+    del_index: np.ndarray = np.where(std_y > 100)[0]  # 测试经验数值
     bar_lines: np.ndarray = np.delete(bar_lines, del_index)
 
     # 去除前景色(白色)占比过少的线段
-    white_ratio_y: list[float] = [
-        np.count_nonzero(img[top_line_y:bottom_line_y, i])
-        / (bottom_line_y - top_line_y)
-        for i in bar_lines
-    ]
-    del_index = [
-        i for i in range(len(white_ratio_y)) if white_ratio_y[i] < 0.93
-    ]  # 测试经验数值
+    white_ratio_y: np.ndarray = (
+        np.sum(img[top_line_y:bottom_line_y, bar_lines], axis=0)
+        / 255  # white==255, get white pixel num
+        / (bottom_line_y - top_line_y)  # divide by total pixel num
+    )
+    del_index: np.ndarray = np.where(white_ratio_y < 0.93)[0]  # 测试经验数值
     bar_lines: np.ndarray = np.delete(bar_lines, del_index)
 
     # 结构化存储结果
-    index: np.ndarray = np.where(np.asarray(bar_lines[1:] - bar_lines[:-1]) != 1)[0] + 1
-    index: np.ndarray = np.sort(np.append(index, [0, len(bar_lines)]))
-    index_region: list[tuple[int, int]] = [
-        (int(index[i]), int(index[i + 1])) for i in range(np.shape(index)[0] - 1)
-    ]
-    result: list = [bar_lines[i:j] for i, j in index_region]
-    try:
-        result = [
-            Line(
-                point1=(line[0], top_line_y),
-                point2=(line[0], bottom_line_y),
-                thickness=len(line),
-                direction=Direction.VERTICAL,
-                image_shape=(img.shape[0:2]),
-            )
-            for line in result
-        ]
-    except IndexError:
-        log.debug("竖直线检测结果中未找到曲谱部分的竖直线")
-        return []
+    split_index: np.ndarray = np.where((bar_lines[1:] - bar_lines[:-1]) != 1)[0] + 1
+    split_index: np.ndarray = np.sort(np.append(split_index, [0, len(bar_lines)]))[1:-1]
+    result: list[np.ndarray] = np.split(bar_lines, split_index)
     return result
 
 

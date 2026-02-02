@@ -12,7 +12,7 @@ from src.Model.Data.settings import (
     pathSettings,
     reclipSettings,
 )
-from src.Model.Data.type import JsonPath
+from src.Model.Data.type import FilePath, JsonPath
 from src.Model.MainTask.Reclip import ReclipThread, style_restitched_clips
 from src.Model.utils import get_sysfonts, read_image
 from src.View import TabReclip_View
@@ -81,18 +81,25 @@ class TabReclip_VM(TabReclip_View):
         self.pushButton_open_style.clicked.connect(self.handle_open_style)
         self.pushButton_save_style.clicked.connect(self.handle_save_style)
 
+        self.sys_fonts = get_sysfonts()
+        self.sys_font_names = list(self.sys_fonts.keys())
         self.check_font()
         self.update_font_name_combox()
 
+    @property
+    def font_path(self) -> FilePath:
+        assert self.sys_fonts
+        return self.sys_fonts[self.reclipSettings.font_name]
+
     def check_font(self) -> None:
         font_name = self.reclipSettings.font_name
-        if font_name == "" or font_name not in get_sysfonts().keys():
-            self.reclipSettings.font_name = list(get_sysfonts().keys())[0]
+        if font_name == "" or font_name not in self.sys_font_names:
+            self.reclipSettings.font_name = self.sys_font_names[0]
 
     def update_font_name_combox(self) -> None:
         self.comboBox_font_name.blockSignals(True)
         self.comboBox_font_name.clear()
-        self.comboBox_font_name.addItems(list(get_sysfonts().keys()))
+        self.comboBox_font_name.addItems(self.sys_font_names)
         self.comboBox_font_name.setCurrentText(self.reclipSettings.font_name)
         self.comboBox_font_name.blockSignals(False)
 
@@ -116,6 +123,7 @@ class TabReclip_VM(TabReclip_View):
             self.reclipSettings,
             self.lineDetectorSettings,
             self.pathSettings.working_dir,
+            self.font_path,
             self.styleData,
         )
         self.reclipThread.finished.connect(self.flush_preview)
@@ -140,6 +148,7 @@ class TabReclip_VM(TabReclip_View):
             self.reclipSettings,
             restitched_image,
             self.styleData,
+            font_path=self.font_path,
             reclip_data=reclip_data,
         )
         self.flush_preview()
