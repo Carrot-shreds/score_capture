@@ -7,6 +7,7 @@ from typing import Any, Self
 
 from loguru import logger as log
 from pydantic import (
+    BaseModel,
     ConfigDict,
     Field,
     NonNegativeInt,
@@ -14,8 +15,10 @@ from pydantic import (
     PositiveInt,
     ValidationError,
     model_validator,
+    validate_call,
 )
 from pydantic_extra_types.color import Color
+from PySide6.QtCore import Qt
 
 from src.Model.Data.const import (
     Align,
@@ -256,16 +259,43 @@ class AppSettings(SettingsModel):
             log.warning(f"AppSettings Saving Failed: {e}")
 
     def load(self) -> "AppSettings":
+        """Load settings for config dir, return a updated new model"""
+        new_model = self.model_copy(deep=True)
         try:
             file_path = self.path_settings.config_dir / "AppSettings.json"
             with open(file=file_path, mode="r", encoding="utf-8") as f:
-                model = AppSettings.model_validate_json(f.read())
-            return model
-        except ValidationError:
-            log.warning("AppSettings load failed, using defalut settings")
+                local_json = json.load(f)
+                if not isinstance(local_json, dict):
+                    log.warning("AppSettings load failed, settings json must be a dict")
+                    return self
+                update_json_to_model(local_json, new_model)
+            return new_model
         except FileNotFoundError:
-            log.warning(f"{file_path} Not Found, using default settings")
-        return self
+            log.warning(f"AppSettings load failed, {file_path} Not Found")
+            return self
+
+
+@validate_call
+def update_json_to_model(json: dict, model: BaseModel):
+    field_names = list(model.__class__.model_fields.keys())
+    for k, v in json.items():
+        if k in field_names:
+            if isinstance(v, dict) and isinstance(
+                submodel := getattr(model, k), BaseModel
+            ):
+                update_json_to_model(v, submodel)
+                continue
+            try:
+                setattr(model, k, v)
+            except ValidationError as e:
+                log.debug(e)
+                log.warning(
+                    f"Invalid field_value:{v} for {k} when loading {model.__class__.__name__} from json"
+                )
+        else:
+            log.warning(
+                f"Invalid field_name:{k} when loading {model.__class__.__name__} from json"
+            )
 
 
 class AppSettingsSavingConfig(dict):
