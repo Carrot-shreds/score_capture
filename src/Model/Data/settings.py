@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 from loguru import logger as log
 from pydantic import (
@@ -138,10 +138,6 @@ class ReclipSettings(SettingsModel):
     font_name: str = ""
 
 
-class ScoreStyleSettings(SettingsModel):
-    title: NonEmptyStr = "untitled"
-
-
 class LogSettings(SettingsModel):
     class LogColorConfig(SettingsModel):
         debug: Color = Color("grey")
@@ -264,6 +260,7 @@ class AppSettings(SettingsModel):
     path_settings: PathSettings = PathSettings()
     log_settings: LogSettings = LogSettings()
     config_settings: ConfigSettings = ConfigSettings()
+    shortcut_settings: ShortcutSettings = ShortcutSettings()
     locate_settings: LocateSettings = LocateSettings()
     preview_settings: PreviewSettings = PreviewSettings()
     capture_settings: CaptureSettings = CaptureSettings()
@@ -304,6 +301,7 @@ class AppSettings(SettingsModel):
                 f.write(AppSettings.model_validate(now_dict).model_dump_json(indent=4))
         except ValidationError as e:
             log.warning(f"AppSettings Saving Failed: {e}")
+        log.debug("AppSetting save complete")
 
     def load(self) -> "AppSettings":
         """Load settings for config dir, return a updated new model"""
@@ -316,6 +314,7 @@ class AppSettings(SettingsModel):
                     log.warning("AppSettings load failed, settings json must be a dict")
                     return self
                 update_json_to_model(local_json, new_model)
+            log.debug("AppSettings load complete")
             return new_model
         except FileNotFoundError:
             log.warning(f"AppSettings load failed, {file_path} Not Found")
@@ -381,6 +380,7 @@ class AppSettingsSavingConfig(dict):
             file_path = pathSettings.config_dir / "AppSettingsSavingConfig.json"
             with open(file_path, "r", encoding="utf-8") as f:
                 config = json.load(f)
+            log.debug("AppSettingsSavingConfig load complete")
             return AppSettingsSavingConfig(d=config)
         except ValidationError:
             log.warning(
@@ -391,11 +391,41 @@ class AppSettingsSavingConfig(dict):
         return self
 
 
-appSettings = AppSettings().load()
+def load_all_settings() -> None:
+    global appSettings
+    appSettings = appSettings.load()
+    global guiSettings
+    guiSettings = appSettings.gui_settings
+    global pathSettings
+    pathSettings = appSettings.path_settings
+    global logSettings
+    logSettings = appSettings.log_settings
+    global configSettings
+    configSettings = appSettings.config_settings
+    global shortcutSettings
+    shortcutSettings = appSettings.shortcut_settings
+    global locateSettings
+    locateSettings = appSettings.locate_settings
+    global previewSettings
+    previewSettings = appSettings.preview_settings
+    global captureSettings
+    captureSettings = appSettings.capture_settings
+    global buildImageSettings
+    buildImageSettings = appSettings.build_image_settings
+    global stitchSettings
+    stitchSettings = appSettings.stitch_settings
+    global reclipSettings
+    reclipSettings = appSettings.recip_settings
+    global lineDetectorSettings
+    lineDetectorSettings = appSettings.line_detector_settings
+
+
+appSettings = AppSettings()
 guiSettings = appSettings.gui_settings
 pathSettings = appSettings.path_settings
 logSettings = appSettings.log_settings
 configSettings = appSettings.config_settings
+shortcutSettings = appSettings.shortcut_settings
 locateSettings = appSettings.locate_settings
 previewSettings = appSettings.preview_settings
 captureSettings = appSettings.capture_settings
@@ -403,7 +433,5 @@ buildImageSettings = appSettings.build_image_settings
 stitchSettings = appSettings.stitch_settings
 reclipSettings = appSettings.recip_settings
 lineDetectorSettings = appSettings.line_detector_settings
-log.info("AppSettings load complete")
 
-appSettingsSavingConfig = AppSettingsSavingConfig().load()
-log.info("AppSettingsSavingConfig load complete")
+appSettingsSavingConfig = AppSettingsSavingConfig()

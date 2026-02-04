@@ -2,31 +2,40 @@ import sys
 from typing import Any, Callable, TextIO
 
 from loguru import logger as log
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import QObject, Signal
 
 from src.Model.Data.const import LogLevel
-from src.Model.Data.settings import LogSettings, logSettings
+from src.Model.Data.settings import LogSettings
 from src.Model.Data.type import Singleton, TxtPath
 
 
-class LogThread(QThread):
-    """log输出线程"""
+class LogToGui(QObject):
+    """Log text output to gui tab"""
 
     signalForText = Signal(str)
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
+        self.buffer_text: list[str] = []
+        self.buffer_mode: bool = True
 
     def write(self, text):
-        """将文本输出传输至信号"""
+        """emit text through qt signal"""
         self.signalForText.emit(str(text))
+        if self.buffer_mode:
+            self.buffer_text.append(text)
 
     def flush(self) -> None:
-        """什么都不用做，但是没有这个函数的声明的话pycharm调试器会报错"""
+        """solve pycharm debuger warning"""
         pass
 
+    def clear_buffer(self):
+        if self.buffer_text:
+            [self.signalForText.emit(str(t)) for t in self.buffer_text]
+            self.buffer_mode = False
 
-class stderr2loguru:
+
+class Stderr2loguru(TextIO):
     def write(self, text):
         if text != "":
             log.error(text.strip())
@@ -37,11 +46,10 @@ class stderr2loguru:
 
 @Singleton
 class LogManager:
-    def __init__(self, log_settings: LogSettings) -> None:
-        sys.stderr = stderr2loguru()
-        self.log_settings = log_settings
-        self._log_config = self.generate_config()
-        self.apply_log_config()
+    def __init__(self) -> None:
+        sys.stderr = Stderr2loguru()
+        self.logToGui = LogToGui()
+        self.log_settings = None
 
     @property
     def log_config(self) -> dict[str, list[dict[str, Any]]]:
@@ -52,12 +60,24 @@ class LogManager:
         self._log_config = value
         self.apply_log_config()
 
+    def init_log_settings(self, log_settings: LogSettings):
+        self.log_settings = log_settings
+        self._log_config = self.generate_config()
+        self.apply_log_config()
+
     def generate_config(self):
+        if not self.log_settings:
+            return
         return {
             "handlers": [
                 {
                     "sink": sys.stdout,
                     "level": self.log_settings.show_level,
+                    "format": self.log_settings.show_format,
+                },
+                {
+                    "sink": self.logToGui,
+                    "level": LogLevel.DEBUG,
                     "format": self.log_settings.show_format,
                 },
                 {
@@ -74,12 +94,14 @@ class LogManager:
 
     def add_log_config(
         self,
-        sink: TxtPath | TextIO | LogThread,
+        sink: TxtPath | TextIO | LogToGui,
         filter: Callable | None = None,
         level: LogLevel | None = None,
         format: str | None = None,
         config: dict | None = None,
     ) -> None:
+        if not self.log_settings:
+            return
         if not config:
             config = self.log_config
         handler = {
@@ -95,7 +117,7 @@ class LogManager:
         self.log_config = config
 
     def remove_log_config(
-        self, sink: TxtPath | TextIO | LogThread, config: dict | None = None
+        self, sink: TxtPath | TextIO | LogToGui, config: dict | None = None
     ) -> None:
         if not config:
             config = self.log_config
@@ -109,4 +131,4 @@ class LogManager:
         log.configure(**config)  # type:ignore
 
 
-logManager = LogManager(logSettings)
+logManager = LogManager()

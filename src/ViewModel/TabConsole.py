@@ -1,3 +1,4 @@
+from loguru import logger as log
 from pydantic_extra_types.color import Color
 from PySide6.QtGui import (
     QBrush,
@@ -8,7 +9,7 @@ from PySide6.QtGui import (
 
 from src.Model.Data.const import LogLevel
 from src.Model.Data.settings import logSettings
-from src.Model.log import LogThread, logManager
+from src.Model.log import LogToGui, logManager
 from src.View import TabConsole_View
 from src.ViewModel.binding.bind_data import bind_data
 
@@ -20,13 +21,8 @@ class TabConsole_VM(TabConsole_View):
         self.logSettings = logSettings
         self.logManager = logManager
 
-        self.logThread = LogThread()
-        self.logThread.signalForText.connect(self.output_log_text)
-        self.logManager.add_log_config(
-            self.logThread,
-            level=LogLevel.DEBUG,
-            format=self.logSettings.show_format,
-        )
+        self.logManager.logToGui.signalForText.connect(self.output_log_text)
+        self.logManager.logToGui.clear_buffer()
 
         self.pushButton_clear_console.clicked.connect(self.clear_console)
         bind_data(self.checkBox_auto_scroll, self.logSettings, "auto_scroll")
