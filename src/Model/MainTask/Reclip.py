@@ -193,9 +193,7 @@ def reclip_image(
         current_y += h
     reclip_save_filename = score_title + "-reclip" + reclipSettings.saving_format
     save_image(working_dir / reclip_save_filename, canvas)
-    log.success(
-        f"拼接操作成功完成，已成功保存图片到{working_dir / reclip_save_filename}"
-    )
+    log.success(f"已重新切片拼接，保存图片到{working_dir / reclip_save_filename}")
 
     if style_data:
         pass
@@ -265,7 +263,13 @@ def style_restitched_clips(
         for i in range(len(cut_indexes) - 1)
     ]
 
+    if old_images := list(working_dir.glob(f"{working_dir.name}*[0-9]*")):
+        [os.remove(i) for i in old_images]
+
     page_num_height = int(canvas_margin_height * 0.5)
+    page_num_height = (
+        page_num_height if page_num_height > (m := int(canvas_height / 50)) else m
+    )
     page_num_width = int(page_num_height * 1.5)
     page_num_font = get_auto_sized_font(
         str(99),
@@ -277,7 +281,7 @@ def style_restitched_clips(
     )
     page_num_xy = (
         int(canvas_width - page_num_width / 2),
-        int(canvas_height - canvas_margin_height / 2),
+        int(canvas_height - page_num_height * 1.5),
     )
     for i, s in enumerate(score_pages):
         c = deepcopy(canvas)
@@ -324,7 +328,7 @@ def get_auto_sized_font(
     max_width: int,
     max_height: int,
     image_draw: ImageDraw,
-    step: int = 10,
+    step: int = 100,
 ) -> FreeTypeFont:
     font_size = step
     while True:
@@ -337,7 +341,9 @@ def get_auto_sized_font(
         if abs(right - left) > max_width or abs(top - bottom) > max_height:
             break
         font_size += step
-    return ImageFont.truetype(font=font_path, size=font_size - step)
+    return ImageFont.truetype(
+        font=font_path, size=(font_size - step) if font_size > step else step
+    )
 
 
 class ReclipThread(BaseTaskThread):
