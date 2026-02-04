@@ -1,8 +1,8 @@
 from typing import NamedTuple, TypedDict
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QMouseEvent
-from PySide6.QtWidgets import QDialog, QPushButton, QWidget
+from PySide6.QtGui import QKeySequence, QMouseEvent
+from PySide6.QtWidgets import QDialog, QLineEdit, QPushButton, QWidget
 
 from src.Model.utils import set_window_always_on_top
 
@@ -59,6 +59,10 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)  # 去掉默认边框
 
+        # shortcut
+        self.pushButton_locate.setShortcut(QKeySequence("l"))
+        self.pushButton_preview.setShortcut(QKeySequence("p"))
+
         # 自定义边框鼠标事件
         self.m_drag_start_pos: QPoint | None = None
         self.m_original_geometry: QRect | None = None
@@ -75,6 +79,9 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
         self.pushButton_toggle_capture.setMouseTracking(True)
         self.pushButton_toggle_capture.setGeometry(45, 15, 30, 30)
         self.pushButton_toggle_capture.setText("📷")
+        self.lineEdit_score_title = QLineEdit(self)
+        self.lineEdit_score_title.setGeometry(5, 35, 80, 20)
+        self.lineEdit_score_title.setVisible(False)
 
         self.widget.setStyleSheet("background:lightgray")
         self.widget.setMouseTracking(True)
@@ -95,15 +102,17 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
             self.minimun_size_before_mini_mode = self.minimumSize()
             self.pushButton_toggle_show_mode.setGeometry(8, 4, 30, 30)
             self.pushButton_toggle_capture.setGeometry(50, 4, 30, 30)
+            self.lineEdit_score_title.setVisible(True)
             self.setWindowOpacity(0.8)
-            self.setMinimumSize(90, 40)
-            self.resize(90, 40)
+            self.setMinimumSize(90, 60)
+            self.resize(90, 60)
             set_window_always_on_top(self, True)
         else:
             self.setMinimumSize(self.minimun_size_before_mini_mode)
             self.resize(self.size_before_mini_mode)
             self.pushButton_toggle_show_mode.setGeometry(15, 15, 30, 30)
             self.pushButton_toggle_capture.setGeometry(45, 15, 30, 30)
+            self.lineEdit_score_title.setVisible(False)
             self.OutMiniMode.emit()
 
     def flash_capture_button(self, msec: int, color: str) -> None:

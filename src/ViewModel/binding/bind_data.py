@@ -3,6 +3,8 @@ from typing import Any, Callable
 
 from loguru import logger as log
 from pydantic import ValidationError
+from PySide6.QtCore import QObject
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -31,8 +33,8 @@ def set_model_field(model: OnValueChangeModel, field: NonEmptyStr, value: Any):
 
 
 def add_binding_map(
-    a: QWidget | OnValueChangeModel,
-    b: QWidget | OnValueChangeModel,
+    a: QObject | OnValueChangeModel,
+    b: QObject | OnValueChangeModel,
     prop: str,
     func: Callable,
 ) -> None:
@@ -150,6 +152,21 @@ def _(
 @bind_data.register(QCheckBox)
 def _(
     widget: QCheckBox,
+    data: OnValueChangeModel,
+    prop: NonEmptyStr,
+    one_way: bool = False,
+):
+    data.add_observer_handler(prop, d2w := lambda v: widget.setChecked(v))
+    d2w(getattr(data, prop))  # update default data vaule
+    add_binding_map(data, widget, prop, d2w)
+    if not one_way:
+        widget.toggled.connect(w2d := lambda v: set_model_field(data, prop, v))
+        add_binding_map(widget, data, prop, w2d)
+
+
+@bind_data.register(QAction)
+def _(
+    widget: QAction,
     data: OnValueChangeModel,
     prop: NonEmptyStr,
     one_way: bool = False,

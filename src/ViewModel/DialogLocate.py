@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from PySide6.QtCore import QPoint, QRect
 from PySide6.QtGui import QMoveEvent, QResizeEvent
 
-from src.Model.Data.settings import captureSettings, locateSettings
+from src.Model.Data.settings import captureSettings, locateSettings, pathSettings
 from src.Model.utils import qrect2array, set_window_always_on_top
 from src.View import DialogLocate_View
 from src.ViewModel.binding.bind_data import bind_data
@@ -21,12 +21,23 @@ class DialogLocate_VM(DialogLocate_View):
 
         self.locateSettings = locateSettings
         self.captureSettings = captureSettings
+        self.pathSettings = pathSettings
 
         bind_data(self.spinBox_region_x, self.locateSettings.region_data, "x")
         bind_data(self.spinBox_region_y, self.locateSettings.region_data, "y")
         bind_data(self.spinBox_region_width, self.locateSettings.region_data, "width")
         bind_data(self.spinBox_region_height, self.locateSettings.region_data, "height")
-        bind_data(self.checkBox_live_locate, self.locateSettings, "live_locate")
+        bind_data(
+            self.checkBox_live_locate,
+            self.locateSettings,
+            "live_locate",
+        )
+        bind_data(
+            self.lineEdit_score_title,
+            self.pathSettings,
+            "score_title",
+            when_finished=True,
+        )
         bind_data(
             self.checkBox_dialog_always_on_top,
             self.locateSettings,
@@ -107,7 +118,7 @@ class DialogLocate_VM(DialogLocate_View):
         return True
 
     def moveEvent(self, event: QMoveEvent, /) -> None:
-        if self.locateSettings.live_locate:
+        if self.locateSettings.live_locate and not self.mini_mode:
             try:
                 self.locate()
             except ValidationError:
@@ -115,7 +126,7 @@ class DialogLocate_VM(DialogLocate_View):
         super().moveEvent(event)
 
     def resizeEvent(self, event: QResizeEvent, /) -> None:
-        if self.locateSettings.live_locate:
+        if self.locateSettings.live_locate and not self.mini_mode:
             try:
                 self.locate()
             except ValidationError:

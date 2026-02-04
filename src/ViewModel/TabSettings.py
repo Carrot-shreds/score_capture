@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from loguru import logger as log
@@ -148,6 +149,7 @@ class TabSettings_VM(TabSettings_View):
                 f"重命名失败，{self.pathSettings.main_out_dir}下不存在{old_title}文件夹，仅更新曲谱标题"
             )
             return
+        os.chdir(self.pathSettings.main_out_dir)
         old_path.rename(new_path)
         log.success(f"已将目录{old_title}重命名为{new_title}")
         for f in new_path.iterdir():

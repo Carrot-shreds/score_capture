@@ -193,21 +193,7 @@
        <attribute name="title">
         <string>视图/操作</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QCheckBox" name="checkBox_lock_zoom">
-          <property name="text">
-           <string>锁定缩放</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkBox_show_mark_point">
-          <property name="text">
-           <string>预览显示标记点</string>
-          </property>
-         </widget>
-        </item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
@@ -231,6 +217,20 @@
           </property>
           <property name="value">
            <double>0.350000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_show_mark_point">
+          <property name="text">
+           <string>预览显示标记点</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_lock_zoom">
+          <property name="text">
+           <string>锁定缩放</string>
           </property>
          </widget>
         </item>

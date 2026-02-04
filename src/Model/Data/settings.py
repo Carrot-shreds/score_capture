@@ -199,6 +199,53 @@ class ConfigSettings(SettingsModel):
     auto_save_all: bool = True
 
 
+class ShortcutSettings(SettingsModel):
+    manualStitch_key_min_index: int = Qt.Key.Key_PageUp
+    manualStitch_key_max_index: int = Qt.Key.Key_PageDown
+    manualStitch_key_prev_index: int = Qt.Key.Key_Up
+    manualStitch_key_next_index: int = Qt.Key.Key_Down
+    manualStitch_key_max_point: int = Qt.Key.Key_Home
+    manualStitch_key_min_point: int = Qt.Key.Key_End
+    manualStitch_key_add_point: int = Qt.Key.Key_Left
+    manualStitch_key_sub_point: int = Qt.Key.Key_Right
+    manualStitch_point_step_normal: PositiveInt = 1
+    manualStitch_point_step_shift: PositiveInt = 20
+    manualStitch_point_step_ctrl: PositiveInt = 50
+    manualStitch_point_step_cs: PositiveInt = 200
+    manualStitch_index_step_normal: PositiveInt = 1
+    manualStitch_index_step_shift: PositiveInt = 5
+    manualStitch_index_step_ctrl: PositiveInt = 10
+    manualStitch_index_step_cs: PositiveInt = 20
+    _key_shift_with_ctrl = (
+        Qt.KeyboardModifier.ShiftModifier | Qt.KeyboardModifier.ControlModifier
+    )
+
+    def get_move_step(
+        self, type: Literal["index", "point"], modifier: Qt.KeyboardModifier
+    ) -> PositiveInt:
+        match modifier:
+            case Qt.KeyboardModifier.ShiftModifier:
+                if type == "index":
+                    return self.manualStitch_index_step_shift
+                elif type == "point":
+                    return self.manualStitch_point_step_shift
+            case Qt.KeyboardModifier.ControlModifier:
+                if type == "index":
+                    return self.manualStitch_index_step_ctrl
+                elif type == "point":
+                    return self.manualStitch_point_step_ctrl
+            case self._key_shift_with_ctrl:
+                if type == "index":
+                    return self.manualStitch_index_step_cs
+                elif type == "point":
+                    return self.manualStitch_point_step_cs
+            case _:
+                if type == "index":
+                    return self.manualStitch_index_step_normal
+                elif type == "point":
+                    return self.manualStitch_point_step_normal
+
+
 class GUISettings(SettingsModel):
     mainWindow_always_on_top: bool = True
     mainWindow_dock_perspective: str = "default"

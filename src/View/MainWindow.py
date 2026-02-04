@@ -1,6 +1,6 @@
 import PySide6QtAds as QtAds
 from PySide6.QtCore import QSignalBlocker, Qt
-from PySide6.QtGui import QAction, QCloseEvent
+from PySide6.QtGui import QAction, QCloseEvent, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (
     QComboBox,
     QInputDialog,
@@ -23,14 +23,26 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         # tool bar
-        self.toolBar_path.removeAction(self.action_select_folder)
-        self.toolBar_path.removeAction(self.action_open_folder)
+        self.toolBar_path.clear()
         self.lineEdit_score_title = QLineEdit(self)
         self.toolBar_path.addSeparator()
         self.toolBar_path.addWidget(QLabel("标题:"))
         self.toolBar_path.addWidget(self.lineEdit_score_title)
         self.toolBar_path.addAction(self.action_select_folder)
+        self.toolBar_path.addAction(self.action_rename_folder)
         self.toolBar_path.addAction(self.action_open_folder)
+        self.action_mainwindow_always_top = QAction("置顶窗口")
+        self.action_mainwindow_always_top.setCheckable(True)
+
+        # shortcut
+        self.action_locate.setShortcut(QKeySequence("F1"))
+        self.action_preview.setShortcut(QKeySequence("F2"))
+        self.action_capture.setShortcut(QKeySequence("F3"))
+        self.action_stitch.setShortcut(QKeySequence("F4"))
+        self.action_reclip.setShortcut(QKeySequence("F5"))
+        self.action_select_folder.setShortcut(QKeySequence.StandardKey.Open)
+        self.action_rename_folder.setShortcut(QKeySequence("Ctrl+r"))
+        self.action_mainwindow_always_top.setShortcut(QKeySequence("F12"))
 
         # status bar
         self.label_version = QLabel()
@@ -113,7 +125,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         # Console
         dock_widget_console = self.dock_manager.createDockWidget("Console")
         dock_widget_console.setWidget(tab_console)
-        dock_area_consol = self.dock_manager.addDockWidget(  # noqa:F841
+        dock_area_console = self.dock_manager.addDockWidget(  # noqa:F841
             QtAds.BottomDockWidgetArea, dock_widget_console
         )
         # Preview
@@ -165,6 +177,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.toolBar_view.addAction(perspective_list_action)
         self.toolBar_view.addAction(save_perspective_action)
         self.toolBar_view.addAction(remove_perspective_action)
+        self.toolBar_view.addAction(self.action_mainwindow_always_top)
 
     def remove_docking_perspective(self):
         name = self.perspective_combobox.currentText()

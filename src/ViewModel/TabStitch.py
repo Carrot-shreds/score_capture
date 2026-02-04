@@ -8,7 +8,9 @@ import numpy as np
 from loguru import logger as log
 from pydantic import ConfigDict, ValidationError, model_validator
 from pyqtgraph import ViewBox
-from PySide6 import QtCore, QtGui
+from PySide6 import QtGui
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QFileDialog
 
 from src.Model.Data.const import Direction
@@ -17,6 +19,7 @@ from src.Model.Data.settings import (
     guiSettings,
     lineDetectorSettings,
     pathSettings,
+    shortcutSettings,
     stitchSettings,
 )
 from src.Model.Data.type import (
@@ -199,10 +202,10 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
             raise ValueError(
                 f"current index{self.current_index} not in the correct region:0-{len(self.stitch_points) - 1}"
             )
-        length_bound = self.image_length(self.current_index)
+        length_bound = self.image_length(self.current_index + 1)
         if self.current_point < 0 or self.current_point > length_bound:
             raise ValueError(
-                f"current stitch point:{self.stitch_points} out off bound of image, must in 0-{length_bound}"
+                f"current stitch point:{self.current_point} out off bound of image, must in 0-{length_bound}"
             )
         return self
 
@@ -219,6 +222,7 @@ class TabStitch_VM(TabStitch_View):
         self.pathSettings = pathSettings
         self.stitchSettings = stitchSettings
         self.detectorSettings = lineDetectorSettings
+        self.shortcutSettings = shortcutSettings
 
         bind_data(self.comboBox_stitch_method, self.stitchSettings, "method")
         bind_data(
@@ -249,9 +253,6 @@ class TabStitch_VM(TabStitch_View):
             ),
         )
 
-        self.checkBox_show_mark_point.toggled.connect(
-            lambda v: self.flush_stitch_preview
-        )
         self.pushButton_start_stitiching.clicked.connect(self.start_stitch)
         self.pushButton_select_file.clicked.connect(self.handel_select_stitch_data_file)
         self.pushButton_save_file.clicked.connect(self.handel_save_stitch_data_file)
@@ -260,37 +261,67 @@ class TabStitch_VM(TabStitch_View):
         )
         self.pushButton_save_image.clicked.connect(self.handel_save_stitched_image)
 
+        shortcut_save = QShortcut(self.tab_manual)
+        shortcut_save.setKey(QKeySequence.StandardKey.Save)
+        shortcut_save.activated.connect(
+            lambda: [
+                self.handel_save_stitch_data_file(),
+                self.handel_save_stitched_image(),
+            ]
+        )
+        self.pushButton_save_file_as.setShortcut(QKeySequence.StandardKey.SaveAs)
+        self.tabWidget.setShortcutEnabled(True)
+
     def keyPressEvent(self, ev: QtGui.QKeyEvent, /) -> None:
         super().keyPressEvent(ev)
         modifiers = ev.modifiers()
+
+        if (
+            Qt.Key.Key_1 <= ev.key() <= Qt.Key.Key_9
+            and 0 <= (index := (int(ev.text()) - 1)) <= self.tabWidget.count()
+        ):
+            self.tabWidget.setCurrentIndex(index)
+
         if not self.manualStitchData:
             return
         try:
+            max_index = len(self.manualStitchData.stitch_points) - 1
+            max_point = self.manualStitchData.image_length(
+                self.manualStitchData.current_index + 1
+            )
             match ev.key():
-                case QtCore.Qt.Key.Key_Up:
-                    self.manualStitchData.current_index -= 1
-                case QtCore.Qt.Key.Key_Down:
-                    if (
-                        self.manualStitchData.current_index
-                        < len(self.manualStitchData.stitch_points) - 1
-                    ):
-                        self.manualStitchData.current_index += 1
-                case QtCore.Qt.Key.Key_Left:
-                    if modifiers == QtCore.Qt.KeyboardModifier.ControlModifier:
-                        self.manualStitchData.current_point += 20
+                case self.shortcutSettings.manualStitch_key_prev_index:
+                    step = self.shortcutSettings.get_move_step("index", modifiers)
+                    if (self.manualStitchData.current_index - step) >= 0:
+                        self.manualStitchData.current_index -= step
                     else:
-                        self.manualStitchData.current_point += 1
-                case QtCore.Qt.Key.Key_Right:
-                    if modifiers == QtCore.Qt.KeyboardModifier.ControlModifier:
-                        self.manualStitchData.current_point -= 20
+                        self.manualStitchData.current_index = 0
+                case self.shortcutSettings.manualStitch_key_next_index:
+                    step = self.shortcutSettings.get_move_step("index", modifiers)
+                    if self.manualStitchData.current_index < (max_index - step):
+                        self.manualStitchData.current_index += step
                     else:
-                        self.manualStitchData.current_point -= 1
-                case QtCore.Qt.Key.Key_Home:
+                        self.manualStitchData.current_index = max_index
+                case self.shortcutSettings.manualStitch_key_add_point:
+                    step = self.shortcutSettings.get_move_step("point", modifiers)
+                    if self.manualStitchData.current_point < max_point:
+                        self.manualStitchData.current_point += step
+                    else:
+                        self.manualStitchData.current_point = max_point
+                case self.shortcutSettings.manualStitch_key_sub_point:
+                    step = self.shortcutSettings.get_move_step("point", modifiers)
+                    if (self.manualStitchData.current_point - step) >= 0:
+                        self.manualStitchData.current_point -= step
+                    else:
+                        self.manualStitchData.current_point = 0
+                case self.shortcutSettings.manualStitch_key_min_index:
+                    self.manualStitchData.current_index = 0
+                case self.shortcutSettings.manualStitch_key_max_index:
+                    self.manualStitchData.current_index = max_index
+                case self.shortcutSettings.manualStitch_key_min_point:
                     self.manualStitchData.current_point = 0
-                case QtCore.Qt.Key.Key_End:
-                    self.manualStitchData.current_point = (
-                        self.manualStitchData.stitched_image_length
-                    )
+                case self.shortcutSettings.manualStitch_key_max_point:
+                    self.manualStitchData.current_point = max_point
         except ValidationError:
             return
 

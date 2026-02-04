@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1179</width>
-    <height>642</height>
+    <width>1279</width>
+    <height>719</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1179</width>
+     <width>1279</width>
      <height>33</height>
     </rect>
    </property>
@@ -38,6 +38,7 @@
      <string>文件</string>
     </property>
     <addaction name="action_select_folder"/>
+    <addaction name="action_rename_folder"/>
     <addaction name="action_open_folder"/>
    </widget>
    <addaction name="menu_file"/>
@@ -76,6 +77,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_select_folder"/>
+   <addaction name="action_rename_folder"/>
    <addaction name="action_open_folder"/>
   </widget>
   <widget class="QToolBar" name="toolBar_view">
@@ -146,6 +148,14 @@
    </property>
    <property name="toolTip">
     <string>在文件资源管理器中打开</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_rename_folder">
+   <property name="text">
+    <string>重命名目录</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>

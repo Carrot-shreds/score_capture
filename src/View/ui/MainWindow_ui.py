@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'MainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.9.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1179, 642)
+        MainWindow.resize(1279, 719)
         self.action_locate = QAction(MainWindow)
         self.action_locate.setObjectName(u"action_locate")
         self.action_locate.setMenuRole(QAction.MenuRole.NoRole)
@@ -46,12 +46,15 @@ class Ui_MainWindow(object):
         self.action_open_folder = QAction(MainWindow)
         self.action_open_folder.setObjectName(u"action_open_folder")
         self.action_open_folder.setMenuRole(QAction.MenuRole.NoRole)
+        self.action_rename_folder = QAction(MainWindow)
+        self.action_rename_folder.setObjectName(u"action_rename_folder")
+        self.action_rename_folder.setMenuRole(QAction.MenuRole.NoRole)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1179, 33))
+        self.menubar.setGeometry(QRect(0, 0, 1279, 33))
         self.menu_view = QMenu(self.menubar)
         self.menu_view.setObjectName(u"menu_view")
         self.menu_help = QMenu(self.menubar)
@@ -77,6 +80,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menu_view.menuAction())
         self.menubar.addAction(self.menu_help.menuAction())
         self.menu_file.addAction(self.action_select_folder)
+        self.menu_file.addAction(self.action_rename_folder)
         self.menu_file.addAction(self.action_open_folder)
         self.toolBar_main.addSeparator()
         self.toolBar_main.addAction(self.action_locate)
@@ -85,6 +89,7 @@ class Ui_MainWindow(object):
         self.toolBar_main.addAction(self.action_stitch)
         self.toolBar_main.addAction(self.action_reclip)
         self.toolBar_path.addAction(self.action_select_folder)
+        self.toolBar_path.addAction(self.action_rename_folder)
         self.toolBar_path.addAction(self.action_open_folder)
 
         self.retranslateUi(MainWindow)
@@ -104,6 +109,7 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.action_open_folder.setToolTip(QCoreApplication.translate("MainWindow", u"\u5728\u6587\u4ef6\u8d44\u6e90\u7ba1\u7406\u5668\u4e2d\u6253\u5f00", None))
 #endif // QT_CONFIG(tooltip)
+        self.action_rename_folder.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u547d\u540d\u76ee\u5f55", None))
         self.menu_view.setTitle(QCoreApplication.translate("MainWindow", u"\u89c6\u56fe", None))
         self.menu_help.setTitle(QCoreApplication.translate("MainWindow", u"\u5e2e\u52a9", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"\u6587\u4ef6", None))

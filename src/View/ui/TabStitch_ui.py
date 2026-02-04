@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'TabStitch.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.9.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -140,23 +140,13 @@ class Ui_TabStitch(object):
         self.tabWidget.addTab(self.tab_manual, "")
         self.tab_view = QWidget()
         self.tab_view.setObjectName(u"tab_view")
-        self.horizontalLayout_2 = QHBoxLayout(self.tab_view)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.checkBox_lock_zoom = QCheckBox(self.tab_view)
-        self.checkBox_lock_zoom.setObjectName(u"checkBox_lock_zoom")
-
-        self.horizontalLayout_2.addWidget(self.checkBox_lock_zoom)
-
-        self.checkBox_show_mark_point = QCheckBox(self.tab_view)
-        self.checkBox_show_mark_point.setObjectName(u"checkBox_show_mark_point")
-
-        self.horizontalLayout_2.addWidget(self.checkBox_show_mark_point)
-
+        self.horizontalLayout_6 = QHBoxLayout(self.tab_view)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.label_4 = QLabel(self.tab_view)
         self.label_4.setObjectName(u"label_4")
         self.label_4.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
-        self.horizontalLayout_2.addWidget(self.label_4)
+        self.horizontalLayout_6.addWidget(self.label_4)
 
         self.doubleSpinBox_location_mark_point = QDoubleSpinBox(self.tab_view)
         self.doubleSpinBox_location_mark_point.setObjectName(u"doubleSpinBox_location_mark_point")
@@ -165,7 +155,17 @@ class Ui_TabStitch(object):
         self.doubleSpinBox_location_mark_point.setSingleStep(0.010000000000000)
         self.doubleSpinBox_location_mark_point.setValue(0.350000000000000)
 
-        self.horizontalLayout_2.addWidget(self.doubleSpinBox_location_mark_point)
+        self.horizontalLayout_6.addWidget(self.doubleSpinBox_location_mark_point)
+
+        self.checkBox_show_mark_point = QCheckBox(self.tab_view)
+        self.checkBox_show_mark_point.setObjectName(u"checkBox_show_mark_point")
+
+        self.horizontalLayout_6.addWidget(self.checkBox_show_mark_point)
+
+        self.checkBox_lock_zoom = QCheckBox(self.tab_view)
+        self.checkBox_lock_zoom.setObjectName(u"checkBox_lock_zoom")
+
+        self.horizontalLayout_6.addWidget(self.checkBox_lock_zoom)
 
         self.tabWidget.addTab(self.tab_view, "")
         self.splitter.addWidget(self.tabWidget)
@@ -205,9 +205,9 @@ class Ui_TabStitch(object):
         self.pushButton_save_file_as.setText(QCoreApplication.translate("TabStitch", u"\u53e6\u5b58\u4e3a", None))
         self.pushButton_save_image.setText(QCoreApplication.translate("TabStitch", u"\u4fdd\u5b58\u62fc\u63a5\u56fe\u50cf", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_manual), QCoreApplication.translate("TabStitch", u"\u624b\u52a8\u8c03\u6574", None))
-        self.checkBox_lock_zoom.setText(QCoreApplication.translate("TabStitch", u"\u9501\u5b9a\u7f29\u653e", None))
-        self.checkBox_show_mark_point.setText(QCoreApplication.translate("TabStitch", u"\u9884\u89c8\u663e\u793a\u6807\u8bb0\u70b9", None))
         self.label_4.setText(QCoreApplication.translate("TabStitch", u"\u6807\u8bb0\u70b9\u4f4d\u7f6e\uff1a", None))
+        self.checkBox_show_mark_point.setText(QCoreApplication.translate("TabStitch", u"\u9884\u89c8\u663e\u793a\u6807\u8bb0\u70b9", None))
+        self.checkBox_lock_zoom.setText(QCoreApplication.translate("TabStitch", u"\u9501\u5b9a\u7f29\u653e", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_view), QCoreApplication.translate("TabStitch", u"\u89c6\u56fe/\u64cd\u4f5c", None))
     # retranslateUi
 

@@ -69,6 +69,11 @@ class MainWindow_VM(MainWindow_View):
         bind_data(
             self.perspective_combobox, self.guiSettings, "mainWindow_dock_perspective"
         )
+        bind_data(
+            self.action_mainwindow_always_top,
+            self.guiSettings,
+            "mainWindow_always_on_top",
+        )
         self.action_locate.triggered.connect(self.dialog_locate.show)
         self.action_preview.triggered.connect(self.tab_preview.preview_region)
         self.action_stitch.triggered.connect(self.tab_stitch.start_stitch)
@@ -80,6 +85,7 @@ class MainWindow_VM(MainWindow_View):
         self.dialog_locate.pushButton_toggle_capture.clicked.connect(
             self.action_capture.toggle
         )
+        self.action_rename_folder.triggered.connect(self.tab_settings.rename_folder)
 
         # state bar
         self.label_version.setText("V" + __version__)
