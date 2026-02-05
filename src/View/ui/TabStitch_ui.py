@@ -167,6 +167,16 @@ class Ui_TabStitch(object):
 
         self.horizontalLayout_6.addWidget(self.checkBox_lock_zoom)
 
+        self.checkBox_auto_zoom = QCheckBox(self.tab_view)
+        self.checkBox_auto_zoom.setObjectName(u"checkBox_auto_zoom")
+
+        self.horizontalLayout_6.addWidget(self.checkBox_auto_zoom)
+
+        self.pushButton_reset_region = QPushButton(self.tab_view)
+        self.pushButton_reset_region.setObjectName(u"pushButton_reset_region")
+
+        self.horizontalLayout_6.addWidget(self.pushButton_reset_region)
+
         self.tabWidget.addTab(self.tab_view, "")
         self.splitter.addWidget(self.tabWidget)
         self.ImageViewer = ImageViewer(self.splitter)
@@ -208,6 +218,8 @@ class Ui_TabStitch(object):
         self.label_4.setText(QCoreApplication.translate("TabStitch", u"\u6807\u8bb0\u70b9\u4f4d\u7f6e\uff1a", None))
         self.checkBox_show_mark_point.setText(QCoreApplication.translate("TabStitch", u"\u9884\u89c8\u663e\u793a\u6807\u8bb0\u70b9", None))
         self.checkBox_lock_zoom.setText(QCoreApplication.translate("TabStitch", u"\u9501\u5b9a\u7f29\u653e", None))
+        self.checkBox_auto_zoom.setText(QCoreApplication.translate("TabStitch", u"\u81ea\u52a8\u7f29\u653e", None))
+        self.pushButton_reset_region.setText(QCoreApplication.translate("TabStitch", u"\u91cd\u7f6e\u7f29\u653e", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_view), QCoreApplication.translate("TabStitch", u"\u89c6\u56fe/\u64cd\u4f5c", None))
     # retranslateUi
 

@@ -59,6 +59,11 @@ class MainWindow_VM(MainWindow_View):
         )
         self.dialog_locate = DialogLocate_VM(self)
 
+        self.dock_widget_stitch.visibilityChanged.connect(
+            lambda state:  # When tab is not visable, viewbox.height() will get wrong 30px value.
+            self.tab_stitch.reset_region() if state else None
+        )
+
         # tool bar
         bind_data(
             self.lineEdit_score_title,

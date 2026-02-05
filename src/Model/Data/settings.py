@@ -37,7 +37,6 @@ from src.Model.Data.type import (
     DirectoryExisting,
     FileName,
     JsonFileName,
-    NonEmptyStr,
     OnValueChangeModel,
     RegionData,
     TxtPath,
@@ -121,6 +120,7 @@ class StitchSettings(SettingsModel):
     direction: Direction = Direction.HORIZONTAL
     saving_format: ImageSavingFormat = ImageSavingFormat.JPEG
     ui_lock_zoom: bool = False
+    ui_auto_zoom: bool = False
     add_mark_point: bool = True
     location_mark_point: ZeroToOneOpen = 0.35
 

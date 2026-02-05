@@ -1,6 +1,6 @@
 import PySide6QtAds as QtAds
 from PySide6.QtCore import QSignalBlocker, Qt
-from PySide6.QtGui import QAction, QCloseEvent, QKeyEvent, QKeySequence
+from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QComboBox,
     QInputDialog,
@@ -133,9 +133,11 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         dock_widget_preview.setWidget(tab_preview)
         self.dock_manager.addDockWidgetTabToArea(dock_widget_preview, dock_area_central)
         # Stitch
-        dock_widget_stitch = self.dock_manager.createDockWidget("Stitch")
-        dock_widget_stitch.setWidget(tab_stitch)
-        self.dock_manager.addDockWidgetTabToArea(dock_widget_stitch, dock_area_central)
+        self.dock_widget_stitch = self.dock_manager.createDockWidget("Stitch")
+        self.dock_widget_stitch.setWidget(tab_stitch)
+        self.dock_manager.addDockWidgetTabToArea(
+            self.dock_widget_stitch, dock_area_central
+        )
         # Reclip
         dock_widget_reclip = self.dock_manager.createDockWidget("Reclip")
         dock_widget_reclip.setWidget(tab_reclip)
@@ -146,7 +148,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.menu_view.addAction(dock_widget_console.toggleViewAction())
         self.menu_view.addAction(dock_widget_settings.toggleViewAction())
         self.menu_view.addAction(dock_widget_preview.toggleViewAction())
-        self.menu_view.addAction(dock_widget_stitch.toggleViewAction())
+        self.menu_view.addAction(self.dock_widget_stitch.toggleViewAction())
         self.menu_view.addAction(dock_widget_reclip.toggleViewAction())
 
         # Add docking perspective select

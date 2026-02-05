@@ -1,5 +1,6 @@
 import gc
 import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Self
 
@@ -9,7 +10,7 @@ from loguru import logger as log
 from pydantic import ConfigDict, ValidationError, model_validator
 from pyqtgraph import ViewBox
 from PySide6 import QtGui
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSignalBlocker, Qt, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QFileDialog
 
@@ -71,7 +72,7 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
             image_origins=image_origins,
             image_stitched=image_stitched,
         )
-        self.add_observer_handler("current_index", lambda v: self.set_view_region())
+        self._prev_index: int | None = None
 
     @property
     def image_shapes(self) -> list[tuple[int, int]]:
@@ -121,6 +122,33 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
         else:
             return (point_position - blank, point_position + blank)
 
+    @property
+    def prev_display_region(self) -> tuple[int, int]:
+        viewbox_length = self.viewbox_length
+        stitched_image_length = self.stitched_image_length
+        point_position: int = self.image_length(0) + sum(
+            [
+                self.image_length(i) - self.stitch_points[i]
+                for i in range(self._prev_index if self._prev_index else 0)
+            ]
+        )
+        blank = int(viewbox_length / 2)
+        if point_position + blank > stitched_image_length - 1:
+            return (
+                stitched_image_length - 1 - viewbox_length,
+                stitched_image_length - 1,
+            )
+        else:
+            return (point_position - blank, point_position + blank)
+
+    def set_prev_index(self, index: int, start_from_zero: bool = True) -> None:
+        if start_from_zero:
+            if index != self._prev_index:
+                self._prev_index = index
+        else:
+            if index - 1 != self._prev_index:
+                self._prev_index = index - 1
+
     def build_score_stitch_data(self) -> ScoreStitchData:
         data = self.score_stitch_data.data
         [
@@ -139,7 +167,7 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
     def image_length(self, index: int, direction: Direction | None = None) -> int:
         "default on the stitch direction"
         if not direction:
-            direction = self.score_stitch_data.stitch_settings.direction
+            direction = self.direction
         return self.image_shapes[index][direction]
 
     def lock_view_zoom(self, viewbox: ViewBox | None = None):
@@ -152,7 +180,6 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
             viewbox.setMouseEnabled(x=True, y=False)
             viewbox.setLimits(xMin=0, xMax=self.stitched_image_length)
             # y轴自动适应缩放
-            viewbox.enableAutoRange(axis="y", enable=True)
             viewbox.setAutoVisible(y=True)
             viewbox.setAutoPan(y=True)  # 不写这个会导致移动缩放闪烁bug
         elif self.direction == Direction.VERTICAL:
@@ -162,7 +189,6 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
             viewbox.setMouseEnabled(x=False, y=True)
             viewbox.setLimits(yMin=0, yMax=self.stitched_image_length)
             # x轴自动适应缩放
-            viewbox.enableAutoRange(axis="x", enable=True)
             viewbox.setAutoVisible(x=True)
             viewbox.setAutoPan(x=True)  # 不写这个会导致移动缩放闪烁bug
 
@@ -171,8 +197,6 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
         # defalut value of state in ViewBox.__init__()
         viewbox.setMouseEnabled(x=True, y=True)
         viewbox.setLimits(xMin=-1e307, xMax=+1e307, yMin=-1e307, yMax=+1e307)
-        viewbox.enableAutoRange(axis="x", enable=True)
-        viewbox.enableAutoRange(axis="y", enable=True)
         viewbox.setAutoVisible(x=False, y=False)
         viewbox.setAutoPan(x=False, y=False)
 
@@ -181,16 +205,43 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
             self.lock_view_zoom()
         else:
             self.unlock_view_zoom()
-        self.set_view_region()
+        self.set_view_region(auto_zoom=True)
 
-    def set_view_region(self):
-        viewbox = self.imageViewer.imageView.getView()
+    def set_view_region(self, auto_zoom: bool, update: bool = False):
+        """Set show region, ignore repeat index, unless update=True"""
+        if self._prev_index == self.current_index and not update:
+            return
+
+        viewbox: ViewBox = self.imageViewer.imageView.getView()
+        if any(viewbox.state["autoRange"]):
+            viewbox.enableAutoRange(axis="xy", enable=False)
         region = self.display_region
-        "设置显示样式和范围"
+        prev_region = self.prev_display_region
+        old_region = viewbox.state["targetRange"][self.direction.reverse]
+        image_wide = self.image_stitched.shape[self.direction.reverse]
+        if_keep_zoom = (
+            not auto_zoom  # old point in old region
+            and old_region[0] <= np.average(prev_region) <= old_region[1]
+            and (old_region[1] - old_region[0]) != (region[1] - region[0])
+        )
         if self.direction == Direction.HORIZONTAL:
-            viewbox.setXRange(region[0], region[1], padding=0)
+            if if_keep_zoom:
+                top = region[0] + old_region[0] - prev_region[0]
+                bottom = region[1] + old_region[1] - prev_region[1]
+                viewbox.setXRange(top, bottom, padding=0)
+            else:
+                viewbox.setYRange(0, image_wide, padding=0)
+                viewbox.setXRange(region[0], region[1], padding=0)
         elif self.direction == Direction.VERTICAL:
-            viewbox.setYRange(region[0], region[1], padding=0)
+            if if_keep_zoom:
+                top = region[0] + old_region[0] - prev_region[0]
+                bottom = region[1] + old_region[1] - prev_region[1]
+                viewbox.setYRange(top, bottom, padding=0)
+            else:
+                viewbox.setXRange(0, image_wide, padding=0)
+                viewbox.setYRange(region[0], region[1], padding=0)
+
+        self._prev_index = self.current_index
 
     @model_validator(mode="after")
     def validator(self) -> Self:
@@ -211,10 +262,13 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
 
 
 class TabStitch_VM(TabStitch_View):
+    pointIndexChanged = Signal(int)
+    pointValueChanged = Signal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.mainWindow = parent
-        self.viewbox = self.ImageViewer.imageView.getView()
+        self.viewbox: ViewBox = self.ImageViewer.imageView.getView()
         self.stitchThread: StitchThread | None = None
         self.manualStitchData: ManualStitchData | None = None
         self.working_stitchData_path: Path | None = None
@@ -227,6 +281,7 @@ class TabStitch_VM(TabStitch_View):
         bind_data(self.comboBox_stitch_method, self.stitchSettings, "method")
         bind_data(
             self.radioButton_stitch_direction_horizontal,
+            self.radioButton_stitch_direction_vertical,
             self.stitchSettings,
             "direction",
         )
@@ -237,12 +292,17 @@ class TabStitch_VM(TabStitch_View):
             self.stitchSettings,
             "location_mark_point",
         )
+        bind_data(self.checkBox_auto_zoom, self.stitchSettings, "ui_auto_zoom")
 
         guiSettings.add_observer_handler(
             "imageViewer_show_tools", self.ImageViewer.toggle_tools
         )
         self.pathSettings.add_observer_handlers(
             ["main_out_dir", "score_title"], lambda v: self.handle_working_dir_changed()
+        )
+        self.stitchSettings.add_observer_handlers(
+            ["add_mark_point", "location_mark_point"],
+            lambda v: self.flush_stitch_preview(),
         )
         self.stitchSettings.add_observer_handler(
             "ui_lock_zoom",
@@ -257,9 +317,12 @@ class TabStitch_VM(TabStitch_View):
         self.pushButton_select_file.clicked.connect(self.handel_select_stitch_data_file)
         self.pushButton_save_file.clicked.connect(self.handel_save_stitch_data_file)
         self.pushButton_save_file_as.clicked.connect(
-            self.handel_save_sttich_data_file_as
+            self.handel_save_stitch_data_file_as
         )
         self.pushButton_save_image.clicked.connect(self.handel_save_stitched_image)
+        self.pushButton_reset_region.clicked.connect(self.reset_region)
+        self.pointIndexChanged.connect(self.handle_point_index_changed)
+        self.pointValueChanged.connect(self.handle_point_value_changed)
 
         shortcut_save = QShortcut(self.tab_manual)
         shortcut_save.setKey(QKeySequence.StandardKey.Save)
@@ -271,6 +334,10 @@ class TabStitch_VM(TabStitch_View):
         )
         self.pushButton_save_file_as.setShortcut(QKeySequence.StandardKey.SaveAs)
         self.tabWidget.setShortcutEnabled(True)
+
+    def reset_region(self) -> None:
+        if data := self.manualStitchData:
+            data.set_view_region(auto_zoom=True, update=True)
 
     def keyPressEvent(self, ev: QtGui.QKeyEvent, /) -> None:
         super().keyPressEvent(ev)
@@ -351,10 +418,10 @@ class TabStitch_VM(TabStitch_View):
             self.spinBox_stitch_points_value, self.manualStitchData, "current_point"
         )
         self.manualStitchData.add_observer_handler(
-            "current_index", self.handle_point_index_changed
+            "current_index", self.pointIndexChanged.emit
         )
         self.manualStitchData.add_observer_handler(
-            "current_point", self.handle_point_value_changed
+            "current_point", self.pointValueChanged.emit
         )
 
         self.ImageViewer.imageView.clear()  # clear screen,then flush_stitch_image will do autoHistogramRange using setImage()
@@ -393,7 +460,7 @@ class TabStitch_VM(TabStitch_View):
         )
         log.success(f"已保存拼接点数据至{self.working_stitchData_path}")
 
-    def handel_save_sttich_data_file_as(self) -> None:
+    def handel_save_stitch_data_file_as(self) -> None:
         name = f"ScoreStitchData_{time.strftime('%Y-%m-%d_%H-%M-%S')}.json"
         file, _ = QFileDialog.getSaveFileName(
             dir=(self.pathSettings.working_dir / name).as_posix(),
@@ -419,9 +486,9 @@ class TabStitch_VM(TabStitch_View):
         self.spinBox_stitch_points_value.setMaximum(
             self.manualStitchData.image_length(index + 1)
         )
-        self.spinBox_stitch_points_value.setValue(
-            self.manualStitchData.stitch_points[index]
-        )
+        _ = QSignalBlocker(self)
+        self.manualStitchData.current_point = self.manualStitchData.stitch_points[index]
+        self.flush_stitch_preview()
 
     def handle_point_value_changed(self, _: int) -> None:
         if not self.manualStitchData:
@@ -451,6 +518,7 @@ class TabStitch_VM(TabStitch_View):
 
         image = self.manualStitchData.image_stitched
         if self.stitchSettings.add_mark_point:
+            image = deepcopy(image)
             if self.manualStitchData.direction == Direction.HORIZONTAL:
                 point = (
                     int(np.average(self.manualStitchData.display_region)),
@@ -470,7 +538,7 @@ class TabStitch_VM(TabStitch_View):
             )
         else:
             self.ImageViewer.imageView.imageItem.updateImage(image)
-        self.manualStitchData.set_view_region()
+        self.manualStitchData.set_view_region(self.stitchSettings.ui_auto_zoom)
 
     def start_stitch(self) -> None:
         if self.stitchThread:

@@ -234,6 +234,20 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_auto_zoom">
+          <property name="text">
+           <string>自动缩放</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_reset_region">
+          <property name="text">
+           <string>重置缩放</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>

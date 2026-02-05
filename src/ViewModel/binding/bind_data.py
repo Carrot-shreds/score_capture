@@ -181,14 +181,18 @@ def _(
 
 @bind_data.register(QRadioButton)
 def _(
-    widget: QRadioButton,
+    bt1: QRadioButton,
+    bt2: QRadioButton,
     data: OnValueChangeModel,
     prop: NonEmptyStr,
     one_way: bool = False,
 ):
-    data.add_observer_handler(prop, d2w := lambda v: widget.setChecked(v))
+    data.add_observer_handler(
+        prop, d2w := lambda v: [bt1.setChecked(v), bt2.setChecked(not v)]
+    )
     d2w(getattr(data, prop))  # update default data vaule
-    add_binding_map(data, widget, prop, d2w)
+    add_binding_map(data, bt1, prop, d2w)
     if not one_way:
-        widget.toggled.connect(w2d := lambda v: set_model_field(data, prop, v))
-        add_binding_map(widget, data, prop, w2d)
+        bt1.toggled.connect(w2d := lambda v: set_model_field(data, prop, v))
+        bt2.toggled.connect(w2d := lambda v: set_model_field(data, prop, not v))
+        add_binding_map(bt1, data, prop, w2d)
