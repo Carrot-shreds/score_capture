@@ -13,7 +13,11 @@ from src.Model.Data.const import Align, Direction, ReclipMethod
 from src.Model.Data.data import ReclipData, ScoreDetections, StyleData
 from src.Model.Data.settings import LineDetectorSettings, ReclipSettings
 from src.Model.Data.type import DirectoryExisting, FilePath, ImageArray, Line
-from src.Model.image_process import clip_image, detect_all_lines_with_clip
+from src.Model.image_process import (
+    clip_image,
+    detect_all_lines_with_clip,
+    detect_horizontal_lines,
+)
 from src.Model.MainTask.BaseTaskThread import BaseTaskThread
 from src.Model.utils import read_image, save_image
 
@@ -34,6 +38,14 @@ def reclip_image(
     os.chdir(working_dir)
     log.debug(f"Working dir: {working_dir}")
 
+    if style_data:
+        pass
+    elif "StyleData.json" in working_dir.iterdir():
+        style_data = StyleData.load_from_file(working_dir / "StyleData.json")
+    else:
+        style_data = StyleData()
+        style_data.save_to_file(working_dir / "StyleData.json")
+
     score_title = working_dir.name
     try:
         stitched_image_filename = working_dir.glob(
@@ -51,10 +63,36 @@ def reclip_image(
     if (working_dir / stitched_detected_image_filename).exists():
         os.remove(working_dir / stitched_detected_image_filename)
 
-    # 获取检测数据
-    log.info("开始检测图像中的线段")
     stitched_image = read_image(stitched_image_path)
     stitched_image_gray = cv2.cvtColor(stitched_image, cv2.COLOR_RGB2GRAY)
+    if stitched_image.shape[0] > stitched_image.shape[1]:
+        # vertical stitched
+        reclip_data = ReclipData(
+            clip_direction=Direction.HORIZONTAL,
+            clip_indexes=[],
+            clip_height=0,
+        )
+        reclip_save_filename = score_title + "-reclip" + reclipSettings.saving_format
+        reclip_data.save_to_file(working_dir / "ReclipData.json")
+        save_image(working_dir / reclip_save_filename, stitched_image)
+
+        blank_line_index = get_gap_line_index(
+            stitched_image, detectorSettings, working_dir
+        )
+
+        style_restitched_clips(
+            log,
+            working_dir,
+            reclipSettings,
+            stitched_image,
+            style_data,
+            blank_line_index,
+            font_path,
+        )
+        return
+
+    # 获取检测数据
+    log.info("开始检测图像中的线段")
     if "ScoreDetections.json" in os.listdir(working_dir):
         clip_length = ScoreDetections.load_from_file(
             working_dir / "ScoreDetections.json"
@@ -195,23 +233,42 @@ def reclip_image(
     save_image(working_dir / reclip_save_filename, canvas)
     log.success(f"已重新切片拼接，保存图片到{working_dir / reclip_save_filename}")
 
-    if style_data:
-        pass
-    elif "StyleData.json" in working_dir.iterdir():
-        style_data = StyleData.load_from_file(working_dir / "StyleData.json")
-    else:
-        style_data = StyleData()
-        style_data.save_to_file(working_dir / "StyleData.json")
-
     style_restitched_clips(
         log,
         working_dir,
         reclipSettings,
         canvas,
         style_data,
-        reclip_data,
+        image_clips[0].shape[0],
         font_path,
     )
+
+
+def get_gap_line_index(
+    stitched_image: ImageArray,
+    detector_settings: LineDetectorSettings,
+    working_dir: Path,
+) -> list[int]:
+    """get white gaps between sheet rows"""
+    blank_gaps = detect_horizontal_lines(
+        cv2.cvtColor(stitched_image, cv2.COLOR_RGB2GRAY),
+        coefficient=detector_settings.coefficient_horizontal,
+        reverse=True,
+        r_pixel_threshold=detector_settings.h_reverse_pixel_threshold,
+        r_thickness_threshold=detector_settings.h_reverse_thickness_threshold,
+    )
+    draw = deepcopy(stitched_image)
+    for line in blank_gaps:
+        line.draw(draw)
+    blank_line_index = [  # use central index of a line
+        int(np.average([line.start_index, line.end_index])) for line in blank_gaps
+    ]
+    if blank_line_index == []:
+        raise ValueError(
+            "Empty lines of sheet gaps! Please try to turn down your reverse horizontal line thresholds"
+        )
+    save_image(working_dir / f"{working_dir.name}-blank-gaps.jpg", draw)
+    return blank_line_index
 
 
 @validate_call
@@ -221,10 +278,10 @@ def style_restitched_clips(
     reclip_settings: ReclipSettings,
     restitched_image: ImageArray,
     style_data: StyleData,
-    reclip_data: ReclipData,
+    clip_height: list[int] | int,
     font_path: FilePath,
 ):
-    log.debug("正在编辑样式")
+    log.debug("Editing score style")
     score_width = restitched_image.shape[1]
     canvas_width = int(score_width / (1 - style_data.margin_width))  # with margin
     canvas_height = int(canvas_width * 1.414)  # A4 shape
@@ -236,26 +293,40 @@ def style_restitched_clips(
     )
     score_cut_height = canvas_height - canvas_margin_height * 2
     canvas = np.ones((canvas_height, canvas_width, 3), dtype=np.uint8) * 255
-
-    clip_height = reclip_data.clip_height
-    if not clip_height:
-        log.error("clip height can not be None")
-        return
+    stitched_image_length = restitched_image.shape[0]
 
     cut_indexes: list[int] = [0]
     cut_clip_num: int = 1
     while True:
-        if (height := clip_height * cut_clip_num) < (
-            score_cut_height_with_title if len(cut_indexes) == 1 else score_cut_height
+        if isinstance(clip_height, int):
+            height = clip_height * cut_clip_num
+        else:
+            if cut_clip_num - 1 == len(clip_height):
+                if cut_indexes[-1] < stitched_image_length:
+                    cut_indexes.append(stitched_image_length)
+                break
+            height = clip_height[cut_clip_num - 1] - cut_indexes[-1]
+
+        if height < (
+            score_cut_height_with_title
+            if len(cut_indexes) == 1 and style_data.add_title
+            else score_cut_height
         ):
             cut_clip_num += 1
             continue
-        cut_indexes.append(cut_indexes[-1] + height - clip_height)
-        cut_clip_num = 1
-        if cut_indexes[-1] > restitched_image.shape[0]:
-            cut_indexes[-1] = restitched_image.shape[0]
-            break
+
+        if isinstance(clip_height, int):
+            cut_indexes.append(cut_indexes[-1] + height - clip_height)
+            cut_clip_num = 1
+            if cut_indexes[-1] > restitched_image.shape[0]:
+                cut_indexes[-1] = restitched_image.shape[0]
+                break
+        else:
+            cut_indexes.append(clip_height[cut_clip_num - 1 - 1])
     log.debug(f"{cut_indexes=}")
+    log.debug(
+        f"cut_page_heights={[cut_indexes[i + 1] - cut_indexes[i] for i in range(len(cut_indexes) - 1)]}"
+    )
     score_pages: list[ImageArray] = [
         clip_image(
             restitched_image, Direction.VERTICAL, (cut_indexes[i], cut_indexes[i + 1])
@@ -271,30 +342,46 @@ def style_restitched_clips(
         page_num_height if page_num_height > (m := int(canvas_height / 50)) else m
     )
     page_num_width = int(page_num_height * 1.5)
-    page_num_font = get_auto_sized_font(
-        str(99),
-        font_path,
-        page_num_width,
-        page_num_height,
-        ImageDraw(Image.new("RGB", (0, 0))),
-        10,
+    page_num_font = (
+        get_auto_sized_font(
+            str(99),
+            font_path,
+            page_num_width,
+            page_num_height,
+            ImageDraw(Image.new("RGB", (0, 0))),
+            10,
+        )
+        if style_data.add_page_num
+        else None
     )
     page_num_xy = (
         int(canvas_width - page_num_width / 2),
         int(canvas_height - page_num_height * 1.5),
     )
     for i, s in enumerate(score_pages):
+        if i == 0 and style_data.add_title:
+            start_y = canvas_margin_title
+        else:
+            start_y = canvas_margin_height
         c = deepcopy(canvas)
-        start_y = canvas_margin_title if i == 0 else canvas_margin_height
-        c[
-            start_y : start_y + s.shape[0],
-            canvas_margin_width : canvas_margin_width + s.shape[1],
-            :,
-        ] = s
+        try:
+            c[
+                start_y : start_y + s.shape[0],
+                canvas_margin_width : canvas_margin_width + s.shape[1],
+                :,
+            ] = s
+        except ValueError as e:
+            log.warning(e)
+            log.warning(
+                f"{working_dir.name}{i}{reclip_settings.saving_format} clip failed."
+                "This may caused by too large cut height that out off the page bound."
+                "Check your height between cut_indexes, and try turning down your threshold reverse horizontal"
+            )
+            return
 
         pil_image = Image.fromarray(c)
         draw = ImageDraw(pil_image)
-        if i == 0 and style_data.title != "":  # draw title
+        if i == 0 and style_data.title != "" and style_data.add_title:  # draw title
             title_w = int(score_width * 0.8)
             title_h = int(canvas_margin_title * 0.5)
             title_font = get_auto_sized_font(
@@ -315,11 +402,11 @@ def style_restitched_clips(
             font=page_num_font,
             fill=(0, 0, 0),
             anchor="mm",
-        )
+        ) if page_num_font else None
 
         filename = f"{working_dir.name}{i}{reclip_settings.saving_format}"
         pil_image.save(working_dir / filename)
-        log.info(f"已保存切分结果到{working_dir / filename}")
+        log.info(f"Save final image to: {working_dir / filename}")
 
 
 def get_auto_sized_font(

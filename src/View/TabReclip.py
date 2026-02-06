@@ -9,4 +9,4 @@ class TabReclip_View(QWidget, Ui_TabReclip):
 
         self.setupUi(self)
 
-        self.scrollArea.resize(200, 300)
+        self.scrollArea.resize(250, 300)

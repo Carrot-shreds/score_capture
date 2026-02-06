@@ -3,8 +3,9 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
+from annotated_types import Gt, Le
 from loguru import logger as log
 from pydantic import (
     BaseModel,
@@ -166,8 +167,10 @@ class LogSettings(SettingsModel):
 
 
 class LineDetectorSettings(SettingsModel):
-    coefficient_horizontal: PositiveFloat = 0.7
-    coefficient_vertical: PositiveFloat = 0.8
+    coefficient_horizontal: Annotated[float, Gt(0), Le(1)] = 0.7
+    coefficient_vertical: Annotated[float, Gt(0), Le(1)] = 0.8
+    h_reverse_pixel_threshold: Annotated[float, Gt(0), Le(255)] = 255
+    h_reverse_thickness_threshold: Annotated[int, Gt(0)] = 10
 
 
 class PathSettings(SettingsModel):
@@ -253,6 +256,7 @@ class PreviewSettings(SettingsModel):
     live_preview: bool = False
     live_detect: bool = False
     save_preview: bool = False
+    show_reversed_horizontal: bool = False
 
 
 class AppSettings(SettingsModel):

@@ -16,6 +16,7 @@ from pydantic import validate_call
 from pydantic_extra_types.color import Color
 from PySide6 import QtCore
 from PySide6.QtCore import QRect
+from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QDialog, QMainWindow
 
 from src.Model.Data.const import CaptureTool
@@ -413,3 +414,13 @@ def get_sysfonts() -> dict[str, Path]:
                     font_name = i.toStr()
             font_info[font_name] = file
     return font_info
+
+
+def ndarray2qimage(img: ImageArray) -> QImage:
+    return QImage(
+        img.data,
+        img.shape[1],
+        img.shape[0],
+        img.shape[1] * 3,
+        QImage.Format.Format_RGB888,
+    )

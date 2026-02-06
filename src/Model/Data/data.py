@@ -370,6 +370,8 @@ class StyleData(AlwaysValidateModel, OnValueChangeModel):
     margin_width: ZeroToOneOpen = 0.08
     margin_height: ZeroToOneOpen = 0.08
     margin_title: ZeroToOneOpen = 0.13
+    add_title: bool = True
+    add_page_num: bool = True
 
     def save_to_file(self, file: JsonPath) -> None:
         """保存到文件中"""

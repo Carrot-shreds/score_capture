@@ -49,6 +49,21 @@ class TabPreview_VM(TabPreview_View):
             "coefficient_vertical",
         )
         bind_data(
+            self.spinBox_h_reverse_thickness_threshold,
+            self.detectorSettings,
+            "h_reverse_thickness_threshold",
+        )
+        bind_data(
+            self.doubleSpinBox_h_reverse_pixel_threshold,
+            self.detectorSettings,
+            "h_reverse_pixel_threshold",
+        )
+        bind_data(
+            self.checkBox_reverse_horizontal,
+            self.previewSetting,
+            "show_reversed_horizontal",
+        )
+        bind_data(
             self.comboBox_line_type,
             self.previewSetting,
             "preview_lines",
@@ -57,8 +72,13 @@ class TabPreview_VM(TabPreview_View):
         bind_data(self.checkBox_save_preview, self.previewSetting, "save_preview")
         bind_data(self.checkBox_live_preview, self.previewSetting, "live_preview")
         bind_data(self.checkBox_live_detect, self.previewSetting, "live_detect")
+
         guiSettings.add_observer_handler(
             "imageViewer_show_tools", self.ImageViewer.toggle_tools
+        )
+        self.previewSetting.add_observer_handlers(
+            ["preview_lines", "show_reversed_horizontal"],
+            lambda v: self.preview_lines() if self.previewSetting.live_detect else None,
         )
         self.previewSetting.add_observer_handler(
             "live_preview", self.toggle_live_preview
@@ -87,19 +107,30 @@ class TabPreview_VM(TabPreview_View):
         match self.previewSetting.preview_lines:
             case PreviewLines.ONLY_H:
                 lines += detect_horizontal_lines(
-                    gray_image, self.detectorSettings.coefficient_horizontal
+                    gray_image,
+                    self.detectorSettings.coefficient_horizontal,
+                    self.previewSetting.show_reversed_horizontal,
+                    self.detectorSettings.h_reverse_pixel_threshold,
+                    self.detectorSettings.h_reverse_thickness_threshold,
                 )
             case PreviewLines.ONLY_V:
-                lines += detect_vertical_lines(
-                    gray_image, coefficient=self.detectorSettings.coefficient_vertical
-                )
+                if not self.previewSetting.show_reversed_horizontal:
+                    lines += detect_vertical_lines(
+                        gray_image,
+                        coefficient=self.detectorSettings.coefficient_vertical,
+                    )
             case PreviewLines.ALL:
                 h_lines = detect_horizontal_lines(
-                    gray_image, self.detectorSettings.coefficient_horizontal
+                    gray_image,
+                    self.detectorSettings.coefficient_horizontal,
+                    self.previewSetting.show_reversed_horizontal,
+                    self.detectorSettings.h_reverse_pixel_threshold,
+                    self.detectorSettings.h_reverse_thickness_threshold,
                 )
-                lines += detect_vertical_lines(
-                    gray_image, h_lines, self.detectorSettings.coefficient_vertical
-                )
+                if not self.previewSetting.show_reversed_horizontal:
+                    lines += detect_vertical_lines(
+                        gray_image, h_lines, self.detectorSettings.coefficient_vertical
+                    )
                 lines += h_lines
         for line in lines:
             line.draw(image_draw)
@@ -142,7 +173,12 @@ class TabPreview_VM(TabPreview_View):
         """切换启用实时检测"""
         if state:
             self.detectorSettings.add_observer_handlers(
-                ["coefficient_horizontal", "coefficient_vertical"],
+                [
+                    "coefficient_horizontal",
+                    "coefficient_vertical",
+                    "h_reverse_thickness_threshold",
+                    "h_reverse_pixel_threshold",
+                ],
                 self.lambda_preview_lines,
             )
             self.ImageViewer.onImageChanged.connect(self.preview_lines)
@@ -150,7 +186,12 @@ class TabPreview_VM(TabPreview_View):
         else:
             try:
                 self.detectorSettings.remove_observer_handlers(
-                    ["coefficient_horizontal", "coefficient_vertical"],
+                    [
+                        "coefficient_horizontal",
+                        "coefficient_vertical",
+                        "h_reverse_thickness_threshold",
+                        "h_reverse_pixel_threshold",
+                    ],
                     self.lambda_preview_lines,
                 )
             except ValueError:

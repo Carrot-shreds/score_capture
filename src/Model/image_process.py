@@ -22,6 +22,9 @@ def gama_transfer(img, threshold, power) -> ImageArray:
 def detect_horizontal_lines(
     img: ImageArray,
     coefficient: float = 0.7,
+    reverse: bool = False,
+    r_pixel_threshold: float = 255,
+    r_thickness_threshold: int = 10,
 ) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有水平线段(白色背景图中的黑色线)"""
     if len(img.shape) != 2:
@@ -36,9 +39,14 @@ def detect_horizontal_lines(
         )
     )
     average_row: np.ndarray = np.average(img_adaptive, axis=1)
-    result_index: list[int] = [
-        i for i in range(len(average_row)) if average_row[i] < 255 * coefficient
-    ]
+    if not reverse:
+        result_index: list[int] = [
+            i for i in range(len(average_row)) if average_row[i] < 255 * coefficient
+        ]
+    else:
+        result_index: list[int] = [
+            i for i in range(len(average_row)) if average_row[i] >= r_pixel_threshold
+        ]
 
     lines: list[Line] = []
     current_y: int = 1  # result比img短2个单位，等效于从img的1像素开始
@@ -60,6 +68,9 @@ def detect_horizontal_lines(
             )
             point_y = 0
         current_y += 1
+    if reverse:
+        lines = [line for line in lines if line.thickness >= r_thickness_threshold]
+
     if not lines:
         log.warning("水平线检测结果为空")
     return lines
