@@ -7,9 +7,9 @@ from pydantic import validate_call
 from src.Model.Data.data import CaptureData
 from src.Model.Data.settings import BuildImageSettings, CaptureSettings
 from src.Model.Data.type import DirectoryExisting
-from src.Model.image_process import compare_image
+from src.Model.image_process import compare_image, reverse_image
 from src.Model.MainTask.BaseTaskThread import BaseTaskThread
-from src.Model.utils import read_image, get_numbered_image_names, save_image
+from src.Model.utils import get_numbered_image_names, read_image, save_image
 
 
 @validate_call
@@ -106,6 +106,8 @@ def build_images(
             ],  # 不要首尾两张
             axis=0,  # 保留图片形状
         ).astype(np.uint8)  # 转换回图片格式
+        if captureSettings.if_reverse_image:
+            image = reverse_image(image)
         save_image(
             working_dir / f"image{image_count}{captureSettings.save_format}", image
         )

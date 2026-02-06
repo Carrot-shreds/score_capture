@@ -38,9 +38,10 @@ class DialogGlobImage(QDialog):
         self.comboBox_glob = QComboBox(self)
         self.comboBox_glob.setEditable(True)
         self.comboBox_glob.addItem("image*[!a-z].*")
-        self.comboBox_glob.addItem("capture*")
-        self.comboBox_glob.addItem("*stitched")
         self.comboBox_glob.addItem("image*")
+        self.comboBox_glob.addItem("capture*[!a-z].*")
+        self.comboBox_glob.addItem("*stitched*")
+        self.comboBox_glob.addItem("*-reclip*")
 
         layout_grid = QGridLayout(self)
         layout_grid.addWidget(self.label_path, 1, 1, 1, 1)

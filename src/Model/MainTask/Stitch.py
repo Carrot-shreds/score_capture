@@ -88,6 +88,8 @@ def stitch_image_task(
             )
         scoreDetections.save_to_file(working_dir / "ScoreDetections.json")
         log.info("线段检测完毕，已生成对应预览图")
+    else:
+        image_filenames = [f.name for f in working_dir.glob("*image*")]
     if len(image_filenames) < 2:
         log.error("未发2现张或以上可供拼接的图像，请检查文件夹中image数目")
         return

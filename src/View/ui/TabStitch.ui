@@ -115,6 +115,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_clear_cache">
+          <property name="text">
+           <string>清除线段缓存</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_manual">

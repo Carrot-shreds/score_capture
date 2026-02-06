@@ -1,4 +1,5 @@
 import gc
+import os
 import time
 from copy import deepcopy
 from pathlib import Path
@@ -321,6 +322,7 @@ class TabStitch_VM(TabStitch_View):
         )
         self.pushButton_save_image.clicked.connect(self.handel_save_stitched_image)
         self.pushButton_reset_region.clicked.connect(self.reset_region)
+        self.pushButton_clear_cache.clicked.connect(self.handle_clear_line_cache)
         self.pointIndexChanged.connect(self.handle_point_index_changed)
         self.pointValueChanged.connect(self.handle_point_value_changed)
 
@@ -508,11 +510,19 @@ class TabStitch_VM(TabStitch_View):
             self.manualStitchData = None
             self.ImageViewer.clear()
 
+    def handle_clear_line_cache(self) -> None:
+        if (path := self.pathSettings.working_dir / "ScoreDetections.json").exists():
+            os.remove(path)
+            log.info(f"Line cache cleared: {path}")
+
     def flush_stitch_preview(self):
         if not self.manualStitchData:
-            self.load_stitch_data(
-                self.pathSettings.working_dir / "ScoreStitchData.json"
-            )
+            if (
+                path := self.pathSettings.working_dir / "ScoreStitchData.json"
+            ).exists():
+                self.load_stitch_data(path)
+            else:
+                return
         if not self.manualStitchData:
             return
 

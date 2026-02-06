@@ -1,4 +1,3 @@
-from loguru import logger as log
 from pydantic_extra_types.color import Color
 from PySide6.QtGui import (
     QBrush,
@@ -7,9 +6,8 @@ from PySide6.QtGui import (
     QTextCursor,
 )
 
-from src.Model.Data.const import LogLevel
 from src.Model.Data.settings import logSettings
-from src.Model.log import LogToGui, logManager
+from src.Model.log import logManager
 from src.View import TabConsole_View
 from src.ViewModel.binding.bind_data import bind_data
 

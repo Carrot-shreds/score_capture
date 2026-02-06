@@ -84,6 +84,11 @@ class Ui_TabStitch(object):
 
         self.horizontalLayout.addWidget(self.pushButton_start_stitiching)
 
+        self.pushButton_clear_cache = QPushButton(self.tab_auto)
+        self.pushButton_clear_cache.setObjectName(u"pushButton_clear_cache")
+
+        self.horizontalLayout.addWidget(self.pushButton_clear_cache)
+
         self.tabWidget.addTab(self.tab_auto, "")
         self.tab_manual = QWidget()
         self.tab_manual.setObjectName(u"tab_manual")
@@ -206,6 +211,7 @@ class Ui_TabStitch(object):
         self.radioButton_stitch_direction_vertical.setText(QCoreApplication.translate("TabStitch", u"\u7eb5\u5411", None))
         self.radioButton_stitch_direction_horizontal.setText(QCoreApplication.translate("TabStitch", u"\u6a2a\u5411", None))
         self.pushButton_start_stitiching.setText(QCoreApplication.translate("TabStitch", u"\u5f00\u59cb\u62fc\u63a5", None))
+        self.pushButton_clear_cache.setText(QCoreApplication.translate("TabStitch", u"\u6e05\u9664\u7ebf\u6bb5\u7f13\u5b58", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_auto), QCoreApplication.translate("TabStitch", u"\u81ea\u52a8\u62fc\u63a5", None))
         self.label.setText(QCoreApplication.translate("TabStitch", u"\u62fc\u63a5\u70b9\u5e8f\u53f7\uff1a", None))
         self.label_2.setText(QCoreApplication.translate("TabStitch", u"\u504f\u79fb\u50cf\u7d20\u503c\uff1a", None))

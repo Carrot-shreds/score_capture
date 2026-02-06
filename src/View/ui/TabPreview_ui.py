@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
     QFrame, QGridLayout, QGroupBox, QHBoxLayout,
-    QLabel, QPushButton, QSizePolicy, QSplitter,
-    QVBoxLayout, QWidget)
+    QLabel, QPushButton, QSizePolicy, QSpinBox,
+    QSplitter, QVBoxLayout, QWidget)
 
 from ..widgets.ImageViewer import ImageViewer
 
@@ -53,85 +53,123 @@ class Ui_TabPreview(object):
         self.groupBox_detect_coefficients.setFlat(False)
         self.gridLayout = QGridLayout(self.groupBox_detect_coefficients)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.label_detect_coefficient_horizontal = QLabel(self.groupBox_detect_coefficients)
-        self.label_detect_coefficient_horizontal.setObjectName(u"label_detect_coefficient_horizontal")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        self.doubleSpinBox_detect_coefficient_vertical = QDoubleSpinBox(self.groupBox_detect_coefficients)
+        self.doubleSpinBox_detect_coefficient_vertical.setObjectName(u"doubleSpinBox_detect_coefficient_vertical")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.label_detect_coefficient_horizontal.sizePolicy().hasHeightForWidth())
-        self.label_detect_coefficient_horizontal.setSizePolicy(sizePolicy2)
-        self.label_detect_coefficient_horizontal.setMinimumSize(QSize(0, 0))
-        self.label_detect_coefficient_horizontal.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        sizePolicy2.setHeightForWidth(self.doubleSpinBox_detect_coefficient_vertical.sizePolicy().hasHeightForWidth())
+        self.doubleSpinBox_detect_coefficient_vertical.setSizePolicy(sizePolicy2)
+        self.doubleSpinBox_detect_coefficient_vertical.setDecimals(3)
+        self.doubleSpinBox_detect_coefficient_vertical.setMinimum(0.001000000000000)
+        self.doubleSpinBox_detect_coefficient_vertical.setMaximum(1.000000000000000)
+        self.doubleSpinBox_detect_coefficient_vertical.setSingleStep(0.010000000000000)
 
-        self.gridLayout.addWidget(self.label_detect_coefficient_horizontal, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.doubleSpinBox_detect_coefficient_vertical, 1, 1, 1, 1)
 
         self.doubleSpinBox_detect_coefficient_horizontal = QDoubleSpinBox(self.groupBox_detect_coefficients)
         self.doubleSpinBox_detect_coefficient_horizontal.setObjectName(u"doubleSpinBox_detect_coefficient_horizontal")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.doubleSpinBox_detect_coefficient_horizontal.sizePolicy().hasHeightForWidth())
-        self.doubleSpinBox_detect_coefficient_horizontal.setSizePolicy(sizePolicy3)
-        self.doubleSpinBox_detect_coefficient_horizontal.setMaximum(100.000000000000000)
+        sizePolicy2.setHeightForWidth(self.doubleSpinBox_detect_coefficient_horizontal.sizePolicy().hasHeightForWidth())
+        self.doubleSpinBox_detect_coefficient_horizontal.setSizePolicy(sizePolicy2)
+        self.doubleSpinBox_detect_coefficient_horizontal.setDecimals(3)
+        self.doubleSpinBox_detect_coefficient_horizontal.setMinimum(0.001000000000000)
+        self.doubleSpinBox_detect_coefficient_horizontal.setMaximum(1.000000000000000)
         self.doubleSpinBox_detect_coefficient_horizontal.setSingleStep(0.010000000000000)
 
         self.gridLayout.addWidget(self.doubleSpinBox_detect_coefficient_horizontal, 0, 1, 1, 1)
 
         self.label_detect_coefficient_vertical = QLabel(self.groupBox_detect_coefficients)
         self.label_detect_coefficient_vertical.setObjectName(u"label_detect_coefficient_vertical")
-        sizePolicy2.setHeightForWidth(self.label_detect_coefficient_vertical.sizePolicy().hasHeightForWidth())
-        self.label_detect_coefficient_vertical.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.label_detect_coefficient_vertical.sizePolicy().hasHeightForWidth())
+        self.label_detect_coefficient_vertical.setSizePolicy(sizePolicy3)
         self.label_detect_coefficient_vertical.setMinimumSize(QSize(0, 0))
         self.label_detect_coefficient_vertical.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_detect_coefficient_vertical, 1, 0, 1, 1)
 
-        self.doubleSpinBox_detect_coefficient_vertical = QDoubleSpinBox(self.groupBox_detect_coefficients)
-        self.doubleSpinBox_detect_coefficient_vertical.setObjectName(u"doubleSpinBox_detect_coefficient_vertical")
-        sizePolicy3.setHeightForWidth(self.doubleSpinBox_detect_coefficient_vertical.sizePolicy().hasHeightForWidth())
-        self.doubleSpinBox_detect_coefficient_vertical.setSizePolicy(sizePolicy3)
-        self.doubleSpinBox_detect_coefficient_vertical.setMaximum(100.000000000000000)
-        self.doubleSpinBox_detect_coefficient_vertical.setSingleStep(0.010000000000000)
+        self.label_detect_coefficient_horizontal = QLabel(self.groupBox_detect_coefficients)
+        self.label_detect_coefficient_horizontal.setObjectName(u"label_detect_coefficient_horizontal")
+        sizePolicy3.setHeightForWidth(self.label_detect_coefficient_horizontal.sizePolicy().hasHeightForWidth())
+        self.label_detect_coefficient_horizontal.setSizePolicy(sizePolicy3)
+        self.label_detect_coefficient_horizontal.setMinimumSize(QSize(0, 0))
+        self.label_detect_coefficient_horizontal.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
-        self.gridLayout.addWidget(self.doubleSpinBox_detect_coefficient_vertical, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.label_detect_coefficient_horizontal, 0, 0, 1, 1)
 
 
         self.horizontalLayout_2.addWidget(self.groupBox_detect_coefficients)
 
+        self.groupBox_3 = QGroupBox(self.gridFrame)
+        self.groupBox_3.setObjectName(u"groupBox_3")
+        self.gridLayout_4 = QGridLayout(self.groupBox_3)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.doubleSpinBox_h_reverse_pixel_threshold = QDoubleSpinBox(self.groupBox_3)
+        self.doubleSpinBox_h_reverse_pixel_threshold.setObjectName(u"doubleSpinBox_h_reverse_pixel_threshold")
+        sizePolicy2.setHeightForWidth(self.doubleSpinBox_h_reverse_pixel_threshold.sizePolicy().hasHeightForWidth())
+        self.doubleSpinBox_h_reverse_pixel_threshold.setSizePolicy(sizePolicy2)
+        self.doubleSpinBox_h_reverse_pixel_threshold.setDecimals(2)
+        self.doubleSpinBox_h_reverse_pixel_threshold.setMinimum(1.000000000000000)
+        self.doubleSpinBox_h_reverse_pixel_threshold.setMaximum(255.000000000000000)
+        self.doubleSpinBox_h_reverse_pixel_threshold.setSingleStep(0.100000000000000)
+
+        self.gridLayout_4.addWidget(self.doubleSpinBox_h_reverse_pixel_threshold, 0, 1, 1, 1)
+
+        self.label_detect_coefficient_horizontal_3 = QLabel(self.groupBox_3)
+        self.label_detect_coefficient_horizontal_3.setObjectName(u"label_detect_coefficient_horizontal_3")
+        sizePolicy3.setHeightForWidth(self.label_detect_coefficient_horizontal_3.sizePolicy().hasHeightForWidth())
+        self.label_detect_coefficient_horizontal_3.setSizePolicy(sizePolicy3)
+        self.label_detect_coefficient_horizontal_3.setMinimumSize(QSize(0, 0))
+        self.label_detect_coefficient_horizontal_3.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+
+        self.gridLayout_4.addWidget(self.label_detect_coefficient_horizontal_3, 2, 0, 1, 1)
+
+        self.label_detect_coefficient_horizontal_2 = QLabel(self.groupBox_3)
+        self.label_detect_coefficient_horizontal_2.setObjectName(u"label_detect_coefficient_horizontal_2")
+        sizePolicy3.setHeightForWidth(self.label_detect_coefficient_horizontal_2.sizePolicy().hasHeightForWidth())
+        self.label_detect_coefficient_horizontal_2.setSizePolicy(sizePolicy3)
+        self.label_detect_coefficient_horizontal_2.setMinimumSize(QSize(0, 0))
+        self.label_detect_coefficient_horizontal_2.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+
+        self.gridLayout_4.addWidget(self.label_detect_coefficient_horizontal_2, 0, 0, 1, 1)
+
+        self.spinBox_h_reverse_thickness_threshold = QSpinBox(self.groupBox_3)
+        self.spinBox_h_reverse_thickness_threshold.setObjectName(u"spinBox_h_reverse_thickness_threshold")
+        self.spinBox_h_reverse_thickness_threshold.setMinimum(1)
+        self.spinBox_h_reverse_thickness_threshold.setMaximum(500)
+
+        self.gridLayout_4.addWidget(self.spinBox_h_reverse_thickness_threshold, 2, 1, 1, 1)
+
+
+        self.horizontalLayout_2.addWidget(self.groupBox_3)
+
         self.groupBox_2 = QGroupBox(self.gridFrame)
         self.groupBox_2.setObjectName(u"groupBox_2")
-        sizePolicy1.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
-        self.groupBox_2.setSizePolicy(sizePolicy1)
+        sizePolicy3.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
+        self.groupBox_2.setSizePolicy(sizePolicy3)
         self.groupBox_2.setFlat(False)
         self.gridLayout_2 = QGridLayout(self.groupBox_2)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.checkBox_show_plot = QCheckBox(self.groupBox_2)
         self.checkBox_show_plot.setObjectName(u"checkBox_show_plot")
-        sizePolicy3.setHeightForWidth(self.checkBox_show_plot.sizePolicy().hasHeightForWidth())
-        self.checkBox_show_plot.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.checkBox_show_plot.sizePolicy().hasHeightForWidth())
+        self.checkBox_show_plot.setSizePolicy(sizePolicy2)
 
         self.gridLayout_2.addWidget(self.checkBox_show_plot, 1, 1, 1, 1)
 
-        self.pushButton_detect_lines = QPushButton(self.groupBox_2)
-        self.pushButton_detect_lines.setObjectName(u"pushButton_detect_lines")
-        sizePolicy3.setHeightForWidth(self.pushButton_detect_lines.sizePolicy().hasHeightForWidth())
-        self.pushButton_detect_lines.setSizePolicy(sizePolicy3)
-
-        self.gridLayout_2.addWidget(self.pushButton_detect_lines, 0, 3, 1, 1)
-
-        self.pushButton_clear_lines = QPushButton(self.groupBox_2)
-        self.pushButton_clear_lines.setObjectName(u"pushButton_clear_lines")
-        sizePolicy3.setHeightForWidth(self.pushButton_clear_lines.sizePolicy().hasHeightForWidth())
-        self.pushButton_clear_lines.setSizePolicy(sizePolicy3)
-
-        self.gridLayout_2.addWidget(self.pushButton_clear_lines, 1, 3, 1, 1)
-
         self.checkBox_live_detect = QCheckBox(self.groupBox_2)
         self.checkBox_live_detect.setObjectName(u"checkBox_live_detect")
-        sizePolicy3.setHeightForWidth(self.checkBox_live_detect.sizePolicy().hasHeightForWidth())
-        self.checkBox_live_detect.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.checkBox_live_detect.sizePolicy().hasHeightForWidth())
+        self.checkBox_live_detect.setSizePolicy(sizePolicy2)
 
         self.gridLayout_2.addWidget(self.checkBox_live_detect, 1, 2, 1, 1)
+
+        self.checkBox_reverse_horizontal = QCheckBox(self.groupBox_2)
+        self.checkBox_reverse_horizontal.setObjectName(u"checkBox_reverse_horizontal")
+
+        self.gridLayout_2.addWidget(self.checkBox_reverse_horizontal, 1, 0, 1, 1)
 
         self.comboBox_line_type = QComboBox(self.groupBox_2)
         self.comboBox_line_type.addItem("")
@@ -145,55 +183,71 @@ class Ui_TabPreview(object):
         self.comboBox_line_type.setSizePolicy(sizePolicy4)
         self.comboBox_line_type.setMinimumSize(QSize(100, 0))
 
-        self.gridLayout_2.addWidget(self.comboBox_line_type, 0, 1, 1, 2)
+        self.gridLayout_2.addWidget(self.comboBox_line_type, 0, 0, 1, 1)
+
+        self.pushButton_detect_lines = QPushButton(self.groupBox_2)
+        self.pushButton_detect_lines.setObjectName(u"pushButton_detect_lines")
+        sizePolicy2.setHeightForWidth(self.pushButton_detect_lines.sizePolicy().hasHeightForWidth())
+        self.pushButton_detect_lines.setSizePolicy(sizePolicy2)
+
+        self.gridLayout_2.addWidget(self.pushButton_detect_lines, 0, 1, 1, 1)
+
+        self.pushButton_clear_lines = QPushButton(self.groupBox_2)
+        self.pushButton_clear_lines.setObjectName(u"pushButton_clear_lines")
+        sizePolicy2.setHeightForWidth(self.pushButton_clear_lines.sizePolicy().hasHeightForWidth())
+        self.pushButton_clear_lines.setSizePolicy(sizePolicy2)
+
+        self.gridLayout_2.addWidget(self.pushButton_clear_lines, 0, 2, 1, 1)
 
 
         self.horizontalLayout_2.addWidget(self.groupBox_2)
 
         self.groupBox = QGroupBox(self.gridFrame)
         self.groupBox.setObjectName(u"groupBox")
+        sizePolicy3.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
+        self.groupBox.setSizePolicy(sizePolicy3)
         self.groupBox.setFlat(False)
         self.gridLayout_3 = QGridLayout(self.groupBox)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.checkBox_live_preview = QCheckBox(self.groupBox)
         self.checkBox_live_preview.setObjectName(u"checkBox_live_preview")
-        sizePolicy3.setHeightForWidth(self.checkBox_live_preview.sizePolicy().hasHeightForWidth())
-        self.checkBox_live_preview.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.checkBox_live_preview.sizePolicy().hasHeightForWidth())
+        self.checkBox_live_preview.setSizePolicy(sizePolicy2)
 
         self.gridLayout_3.addWidget(self.checkBox_live_preview, 1, 1, 1, 1)
 
         self.pushButton_update_image = QPushButton(self.groupBox)
         self.pushButton_update_image.setObjectName(u"pushButton_update_image")
-        sizePolicy3.setHeightForWidth(self.pushButton_update_image.sizePolicy().hasHeightForWidth())
-        self.pushButton_update_image.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.pushButton_update_image.sizePolicy().hasHeightForWidth())
+        self.pushButton_update_image.setSizePolicy(sizePolicy2)
 
         self.gridLayout_3.addWidget(self.pushButton_update_image, 0, 1, 1, 1)
 
         self.checkBox_save_preview = QCheckBox(self.groupBox)
         self.checkBox_save_preview.setObjectName(u"checkBox_save_preview")
-        sizePolicy3.setHeightForWidth(self.checkBox_save_preview.sizePolicy().hasHeightForWidth())
-        self.checkBox_save_preview.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.checkBox_save_preview.sizePolicy().hasHeightForWidth())
+        self.checkBox_save_preview.setSizePolicy(sizePolicy2)
 
         self.gridLayout_3.addWidget(self.checkBox_save_preview, 1, 2, 1, 1)
 
         self.pushButton_glob_image = QPushButton(self.groupBox)
         self.pushButton_glob_image.setObjectName(u"pushButton_glob_image")
-        sizePolicy3.setHeightForWidth(self.pushButton_glob_image.sizePolicy().hasHeightForWidth())
-        self.pushButton_glob_image.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.pushButton_glob_image.sizePolicy().hasHeightForWidth())
+        self.pushButton_glob_image.setSizePolicy(sizePolicy2)
 
         self.gridLayout_3.addWidget(self.pushButton_glob_image, 1, 3, 1, 1)
 
         self.pushButton_reverse_image = QPushButton(self.groupBox)
         self.pushButton_reverse_image.setObjectName(u"pushButton_reverse_image")
-        sizePolicy3.setHeightForWidth(self.pushButton_reverse_image.sizePolicy().hasHeightForWidth())
-        self.pushButton_reverse_image.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.pushButton_reverse_image.sizePolicy().hasHeightForWidth())
+        self.pushButton_reverse_image.setSizePolicy(sizePolicy2)
 
         self.gridLayout_3.addWidget(self.pushButton_reverse_image, 0, 2, 1, 1)
 
         self.pushButton_open_image = QPushButton(self.groupBox)
         self.pushButton_open_image.setObjectName(u"pushButton_open_image")
-        sizePolicy3.setHeightForWidth(self.pushButton_open_image.sizePolicy().hasHeightForWidth())
-        self.pushButton_open_image.setSizePolicy(sizePolicy3)
+        sizePolicy2.setHeightForWidth(self.pushButton_open_image.sizePolicy().hasHeightForWidth())
+        self.pushButton_open_image.setSizePolicy(sizePolicy2)
 
         self.gridLayout_3.addWidget(self.pushButton_open_image, 0, 3, 1, 1)
 
@@ -215,18 +269,22 @@ class Ui_TabPreview(object):
 
     def retranslateUi(self, TabPreview):
         TabPreview.setWindowTitle(QCoreApplication.translate("TabPreview", u"Form", None))
-        self.groupBox_detect_coefficients.setTitle(QCoreApplication.translate("TabPreview", u"\u7ebf\u6bb5\u8bc6\u522b\u7cfb\u6570", None))
-        self.label_detect_coefficient_horizontal.setText(QCoreApplication.translate("TabPreview", u"\u6c34\u5e73\uff1a", None))
+        self.groupBox_detect_coefficients.setTitle(QCoreApplication.translate("TabPreview", u"\u7ebf\u6bb5\u8bc6\u522b\u53c2\u6570", None))
         self.label_detect_coefficient_vertical.setText(QCoreApplication.translate("TabPreview", u"\u7ad6\u76f4\uff1a", None))
-        self.groupBox_2.setTitle(QCoreApplication.translate("TabPreview", u"\u8bc6\u522b\u8bbe\u7f6e", None))
+        self.label_detect_coefficient_horizontal.setText(QCoreApplication.translate("TabPreview", u"\u6c34\u5e73\uff1a", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("TabPreview", u"\u53cd\u76f8\u6c34\u5e73\u7ebf\u8bc6\u522b\u9608\u503c", None))
+        self.label_detect_coefficient_horizontal_3.setText(QCoreApplication.translate("TabPreview", u"\u6700\u5c0f\u5bbd\u5ea6\uff1a", None))
+        self.label_detect_coefficient_horizontal_2.setText(QCoreApplication.translate("TabPreview", u"\u50cf\u7d20\u5747\u503c\uff1a", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("TabPreview", u"\u9884\u89c8\u8bbe\u7f6e", None))
         self.checkBox_show_plot.setText(QCoreApplication.translate("TabPreview", u"\u663e\u793aplot", None))
-        self.pushButton_detect_lines.setText(QCoreApplication.translate("TabPreview", u"\u8bc6\u522b\u7ebf\u6bb5", None))
-        self.pushButton_clear_lines.setText(QCoreApplication.translate("TabPreview", u"\u8fd8\u539f\u56fe\u50cf", None))
         self.checkBox_live_detect.setText(QCoreApplication.translate("TabPreview", u"\u5b9e\u65f6\u8bc6\u522b", None))
-        self.comboBox_line_type.setItemText(0, QCoreApplication.translate("TabPreview", u"\u4ec5\u6c34\u5e73\u7ebf", None))
-        self.comboBox_line_type.setItemText(1, QCoreApplication.translate("TabPreview", u"\u4ec5\u7ad6\u76f4\u7ebf", None))
+        self.checkBox_reverse_horizontal.setText(QCoreApplication.translate("TabPreview", u"\u53cd\u76f8\u6c34\u5e73\u7ebf", None))
+        self.comboBox_line_type.setItemText(0, QCoreApplication.translate("TabPreview", u"\u4ec5\u7ad6\u76f4\u7ebf", None))
+        self.comboBox_line_type.setItemText(1, QCoreApplication.translate("TabPreview", u"\u4ec5\u6c34\u5e73\u7ebf", None))
         self.comboBox_line_type.setItemText(2, QCoreApplication.translate("TabPreview", u"\u6240\u6709\u7ebf\u6bb5", None))
 
+        self.pushButton_detect_lines.setText(QCoreApplication.translate("TabPreview", u"\u8bc6\u522b\u7ebf\u6bb5", None))
+        self.pushButton_clear_lines.setText(QCoreApplication.translate("TabPreview", u"\u8fd8\u539f\u56fe\u50cf", None))
         self.groupBox.setTitle(QCoreApplication.translate("TabPreview", u"\u56fe\u50cf\u8bbe\u7f6e", None))
         self.checkBox_live_preview.setText(QCoreApplication.translate("TabPreview", u"\u5b9e\u65f6\u9884\u89c8", None))
         self.pushButton_update_image.setText(QCoreApplication.translate("TabPreview", u"\u66f4\u65b0\u9884\u89c8", None))

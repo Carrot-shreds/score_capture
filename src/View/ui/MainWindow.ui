@@ -40,8 +40,22 @@
     <addaction name="action_select_folder"/>
     <addaction name="action_rename_folder"/>
     <addaction name="action_open_folder"/>
+    <addaction name="separator"/>
+    <addaction name="action_print_score"/>
+    <addaction name="action_output_pdf"/>
+   </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>操作</string>
+    </property>
+    <addaction name="action_locate"/>
+    <addaction name="action_preview"/>
+    <addaction name="action_capture"/>
+    <addaction name="action_stitch"/>
+    <addaction name="action_reclip"/>
    </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu"/>
    <addaction name="menu_view"/>
    <addaction name="menu_help"/>
   </widget>
@@ -159,6 +173,16 @@
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="action_output_pdf">
+   <property name="text">
+    <string>导出PDF</string>
+   </property>
+  </action>
+  <action name="action_print_score">
+   <property name="text">
+    <string>打印</string>
    </property>
   </action>
  </widget>

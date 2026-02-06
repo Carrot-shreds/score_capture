@@ -92,6 +92,12 @@ class TabSettings_VM(TabSettings_View):
         self.pushButton_rename_folder.clicked.connect(self.rename_folder)
         self.pushButton_image_reorder.clicked.connect(self.reorder_images)
         self.pushButton_image_rebuild.clicked.connect(self.rebuild_images)
+        self.pushButton_clear_capture_data.clicked.connect(
+            lambda: self.clear_data_file("CaptureData.json")
+        )
+        self.pushButton_clear_score_detections.clicked.connect(
+            lambda: self.clear_data_file("ScoreDetections.json")
+        )
 
     def select_main_output_dir(self) -> None:
         """浏览并选择本地保存路径"""
@@ -160,7 +166,7 @@ class TabSettings_VM(TabSettings_View):
 
     def rebuild_images(self) -> None:
         """从Capture图像重新构建image"""
-        if self.buildImageThread and not self.buildImageThread.isFinished():
+        if self.buildImageThread:
             QMessageBox.warning(self, "警告", "仍有image重构建任务尚未完成，请稍后再试")
             return
         working_dir = self.pathSettings.working_dir
@@ -176,6 +182,9 @@ class TabSettings_VM(TabSettings_View):
         self.buildImageThread = BuildImageThread(
             self.buildImageSettings, self.captureSettings, working_dir
         )
+        self.buildImageThread.destroyed.connect(
+            lambda: setattr(self, "buildImageThread", None)
+        )
         self.buildImageThread.start()  # 启动截图线程
 
     def reorder_images(self) -> None:
@@ -185,7 +194,7 @@ class TabSettings_VM(TabSettings_View):
             log.error(f"指定路径不存在: {path}")
             return
 
-        old_filenames = get_numbered_image_names(path, "image", order_names=False)
+        old_filenames = get_numbered_image_names(path, "image")
         ordered_filenames = order_filenames(old_filenames)
 
         image_format = ordered_filenames[0].split(".")[-1]
@@ -193,3 +202,10 @@ class TabSettings_VM(TabSettings_View):
             ordered_filenames[n] = f"image{n}.{image_format}"
 
         rename_files(path, old_filenames, ordered_filenames)
+
+    def clear_data_file(self, filename: str) -> None:
+        if (path := self.pathSettings.working_dir / filename).exists():
+            os.remove(path)
+            log.info(f"{filename.split('.')[0]} Removed: {path}")
+        else:
+            log.info(f"File not found: {path}")

@@ -82,6 +82,9 @@ class MainWindow_VM(MainWindow_View):
         self.action_locate.triggered.connect(self.dialog_locate.show)
         self.action_preview.triggered.connect(self.tab_preview.preview_region)
         self.action_stitch.triggered.connect(self.tab_stitch.start_stitch)
+        self.action_reclip.triggered.connect(self.tab_reclip.start_reclip)
+        self.action_print_score.triggered.connect(self.tab_reclip.printing_score)
+        self.action_output_pdf.triggered.connect(self.tab_reclip.save_pdf)
         self.action_select_folder.triggered.connect(
             self.tab_settings.select_score_working_folder
         )
@@ -106,6 +109,7 @@ class MainWindow_VM(MainWindow_View):
         )
 
         self.load_dock_perspective()
+        self.toolBar_path.setFocus()
         self.appSettings.notice_all_observers()
 
     def load_dock_perspective(self) -> None:

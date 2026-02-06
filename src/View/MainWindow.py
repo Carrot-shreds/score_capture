@@ -43,6 +43,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.action_select_folder.setShortcut(QKeySequence.StandardKey.Open)
         self.action_rename_folder.setShortcut(QKeySequence("Ctrl+r"))
         self.action_mainwindow_always_top.setShortcut(QKeySequence("F12"))
+        self.action_print_score.setShortcut(QKeySequence.StandardKey.Print)
 
         # status bar
         self.label_version = QLabel()
@@ -121,7 +122,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         dock_area_settings = self.dock_manager.addAutoHideDockWidget(
             QtAds.SideBarLeft, dock_widget_settings
         )
-        dock_area_settings.setSize(self.frameGeometry().width() * 2 // 3)
+        dock_area_settings.setSize(self.frameGeometry().width() * 4 // 5)
         # Console
         dock_widget_console = self.dock_manager.createDockWidget("Console")
         dock_widget_console.setWidget(tab_console)
