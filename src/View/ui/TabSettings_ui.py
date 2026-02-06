@@ -127,15 +127,15 @@ class Ui_TabSettings(object):
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.pushButton_clear_capture_data = QPushButton(self.groupBox_4)
         self.pushButton_clear_capture_data.setObjectName(u"pushButton_clear_capture_data")
-        sizePolicy1.setHeightForWidth(self.pushButton_clear_capture_data.sizePolicy().hasHeightForWidth())
-        self.pushButton_clear_capture_data.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.pushButton_clear_capture_data.sizePolicy().hasHeightForWidth())
+        self.pushButton_clear_capture_data.setSizePolicy(sizePolicy2)
 
         self.gridLayout_5.addWidget(self.pushButton_clear_capture_data, 1, 0, 1, 1)
 
         self.pushButton_clear_score_detections = QPushButton(self.groupBox_4)
         self.pushButton_clear_score_detections.setObjectName(u"pushButton_clear_score_detections")
-        sizePolicy1.setHeightForWidth(self.pushButton_clear_score_detections.sizePolicy().hasHeightForWidth())
-        self.pushButton_clear_score_detections.setSizePolicy(sizePolicy1)
+        sizePolicy2.setHeightForWidth(self.pushButton_clear_score_detections.sizePolicy().hasHeightForWidth())
+        self.pushButton_clear_score_detections.setSizePolicy(sizePolicy2)
 
         self.gridLayout_5.addWidget(self.pushButton_clear_score_detections, 2, 0, 1, 1)
 
@@ -282,14 +282,19 @@ class Ui_TabSettings(object):
 
         self.pushButton_image_rebuild = QPushButton(self.groupBox_2)
         self.pushButton_image_rebuild.setObjectName(u"pushButton_image_rebuild")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.pushButton_image_rebuild.sizePolicy().hasHeightForWidth())
+        self.pushButton_image_rebuild.setSizePolicy(sizePolicy4)
         self.pushButton_image_rebuild.setFlat(False)
 
         self.gridLayout_2.addWidget(self.pushButton_image_rebuild, 1, 9, 1, 1)
 
         self.pushButton_image_reorder = QPushButton(self.groupBox_2)
         self.pushButton_image_reorder.setObjectName(u"pushButton_image_reorder")
-        sizePolicy2.setHeightForWidth(self.pushButton_image_reorder.sizePolicy().hasHeightForWidth())
-        self.pushButton_image_reorder.setSizePolicy(sizePolicy2)
+        sizePolicy4.setHeightForWidth(self.pushButton_image_reorder.sizePolicy().hasHeightForWidth())
+        self.pushButton_image_reorder.setSizePolicy(sizePolicy4)
 
         self.gridLayout_2.addWidget(self.pushButton_image_reorder, 2, 9, 1, 1)
 

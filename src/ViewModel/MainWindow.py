@@ -15,6 +15,7 @@ from src.Model.Data.settings import (
 from src.Model.MainTask.Capture import CaptureThread
 from src.Model.utils import get_unused_filename
 from src.View import MainWindow_View
+from src.View.MainWindow import About
 from src.ViewModel import (
     DialogLocate_VM,
     TabConsole_VM,
@@ -94,6 +95,7 @@ class MainWindow_VM(MainWindow_View):
             self.action_capture.toggle
         )
         self.action_rename_folder.triggered.connect(self.tab_settings.rename_folder)
+        self.action_about.triggered.connect(lambda: About(self, __version__))
 
         # state bar
         self.label_version.setText("V" + __version__)

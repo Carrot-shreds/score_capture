@@ -1,3 +1,14 @@
+# This program is free software:you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free Software Foundation,
+# either version 3 of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+
 import sys
 
 from loguru import logger as log
@@ -9,6 +20,8 @@ def show_main_window() -> None:
     from PySide6 import QtCore
     from PySide6.QtWidgets import QApplication
 
+    # init qfile resource during import
+    from src.resource import compiled_resource  # noqa:F401
     from src.ViewModel.MainWindow import MainWindow_VM
 
     """主窗口进程函数"""

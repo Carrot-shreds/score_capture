@@ -1,20 +1,67 @@
 import PySide6QtAds as QtAds
-from PySide6.QtCore import QSignalBlocker, Qt
+from PySide6.QtCore import QFile, QIODevice, QSignalBlocker, Qt
 from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QComboBox,
+    QDialog,
     QInputDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
+    QPushButton,
     QSizePolicy,
     QSpacerItem,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
     QWidgetAction,
 )
 
 from .ui.MainWindow_ui import Ui_MainWindow
+
+
+class About(QDialog):
+    def __init__(self, parent, version: str) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("About")
+        self.label_title = QLabel("Score capture")
+        self.label_version = QLabel(f"Version: {version}")
+        self.label_copyright = QLabel("Copyright © 2025 Carrot-shreds")
+        self.label_repo = QLabel(
+            "<a href='https://github.com/Carrot-shreds/score_capture'>Open source repository</a>",
+            openExternalLinks=True,
+        )
+        self.button_license = QPushButton("View license")
+        self.button_license.clicked.connect(lambda: License(self))
+
+        self.boxlayout = QVBoxLayout(self)
+        self.boxlayout.addWidget(self.label_title)
+        self.boxlayout.addWidget(self.label_version)
+        self.boxlayout.addWidget(self.label_copyright)
+        self.boxlayout.addWidget(self.label_repo)
+        self.boxlayout.addWidget(QLabel("Free software under GPLv3"))
+        self.boxlayout.addWidget(self.button_license)
+        self.show()
+        self.setFixedSize(self.size())
+
+
+class License(QDialog):
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("License")
+        self.resize(550, 600)
+
+        license_file = QFile(":/license")
+        license_file.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text)
+        license_str = license_file.readAll().toStdString()
+        license_file.close()
+
+        self.license = QTextEdit()
+        self.license.setText(license_str)
+        self.license.setReadOnly(True)
+        self.vboxlayout = QVBoxLayout(self)
+        self.vboxlayout.addWidget(self.license)
+        self.show()
 
 
 class MainWindow_View(QMainWindow, Ui_MainWindow):
@@ -103,6 +150,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
             QLabel(
                 """<a href='https://github.com/Carrot-shreds/score_capture'>Open source repo</a>""",
                 alignment=Qt.AlignmentFlag.AlignCenter,
+                openExternalLinks=True,
             )
         )
         layout_central_label.addItem(
