@@ -187,7 +187,7 @@ class TabReclip_VM(TabReclip_View):
     def check_font(self) -> None:
         font_name = self.reclipSettings.font_name
         if font_name == "" or font_name not in self.sys_font_names:
-            self.reclipSettings.font_name = self.sys_font_names[0]
+            self.reclipSettings.font_name = self.sys_font_names[-1]
 
     def update_font_name_combox(self) -> None:
         self.comboBox_font_name.blockSignals(True)

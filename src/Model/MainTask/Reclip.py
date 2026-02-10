@@ -393,7 +393,7 @@ def style_restitched_clips(
     page_num_width = int(page_num_height * 1.5)
     page_num_font = (
         get_auto_sized_font(
-            str(99),
+            "99/99",
             font_path,
             page_num_width,
             page_num_height,
@@ -453,9 +453,10 @@ def style_restitched_clips(
                 anchor="mm",
             )
 
+        # Page number
         draw.text(
             xy=page_num_xy,
-            text=str(i + 1),
+            text=f"{i + 1}/{len(score_pages)}",
             font=page_num_font,
             fill=(0, 0, 0),
             anchor="mm",
