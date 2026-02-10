@@ -17,7 +17,7 @@ from pydantic_extra_types.color import Color
 from PySide6 import QtCore
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QImage
-from PySide6.QtWidgets import QDialog, QMainWindow
+from PySide6.QtWidgets import QApplication, QDialog, QMainWindow
 
 from src.Model.Data.const import CaptureTool
 from src.Model.Data.type import (
@@ -83,7 +83,11 @@ def rename_files(
     重命名文件，将old_filenames中的文件重命名为new_filenames中的对应名称。
     """
     if len(old_filenames) != len(new_filenames):
-        raise ValueError("旧文件名和新文件名列表长度不匹配")
+        raise ValueError(
+            QApplication.translate(
+                "rename_files", "Old and New filenames list have different length."
+            )
+        )
 
     # 检查新文件名是否与旧文件名相同
     for old, new in list(zip(old_filenames, new_filenames)):
@@ -91,7 +95,11 @@ def rename_files(
             old_filenames.remove(old)
             new_filenames.remove(new)
     if new_filenames == []:
-        log.info("没有需要重命名的文件")
+        log.info(
+            QApplication.translate(
+                "rename_files", "There are no file needed to rename."
+            )
+        )
         return
 
     temp_filenames = [filename + ".tmp" for filename in new_filenames]
@@ -103,7 +111,11 @@ def rename_files(
         old_filenames, temp_filenames, new_filenames
     ):
         (path / temp_name).rename(path / new_name)
-        log.info(f"成功将'{old_name}'重命名为'{new_name}'")
+        log.info(
+            QApplication.translate("rename_files", "Renamed file {} -> {}").format(
+                old_name, new_name
+            )
+        )
 
 
 @validate_call
@@ -118,7 +130,11 @@ def reorder_image_files(path: DirectoryExisting, filename: ImageFileName) -> Non
         if f.rfind(filename) > -1 and f.split(".")[0].split(filename)[-1].isdigit()
     ]
     if file_names == []:
-        log.warning(f"没有在当前工作路径下找到{filename}相关的图像文件")
+        log.warning(
+            QApplication.translate(
+                "reorder_image_files", "No {} related file found."
+            ).format(filename)
+        )
         return
     ordered_filenames = order_filenames(file_names)
 
@@ -222,14 +238,14 @@ def open_folder_in_explorer(folder_path: DirectoryExisting) -> None:
             os.startfile(folder_path)
         case "darwin":  # macOS
             if err := subprocess.run(["open", folder_path], capture_output=True).stderr:
-                log.error(f"无法打开文件夹: {err.decode()}")
+                log.error(f"Reveal folder failed: {err.decode()}")
         case "linux":  # Linux
             if err := subprocess.run(
                 ["xdg-open", folder_path], capture_output=True
             ).stderr:
-                log.error(f"无法打开文件夹: {err.decode()}")
+                log.error(f"Reveal folder failed: {err.decode()}")
         case _:
-            log.error(f"不支持的操作系统: {sys.platform}")
+            log.error(f"Unsupport system: {sys.platform}")
 
 
 def qrect2tuple(rect: QRect) -> tuple[int, int, int, int]:
@@ -268,7 +284,11 @@ def screenshot(
                     capture_output=True,
                 )
         if result.stderr:
-            log.error(f"{capture_tool}截图失败: {result.stderr.decode()}")
+            log.error(
+                QApplication.translate(
+                    "screenshot", "Capture Failed using {}: {}"
+                ).format(capture_tool, result.stderr.decode())
+            )
             return np.array([])
         # TODO Linux 兼容性测试
         img = read_image(Path(temp_filename))
@@ -279,7 +299,11 @@ def screenshot(
     with mss.mss() as sct:
         monitors = sct.monitors
         if monitor_num < 1 or monitor_num >= len(monitors):
-            log.error(f"无效的显示器编号: {monitor_num}")
+            log.error(
+                QApplication.translate("screenshot", "Invalid Monitor Number").format(
+                    monitor_num
+                )
+            )
             return np.array([])
         monitor = monitors[monitor_num]
         left, top, width, height = region

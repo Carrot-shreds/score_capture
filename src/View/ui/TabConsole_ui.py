@@ -23,7 +23,7 @@ class Ui_TabConsole(object):
     def setupUi(self, TabConsole):
         if not TabConsole.objectName():
             TabConsole.setObjectName(u"TabConsole")
-        TabConsole.resize(877, 0)
+        TabConsole.resize(877, 110)
         self.verticalLayout = QVBoxLayout(TabConsole)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.gridLayout_settings = QGridLayout()
@@ -105,9 +105,9 @@ class Ui_TabConsole(object):
 
     def retranslateUi(self, TabConsole):
         TabConsole.setWindowTitle(QCoreApplication.translate("TabConsole", u"Form", None))
-        self.checkBox_auto_scroll.setText(QCoreApplication.translate("TabConsole", u"\u81ea\u52a8\u6eda\u52a8", None))
-        self.pushButton_clear_console.setText(QCoreApplication.translate("TabConsole", u"\u6e05\u7a7a\u8f93\u51fa", None))
-        self.label_log_level.setText(QCoreApplication.translate("TabConsole", u"\u65e5\u5fd7\u7b49\u7ea7\uff1a", None))
+        self.checkBox_auto_scroll.setText(QCoreApplication.translate("TabConsole", u"Auto Scroll", None))
+        self.pushButton_clear_console.setText(QCoreApplication.translate("TabConsole", u"Clear Output", None))
+        self.label_log_level.setText(QCoreApplication.translate("TabConsole", u"Log Level: ", None))
         self.comboBox_log_level.setItemText(0, QCoreApplication.translate("TabConsole", u"DEBUG", None))
         self.comboBox_log_level.setItemText(1, QCoreApplication.translate("TabConsole", u"INFO", None))
         self.comboBox_log_level.setItemText(2, QCoreApplication.translate("TabConsole", u"SUCCESS", None))

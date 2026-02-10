@@ -61,7 +61,7 @@ class TabSettings_VM(TabSettings_View):
         bind_data(self.doubleSpinBox_capture_delay, self.captureSettings, "delay_time")
         bind_data(self.comboBox_capture_tool, self.captureSettings, "tool")
         bind_data(self.checkBox_keep_last, self.captureSettings, "if_keep_last")
-        bind_data(self.checkBox_reverse_image, self.captureSettings, "if_reverse_image")
+        bind_data(self.checkBox_invert_image, self.captureSettings, "if_invert_image")
 
         # Locate Settings
         self.locateSettings = locateSettings
@@ -122,8 +122,9 @@ class TabSettings_VM(TabSettings_View):
             open_folder_in_explorer(self.pathSettings.working_dir)
         else:
             log.warning(
-                f"""打开目录失败，{self.pathSettings.main_out_dir}
-                下不存在{self.pathSettings.score_title}文件夹"""
+                self.tr("Failed to reveal folder that does not exist: {}").format(
+                    self.pathSettings.working_dir
+                )
             )
 
     def rename_folder(self) -> None:
@@ -131,8 +132,8 @@ class TabSettings_VM(TabSettings_View):
         old_title = self.pathSettings.score_title
         new_title, ok = QInputDialog.getText(
             self,
-            "重命名当前曲谱工作目录及其中的文件",
-            "请输入新的名称：",
+            self.tr("Rename Working Folder"),
+            self.tr("New Folder Title:"),
             text=old_title,
         )
         if new_title == "" or not ok:
@@ -140,8 +141,8 @@ class TabSettings_VM(TabSettings_View):
         if not is_valid_filename(new_title):
             QMessageBox.warning(
                 self,
-                "重命名失败",
-                "文件名不合法",
+                self.tr("Folder rename failed."),
+                self.tr("Folder name invalid."),
                 QMessageBox.StandardButton.Ok,
                 QMessageBox.StandardButton.Ok,
             )
@@ -152,22 +153,30 @@ class TabSettings_VM(TabSettings_View):
         new_path = self.pathSettings.main_out_dir / new_title
         if not (old_path.is_dir() and old_path.exists()):
             log.warning(
-                f"重命名失败，{self.pathSettings.main_out_dir}下不存在{old_title}文件夹，仅更新曲谱标题"
+                self.tr(
+                    "Folder rename failed. Working dir does not exist: {} Only switched to a new folder"
+                ).format(old_path)
             )
             return
         os.chdir(self.pathSettings.main_out_dir)
         old_path.rename(new_path)
-        log.success(f"已将目录{old_title}重命名为{new_title}")
+        log.success(self.tr("Renamed folder: {} -> {}").format(old_title, new_title))
         for f in new_path.iterdir():
             if old_title in f.name:  # 重命名目录下,文件中的标题部分
                 new_name = f.name.replace(old_title, new_title)
                 f.rename(f.parent / new_name)
-                log.debug(f"已将文件{f.name}重命名为{new_name}")
+                log.debug(self.tr("Renamed file: {} -> {}").format(f.name, new_name))
 
     def rebuild_images(self) -> None:
         """从Capture图像重新构建image"""
         if self.buildImageThread:
-            QMessageBox.warning(self, "警告", "仍有image重构建任务尚未完成，请稍后再试")
+            QMessageBox.warning(
+                self,
+                self.tr("Warning"),
+                self.tr(
+                    "Current rebuild task is not finished, please try again later."
+                ),
+            )
             return
         working_dir = self.pathSettings.working_dir
         if not (
@@ -175,7 +184,9 @@ class TabSettings_VM(TabSettings_View):
             and len(get_numbered_image_names(working_dir, "capture")) > 2
         ):
             QMessageBox.warning(
-                self, "警告", f"{working_dir}下未找到capture图像，请先进行截图操作"
+                self,
+                self.tr("Warning"),
+                self.tr("Capture images not found, please do capture first."),
             )
             return
 
@@ -191,7 +202,7 @@ class TabSettings_VM(TabSettings_View):
         """对图像文件进行重新排序和重命名"""
         path = self.pathSettings.working_dir
         if not path.exists():
-            log.error(f"指定路径不存在: {path}")
+            log.error(self.tr("Path does not exist: {}").format(path))
             return
 
         old_filenames = get_numbered_image_names(path, "image")
@@ -206,6 +217,6 @@ class TabSettings_VM(TabSettings_View):
     def clear_data_file(self, filename: str) -> None:
         if (path := self.pathSettings.working_dir / filename).exists():
             os.remove(path)
-            log.info(f"{filename.split('.')[0]} Removed: {path}")
+            log.info(self.tr("{} Removed: {}").format(filename.split(".")[0], path))
         else:
-            log.info(f"File not found: {path}")
+            log.info(self.tr("File not found: {}").format(path))

@@ -49,7 +49,7 @@ class ImageData(BaseModel):
                 hash=hash_image(image),
             )
         else:
-            raise ValueError("Invaild ImageData parameter")
+            raise ValueError("Invalid ImageData parameter")
 
     @property
     def file_extension(self):
@@ -123,12 +123,14 @@ class CaptureData(BaseModel):
             image_couple = frozenset([image_names[n], image_names[n + 1]])
             img_data = self.data.get(image_couple)
             if not img_data:
-                log.error(f"未找到{image_names[n]}|{image_names[n + 1]}图像的比对信息")
+                log.warning(
+                    f"No compare data found for {image_names[n]}|{image_names[n + 1]}"
+                )
                 return []
             diff = img_data.get(compare_method)
             if not diff:
-                log.error(
-                    f"未找到{image_names[n]}|{image_names[n + 1]}的{compare_method}算法差异值"
+                log.warning(
+                    f"No compare data found with {compare_method} method for {image_names[n]}|{image_names[n + 1]}"
                 )
                 return []
             diff_sequence.append(diff)
@@ -243,10 +245,10 @@ class ScoreDetections(BaseModel):
         elif type(key) is int:
             result = self.image_detections.get(self.get_image_filenames()[key])
         else:
-            raise TypeError(f"错误的索引类型{type(key)}")
+            raise TypeError(f"Invalid index type {type(key)}")
 
         if result is None:
-            raise KeyError(f"未找到图像{key}的检测结果")
+            raise KeyError(f"No detection data found for {key}")
         else:
             return result
 
@@ -305,7 +307,7 @@ class ScoreStitchData(BaseModel):
     ) -> None:
         if not len(points) + 1 == len(images) == len(image_names):
             raise ValueError(
-                "The number of stitch_point, images and image_names are not matched"
+                "The length of stitch_point, images and image_names are not matched"
             )
         for i in range(len(points)):
             image1_data = ImageData(filename=image_names[i], image=images[i])

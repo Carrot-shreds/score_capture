@@ -4,6 +4,7 @@ from fast_ssim import ssim
 from loguru import logger as log
 from PIL.Image import Image
 from pydantic import validate_call
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.const import Direction, ImageCompareMethod
 from src.Model.Data.data import ImageDetection
@@ -22,13 +23,12 @@ def gama_transfer(img, threshold, power) -> ImageArray:
 def detect_horizontal_lines(
     img: ImageArray,
     coefficient: float = 0.7,
-    reverse: bool = False,
+    invert: bool = False,
     r_pixel_threshold: float = 255,
     r_thickness_threshold: int = 10,
 ) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有水平线段(白色背景图中的黑色线)"""
     if len(img.shape) != 2:
-        log.debug("传入图像数组维度不为2，自动转换为灰度图，BGR2GRAY")
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
     if np.average(img) < 128:
         img = 255 - img  # 将图像反相为白底图
@@ -39,7 +39,7 @@ def detect_horizontal_lines(
         )
     )
     average_row: np.ndarray = np.average(img_adaptive, axis=1)
-    if not reverse:
+    if not invert:
         result_index: list[int] = [
             i for i in range(len(average_row)) if average_row[i] < 255 * coefficient
         ]
@@ -68,11 +68,13 @@ def detect_horizontal_lines(
             )
             point_y = 0
         current_y += 1
-    if reverse:
+    if invert:
         lines = [line for line in lines if line.thickness >= r_thickness_threshold]
 
     if not lines:
-        log.warning("水平线检测结果为空")
+        log.warning(
+            QApplication.translate("detect_horizontal_lines", "Empty horizontal line.")
+        )
     return lines
 
 
@@ -98,7 +100,7 @@ def get_score_lines(horizontal_lines: list[Line]) -> list[Line]:
     try:
         result = [horizontal_lines[i:j] for i, j in index][-1]
     except IndexError:
-        log.debug("水平线检测结果中未找到曲谱部分的横线")
+        log.debug("Get no staff lines from horizontal lines.")
         return []
     return result
 
@@ -107,7 +109,7 @@ def get_score_lines(horizontal_lines: list[Line]) -> list[Line]:
 @validate_call
 def detect_vertical_lines(
     image: ImageArray,
-    horizontal_lines_data: list[Line] | None = None,
+    horizontal_lines_data: list[Line] | None,
     coefficient: float = 0.9,
 ) -> list[Line]:
     """img为灰度图(二维数组)，识别并返回所有竖直线段(黑色背景图中的白色线)"""
@@ -117,15 +119,24 @@ def detect_vertical_lines(
     # Check horizontal lines
     if horizontal_lines_data is None:
         horizontal_lines: list[Line] = detect_horizontal_lines(img)
-        log.debug("检测竖直线时未传入水平线数据，将先以默认系数进行水平线检测")
     else:
         horizontal_lines: list[Line] = horizontal_lines_data
     if not horizontal_lines:
-        log.info("由于水平线检测结果为空，未进行竖直线检测")
+        log.info(
+            QApplication.translate(
+                "detect_vertical_lines",
+                "Skip vertical line detect, due to empty horizontal line.",
+            )
+        )
         return []
     horizontal_lines = get_score_lines(horizontal_lines)  # 水平线预处理
     if not horizontal_lines:
-        log.info("曲谱部分的水平线检测结果为空，无法进行竖直线检测")
+        log.info(
+            QApplication.translate(
+                "detect_vertical_lines",
+                "Skip vertical line detect, due to empty staff line.",
+            )
+        )
         return []
 
     # 识别区域
@@ -162,14 +173,17 @@ def detect_vertical_lines(
             for line in bar_lines_indexes_group
         ]
     except IndexError:
-        log.debug("竖直线检测结果中未找到曲谱部分的竖直线")
+        log.warning(
+            QApplication.translate(
+                "detect_vertical_lines", "Get no vertical line from staff region."
+            )
+        )
         return []
     return result
 
 
 def _image_preprocess_for_vertical_line_detect(image: ImageArray) -> GrayImageArray:
     if len(image.shape) != 2:
-        log.debug("传入图像数组维度不为2，自动转换为灰度图，使用RGB2GRAY")
         img: np.ndarray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
     else:
         img: np.ndarray = image
@@ -246,7 +260,6 @@ def detect_all_lines_with_clip(
 ) -> tuple[list[Line], list[Line]]:
     """将图片以指定长度切片后，进行水平与竖直线段的检测"""
     if len(img.shape) != 2:
-        log.debug("传入图像数组维度不为2，自动转换为灰度图，RGB2GRAY")
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # 转换为灰度图
 
     lines = [[], []]
@@ -293,10 +306,10 @@ def get_barline_num_region(image_detection: ImageDetection) -> tuple[int, int]:
     return detect_start, detect_end
 
 
-def image_pre_process(img: np.ndarray | Image, if_reverse_image: bool) -> ImageArray:
+def image_pre_process(img: np.ndarray | Image, if_invert_image: bool) -> ImageArray:
     """图像预处理"""
     img = np.array(img, np.uint8)
-    if if_reverse_image:
+    if if_invert_image:
         img = 255 - img
     # img = super_resolution(img)
     return img
@@ -318,16 +331,21 @@ def clip_image(
             elif len(image.shape) == 3:  # 彩色图
                 return image[:, start:end, :]
             else:
-                raise ValueError("图像维度不正确，应为2或3维")
+                raise ValueError("Invalid image dimension, should be 2 or 3.")
         if direction == Direction.VERTICAL:
             if len(image.shape) == 2:  # 灰度图
                 return image[start:end, :]
             elif len(image.shape) == 3:  # 彩色图
                 return image[start:end, :, :]
             else:
-                raise ValueError("图像维度不正确，应为2或3维")
+                raise ValueError("Invalid image dimension, should be 2 or 3.")
     except IndexError:
-        raise IndexError("切片范围超出图像范围，请检查index参数")
+        raise IndexError(
+            QApplication.translate(
+                "clip_image",
+                "Clip index out of image bound. Index:{}, image_shape:{}, direction:{}",
+            ).format(index, image.shape, direction.name)
+        )
     else:
         return image  # 确保函数有显式返回值
 
@@ -349,11 +367,11 @@ def compare_image(
     elif method == "SSIM":
         diff = ssim(image1, image2, data_range=255)
     else:
-        raise ValueError("错误的算法类型")
+        raise ValueError("Invalid Compare Method.")
     if type(diff) is float or type(diff) is np.float64:
         return float(diff)
     else:
-        raise TypeError("比较结果不是浮点数，可能是图像维度不匹配或其他错误")
+        raise TypeError("Comapre result is not float.")
 
 
 @validate_call
@@ -362,7 +380,9 @@ def stitch_images(
 ) -> ImageArray:
     """将多张图像按指定方向和拼接点进行拼接"""
     if len(images) != len(points) + 1:
-        raise ValueError("图像数量必须比拼接点数量多1")
+        raise ValueError(
+            f"The image nums must be one greater than the stitching point nums. Got {len(images)} and {len(points)}"
+        )
 
     match direction:
         case Direction.HORIZONTAL:
@@ -379,5 +399,5 @@ def stitch_images(
 
 
 @validate_call
-def reverse_image(img: ImageArray) -> ImageArray:
+def invert_image(img: ImageArray) -> ImageArray:
     return 255 - img

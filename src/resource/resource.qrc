@@ -2,5 +2,6 @@
 <RCC>
     <qresource>
         <file alias="license">../../LICENSE</file>
+        <file>translations/zh_CN.qm</file>
     </qresource>
 </RCC>

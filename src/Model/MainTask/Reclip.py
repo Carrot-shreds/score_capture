@@ -8,6 +8,7 @@ from PIL import Image, ImageFont
 from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import FreeTypeFont
 from pydantic import validate_call
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.const import Align, Direction, ReclipMethod
 from src.Model.Data.data import ReclipData, ScoreDetections, StyleData
@@ -37,6 +38,9 @@ def reclip_image(
         log = logger
     os.chdir(working_dir)
     log.debug(f"Working dir: {working_dir}")
+    log.debug(f"Reclip Settings: {reclipSettings}")
+    log.debug(f"Detector Settings: {detectorSettings}")
+    log.info
 
     if style_data:
         pass
@@ -53,7 +57,9 @@ def reclip_image(
         ).__next__()
     except StopIteration:
         log.error(
-            f"未在当前工作目录下发现'{score_title}-stitched.*'图片，请先进行拼接操作"
+            QApplication.translate(
+                "Reclip", "Image Not Found with wildcard {}, please do stitch first."
+            ).format(f"{score_title}-stitched.*")
         )
         return
     stitched_image_path = working_dir / stitched_image_filename
@@ -62,10 +68,18 @@ def reclip_image(
     )
     if (working_dir / stitched_detected_image_filename).exists():
         os.remove(working_dir / stitched_detected_image_filename)
+        log.debug(f"Removed file: {working_dir / stitched_detected_image_filename}")
 
+    log.debug(f"Reading stitched image: {stitched_image_path}")
     stitched_image = read_image(stitched_image_path)
     stitched_image_gray = cv2.cvtColor(stitched_image, cv2.COLOR_RGB2GRAY)
     if stitched_image.shape[0] > stitched_image.shape[1]:
+        log.info(
+            QApplication.translate(
+                "Reclip",
+                "Vertical stitched image detected, will skip reclip and try to style it directly.",
+            )
+        )
         # vertical stitched
         reclip_data = ReclipData(
             clip_direction=Direction.HORIZONTAL,
@@ -75,9 +89,12 @@ def reclip_image(
         reclip_save_filename = score_title + "-reclip" + reclipSettings.saving_format
         reclip_data.save_to_file(working_dir / "ReclipData.json")
         save_image(working_dir / reclip_save_filename, stitched_image)
+        log.debug(
+            f"Save 'reclip' as a copy of stitched image to {reclip_save_filename}"
+        )
 
         blank_line_index = get_gap_line_index(
-            stitched_image, detectorSettings, working_dir
+            stitched_image, detectorSettings, working_dir, log
         )
 
         style_restitched_clips(
@@ -92,13 +109,16 @@ def reclip_image(
         return
 
     # 获取检测数据
-    log.info("开始检测图像中的线段")
+    log.info(
+        QApplication.translate("Reclip", "Start detecting lines in stitched image.")
+    )
     if "ScoreDetections.json" in os.listdir(working_dir):
         clip_length = ScoreDetections.load_from_file(
             working_dir / "ScoreDetections.json"
         )[0].image_shape[1]
     else:
         clip_length = 800
+    log.debug(f"Slice length for detection: {clip_length}")
     horizontal_lines, vertical_lines = detect_all_lines_with_clip(
         stitched_image_gray,
         clip_length,
@@ -109,10 +129,15 @@ def reclip_image(
     for line in horizontal_lines + vertical_lines:
         line.draw(stitched_detected_image)
     save_image(working_dir / stitched_detected_image_filename, stitched_detected_image)
-    log.debug(f"horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}")
-    log.info("线段检测完毕，已生成对应预览图")
+    log.debug(
+        f"Horizontal Lines: {len(horizontal_lines)}  Vertical Lines: {len(vertical_lines)}"
+    )
+    log.debug(
+        f"Detect completed, save preview image to: {stitched_detected_image_filename}"
+    )
 
     # 小节线分组
+    log.info(QApplication.translate("Reclip", "Start group barlines."))
     index = np.asarray([line.start_index for line in vertical_lines])
     distance: np.ndarray = index[1:] - index[:-1]
     del_index: list[int] = []
@@ -129,10 +154,12 @@ def reclip_image(
         score_title + "-detected-barlines" + reclipSettings.saving_format
     )
     save_image(working_dir / detected_barlines_filename, detected_barlines_image)
-    log.info(f"成功对小节线进行归类，共检测出{len(bar_lines)}组小节线,预览图像已保存")
+    log.debug(
+        f"Grouped {len(bar_lines)} from vertical lines. Preview image saved to {detected_barlines_filename}"
+    )
 
     # 进行切片
-    log.debug("开始进行切片操作")
+    log.info(QApplication.translate("Reclip", "Start to reclip stitched image."))
     image_clips: list[np.ndarray] = []
     clip_index: list[tuple[int, int]] = []
     extern_pixel = reclipSettings.clip_margin  # 切片左右额外包含的像素
@@ -164,6 +191,7 @@ def reclip_image(
             bar_lines[reclipSettings.bar_num_line_max_length].end_index
             - bar_lines[0].start_index
         )  # 使用前n小节的总长度作为限制长度
+        log.debug(f"Max Row Length: {max_length}px")
         result_index = [bar_lines_index[0]]
         for i in range(bar_lines_index.size):
             if bar_lines_index[i] - result_index[-1] >= max_length:
@@ -187,7 +215,8 @@ def reclip_image(
         clip_start = max(0, i[0])  # 确保起始位置不小于0
         clip_end = min(stitched_image.shape[1], i[1])  # 确保结束位置不大于图片宽度
         image_clips.append(stitched_image[:, clip_start:clip_end, :])  # 切片
-    log.debug("成功完成切片操作")
+    log.info(QApplication.translate("Reclip", "Reclip completed."))
+    log.debug(f"Clip indexes: {clip_index}")
 
     reclip_data = ReclipData(
         clip_direction=Direction.VERTICAL,
@@ -197,7 +226,7 @@ def reclip_image(
     reclip_data.save_to_file(working_dir / "ReclipData.json")
 
     # 拼接
-    log.debug("开始进行拼接操作")
+    log.info(QApplication.translate("Reclip", "Start restitching clips"))
     canvas: np.ndarray = (
         np.ones_like(image_clips[np.argmax([c.size for c in image_clips])]).astype(
             np.uint8
@@ -231,7 +260,7 @@ def reclip_image(
         current_y += h
     reclip_save_filename = score_title + "-reclip" + reclipSettings.saving_format
     save_image(working_dir / reclip_save_filename, canvas)
-    log.success(f"已重新切片拼接，保存图片到{working_dir / reclip_save_filename}")
+    log.debug(f"Restitch completed, save preview to: {reclip_save_filename}")
 
     style_restitched_clips(
         log,
@@ -248,14 +277,20 @@ def get_gap_line_index(
     stitched_image: ImageArray,
     detector_settings: LineDetectorSettings,
     working_dir: Path,
+    log=None,
 ) -> list[int]:
     """get white gaps between sheet rows"""
+    if log is None:
+        from loguru import logger
+
+        log = logger
+
     blank_gaps = detect_horizontal_lines(
         cv2.cvtColor(stitched_image, cv2.COLOR_RGB2GRAY),
         coefficient=detector_settings.coefficient_horizontal,
-        reverse=True,
-        r_pixel_threshold=detector_settings.h_reverse_pixel_threshold,
-        r_thickness_threshold=detector_settings.h_reverse_thickness_threshold,
+        invert=True,
+        r_pixel_threshold=detector_settings.h_invert_pixel_threshold,
+        r_thickness_threshold=detector_settings.h_invert_thickness_threshold,
     )
     draw = deepcopy(stitched_image)
     for line in blank_gaps:
@@ -265,9 +300,16 @@ def get_gap_line_index(
     ]
     if blank_line_index == []:
         raise ValueError(
-            "Empty lines of sheet gaps! Please try to turn down your reverse horizontal line thresholds"
+            QApplication.translate(
+                "get_gap_line_index",
+                "Empty lines of sheet gaps! Please try to turn down your invert horizontal line thresholds",
+            )
         )
-    save_image(working_dir / f"{working_dir.name}-blank-gaps.jpg", draw)
+    save_image_name = f"{working_dir.name}-blank-gaps.jpg"
+    save_image(working_dir / save_image_name, draw)
+    log.debug(
+        f"Completely get gaps of the sheet row, save preview to: {save_image_name}"
+    )
     return blank_line_index
 
 
@@ -281,7 +323,13 @@ def style_restitched_clips(
     clip_height: list[int] | int,
     font_path: FilePath,
 ):
-    log.debug("Editing score style")
+    log.info(QApplication.translate("style_restitched_clips", "Editing score style"))
+    log.debug(f"Working dir: {working_dir}")
+    log.debug(f"Reclip Settings: {reclip_settings}")
+    # log.debug(f"Clip Height: {clip_height}")
+    log.debug(f"Style Data: {style_data}")
+    log.debug(f"Font Path: {font_path}")
+
     score_width = restitched_image.shape[1]
     canvas_width = int(score_width / (1 - style_data.margin_width))  # with margin
     canvas_height = int(canvas_width * 1.414)  # A4 shape
@@ -294,6 +342,7 @@ def style_restitched_clips(
     score_cut_height = canvas_height - canvas_margin_height * 2
     canvas = np.ones((canvas_height, canvas_width, 3), dtype=np.uint8) * 255
     stitched_image_length = restitched_image.shape[0]
+    log.debug(f"Canvas Shape: {(canvas_width, canvas_height)}")
 
     cut_indexes: list[int] = [0]
     cut_clip_num: int = 1
@@ -373,9 +422,17 @@ def style_restitched_clips(
         except ValueError as e:
             log.warning(e)
             log.warning(
-                f"{working_dir.name}{i}{reclip_settings.saving_format} clip failed."
-                "This may caused by too large cut height that out off the page bound."
-                "Check your height between cut_indexes, and try turning down your threshold reverse horizontal"
+                QApplication.translate("Reclip", "Clip image {} failed.").format(
+                    f"{working_dir.name}{i}{reclip_settings.saving_format}"
+                )
+                + QApplication.translate(
+                    "Reclip",
+                    "This may be caused by too large cut height that is out of the page bound.",
+                )
+                + QApplication.translate(
+                    "Reclip",
+                    "Check your cut_page_heights, and try lowering your invert horizontal line threshold.",
+                ),
             )
             return
 
@@ -406,7 +463,12 @@ def style_restitched_clips(
 
         filename = f"{working_dir.name}{i}{reclip_settings.saving_format}"
         pil_image.save(working_dir / filename)
-        log.info(f"Save final image to: {working_dir / filename}")
+        log.info(
+            QApplication.translate("Reclip", "Save final image to: {}").format(
+                working_dir / filename
+            )
+        )
+    log.success(QApplication.translate("Reclip", "Style edit completed."))
 
 
 def get_auto_sized_font(

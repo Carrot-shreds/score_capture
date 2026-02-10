@@ -5,6 +5,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from PySide6.QtCore import Signal, SignalInstance
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.data import CaptureData
 from src.Model.Data.settings import BuildImageSettings, CaptureSettings
@@ -30,6 +31,9 @@ def start_capture_loop(
         log = logger
     os.chdir(working_dir)
     log.debug(f"Working dir: {working_dir}")
+    log.debug(f"Region Data: {regionData}")
+    log.debug(f"Capture Setttings: {captureSettings}")
+    log.debug(f"ImageBuild Settings: {buildImageSettings}")
 
     captureData = CaptureData()
     temp_list: list[np.ndarray] = []
@@ -42,7 +46,7 @@ def start_capture_loop(
         temp_list.append(
             image_pre_process(
                 screenshot(region_data=regionData, capture_tool=captureSettings.tool),
-                captureSettings.if_reverse_image,
+                captureSettings.if_invert_image,
             )
         )
         temp_count += 1
@@ -52,8 +56,8 @@ def start_capture_loop(
         if signalCaptured:
             signalCaptured.emit(working_dir / save_filename)
         if total_count == 0:
-            log.info("===开始截图===")
-        if temp_count == 0:  # 不过第一张图象不进行对比
+            log.info(QApplication.translate("Capture", "=====Start Capture====="))
+        if temp_count == 0:  # 不过第一张图像不进行对比
             time.sleep(captureSettings.delay_time)  # 延时
             continue
 
@@ -75,16 +79,20 @@ def start_capture_loop(
         elif buildImageSettings.compare_method == "MSE":
             is_different = diff > buildImageSettings.compare_threshold
         else:
-            log.error("未知算法类型")
+            log.error(
+                QApplication.translate("Capture", "Invalid compare method {}").format(
+                    buildImageSettings.compare_method
+                )
+            )
             return
         # 输出diff至log
         if is_different:
             log.info(
-                f"{buildImageSettings.compare_method}-{str(total_count - 1)}-{str(total_count)}={str(round(diff, 5))}"
+                f"{buildImageSettings.compare_method}: {str(total_count - 1)} - {str(total_count)} = {str(round(diff, 5))}"
             )
         else:
             log.debug(
-                f"{buildImageSettings.compare_method}-{str(total_count - 1)}-{str(total_count)}={str(round(diff, 5))}"
+                f"{buildImageSettings.compare_method}: {str(total_count - 1)} - {str(total_count)} = {str(round(diff, 5))}"
             )
 
         # 保存去重后的图像
@@ -107,14 +115,15 @@ def start_capture_loop(
                 if signalBuildImage:
                     signalBuildImage.emit(working_dir / save_filename)
                 log.success(
-                    f"output image{image_count} from "
-                    f"capture{total_count - temp_count + 1}-{total_count - 1}"
+                    QApplication.translate(
+                        "Capture", "Output image{} build from capture{} - capture{}"
+                    ).format(image_count, total_count - temp_count + 1, total_count - 1)
                 )
             temp_list.clear()  # 清除缓存
             temp_count = -1  # 重置计数
         if stop_flag:  # 检测信号跳出循环
             stop_flag.set(False)
-            log.success("===本次截图完成===")
+            log.success(QApplication.translate("Capture", "=====Capture Finished====="))
             captureData.save_to_file(
                 working_dir / captureSettings.capture_data_filename
             )

@@ -20,6 +20,7 @@ from pydantic import (
 )
 from pydantic_extra_types.color import Color
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.const import (
     Align,
@@ -94,7 +95,7 @@ class CaptureSettings(SettingsModel):
     save_format: ImageSavingFormat = ImageSavingFormat.JPEG
     delay_time: PositiveFloat = 0.7  # seconds
     if_keep_last: bool = True
-    if_reverse_image: bool = False
+    if_invert_image: bool = False
     capture_data_filename: JsonFileName = "CaptureData.json"
 
 
@@ -107,11 +108,21 @@ class BuildImageSettings(SettingsModel):
         if self.compare_method == ImageCompareMethod.SSIM:
             if 0 < self.compare_threshold < 1:
                 return self
-            raise ValueError("compare_threshold must between 0-1 when using SSIM")
+            raise ValueError(
+                QApplication.translate(
+                    "validate_compare_threshold",
+                    "Compare_threshold must in 0-1 when using SSIM",
+                )
+            )
         elif self.compare_method == ImageCompareMethod.MSE:
             if 0 < self.compare_threshold < 65025:
                 return self
-            raise ValueError("compare_threshold must between 0-65025 when using MSE")
+            raise ValueError(
+                QApplication.translate(
+                    "validate_compare_threshold",
+                    "Compare_threshold must in 0-65025 when using MSE",
+                )
+            )
         else:
             raise ValueError(f"Invalid compare_method {self.compare_method}")
 
@@ -169,8 +180,8 @@ class LogSettings(SettingsModel):
 class LineDetectorSettings(SettingsModel):
     coefficient_horizontal: Annotated[float, Gt(0), Le(1)] = 0.7
     coefficient_vertical: Annotated[float, Gt(0), Le(1)] = 0.8
-    h_reverse_pixel_threshold: Annotated[float, Gt(0), Le(255)] = 255
-    h_reverse_thickness_threshold: Annotated[int, Gt(0)] = 10
+    h_invert_pixel_threshold: Annotated[float, Gt(0), Le(255)] = 255
+    h_invert_thickness_threshold: Annotated[int, Gt(0)] = 10
 
 
 class PathSettings(SettingsModel):
@@ -246,6 +257,7 @@ class ShortcutSettings(SettingsModel):
 
 
 class GUISettings(SettingsModel):
+    language: str = ""
     mainWindow_always_on_top: bool = True
     mainWindow_dock_perspective: str = "default"
     imageViewer_show_tools: bool = False
@@ -256,7 +268,7 @@ class PreviewSettings(SettingsModel):
     live_preview: bool = False
     live_detect: bool = False
     save_preview: bool = False
-    show_reversed_horizontal: bool = False
+    show_inverted_horizontal: bool = False
 
 
 class AppSettings(SettingsModel):
@@ -304,7 +316,9 @@ class AppSettings(SettingsModel):
             ) as f:
                 f.write(AppSettings.model_validate(now_dict).model_dump_json(indent=4))
         except ValidationError as e:
-            log.warning(f"AppSettings Saving Failed: {e}")
+            QApplication.translate("Settings", "AppSettings Saving Failed: {}").format(
+                e
+            )
         log.debug("AppSetting save complete")
 
     def load(self) -> "AppSettings":
@@ -315,13 +329,21 @@ class AppSettings(SettingsModel):
             with open(file=file_path, mode="r", encoding="utf-8") as f:
                 local_json = json.load(f)
                 if not isinstance(local_json, dict):
-                    log.warning("AppSettings load failed, settings json must be a dict")
+                    QApplication.translate(
+                        "Settings",
+                        "AppSettings load failed, settings json must be a dict",
+                    )
                     return self
                 update_json_to_model(local_json, new_model)
             log.debug("AppSettings load complete")
             return new_model
         except FileNotFoundError:
-            log.warning(f"AppSettings load failed, {file_path} Not Found")
+            log.info(
+                QApplication.translate(
+                    "Settings",
+                    "AppSettings load failed, {} Not Found, will use default settings.",
+                ).format(file_path)
+            )
             return self
 
 
@@ -340,11 +362,16 @@ def update_json_to_model(json: dict, model: BaseModel):
             except ValidationError as e:
                 log.debug(e)
                 log.warning(
-                    f"Invalid field_value:{v} for {k} when loading {model.__class__.__name__} from json"
+                    QApplication.translate(
+                        "Settings",
+                        "Invalid field_value:{0} for {1} when loading {2} from json",
+                    ).format(v, k, model.__class__.__name__)
                 )
         else:
             log.warning(
-                f"Invalid field_name:{k} when loading {model.__class__.__name__} from json"
+                QApplication.translate(
+                    "Settings", "Invalid field_name:{0} when loading {1} from json"
+                ).format(k, model.__class__.__name__)
             )
 
 
@@ -388,10 +415,17 @@ class AppSettingsSavingConfig(dict):
             return AppSettingsSavingConfig(d=config)
         except ValidationError:
             log.warning(
-                "AppSettingsSavingConfig load failed, using defalut config with all true"
+                QApplication.translate(
+                    "Settings",
+                    "AppSettingsSavingConfig load failed, using default config with all true (save all settings)",
+                )
             )
         except FileNotFoundError:
-            log.info(f"{file_path} Not Found, using default config")
+            log.info(
+                QApplication.translate(
+                    "Settings", "Config {} Not Found, using default config."
+                ).format(file_path)
+            )
         return self
 
 

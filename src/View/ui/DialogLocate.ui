@@ -83,15 +83,18 @@
          </item>
          <item row="1" column="3">
           <widget class="QPushButton" name="pushButton_preview">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show preview in tab preview.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
-            <string>预览</string>
+            <string>Preview</string>
            </property>
           </widget>
          </item>
          <item row="1" column="5">
           <widget class="QCheckBox" name="checkBox_dialog_always_on_top">
            <property name="text">
-            <string>窗口置顶</string>
+            <string>Always on Top</string>
            </property>
           </widget>
          </item>
@@ -107,13 +110,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item row="1" column="6">
-          <widget class="QCheckBox" name="checkBox_live_locate">
-           <property name="text">
-            <string>实时更新</string>
-           </property>
-          </widget>
          </item>
          <item row="1" column="12">
           <spacer name="horizontalSpacer_2">
@@ -147,38 +143,30 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>高:</string>
+            <string>Height:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
            </property>
           </widget>
          </item>
-         <item row="1" column="9">
-          <widget class="QPushButton" name="pushButton_close">
-           <property name="text">
-            <string>关闭</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="2">
           <widget class="QPushButton" name="pushButton_locate">
-           <property name="text">
-            <string>定位</string>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Update current location to region data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-          </widget>
-         </item>
-         <item row="1" column="8">
-          <widget class="QPushButton" name="pushButton_minimize">
            <property name="text">
-            <string>最小化</string>
+            <string>Locate</string>
            </property>
           </widget>
          </item>
          <item row="1" column="4">
-          <widget class="QCheckBox" name="checkBox_reverse_image">
+          <widget class="QCheckBox" name="checkBox_invert_image">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-family:'quote-cjk-patch','Inter','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Open Sans','Helvetica Neue','sans-serif'; font-size:16px; color:#0f1115; background-color:#ffffff;&quot;&gt;Converts image to its complementary colors.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
-            <string>图片反相</string>
+            <string>Invert</string>
            </property>
           </widget>
          </item>
@@ -207,7 +195,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>宽:</string>
+            <string>Width:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -296,6 +284,36 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item row="1" column="6">
+          <widget class="QCheckBox" name="checkBox_live_locate">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Update region when window geometry changed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Live Update</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="9">
+          <widget class="QPushButton" name="pushButton_close">
+           <property name="text">
+            <string>Close</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="7" colspan="2">
+          <widget class="QPushButton" name="pushButton_minimize">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Minimize</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

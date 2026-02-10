@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QCheckBox, QComboBox,
-    QDoubleSpinBox, QHBoxLayout, QLabel, QPushButton,
-    QRadioButton, QSizePolicy, QSpinBox, QSplitter,
-    QTabWidget, QVBoxLayout, QWidget)
+    QDoubleSpinBox, QFrame, QHBoxLayout, QLabel,
+    QPushButton, QRadioButton, QSizePolicy, QSpinBox,
+    QSplitter, QTabWidget, QVBoxLayout, QWidget)
 
 from ..widgets.ImageViewer import ImageViewer
 
@@ -63,6 +63,19 @@ class Ui_TabStitch(object):
 
         self.horizontalLayout.addWidget(self.comboBox_stitch_method)
 
+        self.line_5 = QFrame(self.tab_auto)
+        self.line_5.setObjectName(u"line_5")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.line_5.sizePolicy().hasHeightForWidth())
+        self.line_5.setSizePolicy(sizePolicy1)
+        self.line_5.setMinimumSize(QSize(0, 30))
+        self.line_5.setFrameShape(QFrame.Shape.VLine)
+        self.line_5.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout.addWidget(self.line_5)
+
         self.label_27 = QLabel(self.tab_auto)
         self.label_27.setObjectName(u"label_27")
         self.label_27.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
@@ -71,13 +84,27 @@ class Ui_TabStitch(object):
 
         self.radioButton_stitch_direction_vertical = QRadioButton(self.tab_auto)
         self.radioButton_stitch_direction_vertical.setObjectName(u"radioButton_stitch_direction_vertical")
+        sizePolicy1.setHeightForWidth(self.radioButton_stitch_direction_vertical.sizePolicy().hasHeightForWidth())
+        self.radioButton_stitch_direction_vertical.setSizePolicy(sizePolicy1)
 
         self.horizontalLayout.addWidget(self.radioButton_stitch_direction_vertical)
 
         self.radioButton_stitch_direction_horizontal = QRadioButton(self.tab_auto)
         self.radioButton_stitch_direction_horizontal.setObjectName(u"radioButton_stitch_direction_horizontal")
+        sizePolicy1.setHeightForWidth(self.radioButton_stitch_direction_horizontal.sizePolicy().hasHeightForWidth())
+        self.radioButton_stitch_direction_horizontal.setSizePolicy(sizePolicy1)
 
         self.horizontalLayout.addWidget(self.radioButton_stitch_direction_horizontal)
+
+        self.line_4 = QFrame(self.tab_auto)
+        self.line_4.setObjectName(u"line_4")
+        sizePolicy1.setHeightForWidth(self.line_4.sizePolicy().hasHeightForWidth())
+        self.line_4.setSizePolicy(sizePolicy1)
+        self.line_4.setMinimumSize(QSize(0, 30))
+        self.line_4.setFrameShape(QFrame.Shape.VLine)
+        self.line_4.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout.addWidget(self.line_4)
 
         self.pushButton_start_stitiching = QPushButton(self.tab_auto)
         self.pushButton_start_stitiching.setObjectName(u"pushButton_start_stitiching")
@@ -107,6 +134,7 @@ class Ui_TabStitch(object):
 
         self.label_2 = QLabel(self.tab_manual)
         self.label_2.setObjectName(u"label_2")
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.horizontalLayout_3.addWidget(self.label_2)
 
@@ -115,6 +143,16 @@ class Ui_TabStitch(object):
         self.spinBox_stitch_points_value.setStepType(QAbstractSpinBox.StepType.DefaultStepType)
 
         self.horizontalLayout_3.addWidget(self.spinBox_stitch_points_value)
+
+        self.line = QFrame(self.tab_manual)
+        self.line.setObjectName(u"line")
+        sizePolicy1.setHeightForWidth(self.line.sizePolicy().hasHeightForWidth())
+        self.line.setSizePolicy(sizePolicy1)
+        self.line.setMinimumSize(QSize(0, 40))
+        self.line.setFrameShape(QFrame.Shape.VLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_3.addWidget(self.line)
 
         self.label_3 = QLabel(self.tab_manual)
         self.label_3.setObjectName(u"label_3")
@@ -136,6 +174,16 @@ class Ui_TabStitch(object):
         self.pushButton_save_file_as.setObjectName(u"pushButton_save_file_as")
 
         self.horizontalLayout_3.addWidget(self.pushButton_save_file_as)
+
+        self.line_2 = QFrame(self.tab_manual)
+        self.line_2.setObjectName(u"line_2")
+        sizePolicy1.setHeightForWidth(self.line_2.sizePolicy().hasHeightForWidth())
+        self.line_2.setSizePolicy(sizePolicy1)
+        self.line_2.setMinimumSize(QSize(0, 40))
+        self.line_2.setFrameShape(QFrame.Shape.VLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_3.addWidget(self.line_2)
 
         self.pushButton_save_image = QPushButton(self.tab_manual)
         self.pushButton_save_image.setObjectName(u"pushButton_save_image")
@@ -166,6 +214,16 @@ class Ui_TabStitch(object):
         self.checkBox_show_mark_point.setObjectName(u"checkBox_show_mark_point")
 
         self.horizontalLayout_6.addWidget(self.checkBox_show_mark_point)
+
+        self.line_3 = QFrame(self.tab_view)
+        self.line_3.setObjectName(u"line_3")
+        sizePolicy1.setHeightForWidth(self.line_3.sizePolicy().hasHeightForWidth())
+        self.line_3.setSizePolicy(sizePolicy1)
+        self.line_3.setMinimumSize(QSize(0, 30))
+        self.line_3.setFrameShape(QFrame.Shape.VLine)
+        self.line_3.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_6.addWidget(self.line_3)
 
         self.checkBox_lock_zoom = QCheckBox(self.tab_view)
         self.checkBox_lock_zoom.setObjectName(u"checkBox_lock_zoom")
@@ -201,31 +259,58 @@ class Ui_TabStitch(object):
 
     def retranslateUi(self, TabStitch):
         TabStitch.setWindowTitle(QCoreApplication.translate("TabStitch", u"Form", None))
-        self.label_17.setText(QCoreApplication.translate("TabStitch", u"\u62fc\u63a5\u70b9\u7b97\u6cd5\uff1a", None))
+        self.label_17.setText(QCoreApplication.translate("TabStitch", u"Stitch Method:", None))
         self.comboBox_stitch_method.setItemText(0, QCoreApplication.translate("TabStitch", u"MSE", None))
         self.comboBox_stitch_method.setItemText(1, QCoreApplication.translate("TabStitch", u"SSIM", None))
         self.comboBox_stitch_method.setItemText(2, QCoreApplication.translate("TabStitch", u"DIRECT", None))
 
+#if QT_CONFIG(tooltip)
+        self.comboBox_stitch_method.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>SSIM: A bit slower but have way better result. Recommended.</p><p>MSE: Less cpu usage.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
         self.comboBox_stitch_method.setCurrentText(QCoreApplication.translate("TabStitch", u"MSE", None))
-        self.label_27.setText(QCoreApplication.translate("TabStitch", u"\u62fc\u63a5\u65b9\u5411\uff1a", None))
-        self.radioButton_stitch_direction_vertical.setText(QCoreApplication.translate("TabStitch", u"\u7eb5\u5411", None))
-        self.radioButton_stitch_direction_horizontal.setText(QCoreApplication.translate("TabStitch", u"\u6a2a\u5411", None))
-        self.pushButton_start_stitiching.setText(QCoreApplication.translate("TabStitch", u"\u5f00\u59cb\u62fc\u63a5", None))
-        self.pushButton_clear_cache.setText(QCoreApplication.translate("TabStitch", u"\u6e05\u9664\u7ebf\u6bb5\u7f13\u5b58", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_auto), QCoreApplication.translate("TabStitch", u"\u81ea\u52a8\u62fc\u63a5", None))
-        self.label.setText(QCoreApplication.translate("TabStitch", u"\u62fc\u63a5\u70b9\u5e8f\u53f7\uff1a", None))
-        self.label_2.setText(QCoreApplication.translate("TabStitch", u"\u504f\u79fb\u50cf\u7d20\u503c\uff1a", None))
-        self.label_3.setText(QCoreApplication.translate("TabStitch", u"\u62fc\u63a5\u70b9\u6570\u636e\uff1a", None))
-        self.pushButton_select_file.setText(QCoreApplication.translate("TabStitch", u"\u6253\u5f00\u6587\u4ef6", None))
-        self.pushButton_save_file.setText(QCoreApplication.translate("TabStitch", u"\u4fdd\u5b58", None))
-        self.pushButton_save_file_as.setText(QCoreApplication.translate("TabStitch", u"\u53e6\u5b58\u4e3a", None))
-        self.pushButton_save_image.setText(QCoreApplication.translate("TabStitch", u"\u4fdd\u5b58\u62fc\u63a5\u56fe\u50cf", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_manual), QCoreApplication.translate("TabStitch", u"\u624b\u52a8\u8c03\u6574", None))
-        self.label_4.setText(QCoreApplication.translate("TabStitch", u"\u6807\u8bb0\u70b9\u4f4d\u7f6e\uff1a", None))
-        self.checkBox_show_mark_point.setText(QCoreApplication.translate("TabStitch", u"\u9884\u89c8\u663e\u793a\u6807\u8bb0\u70b9", None))
-        self.checkBox_lock_zoom.setText(QCoreApplication.translate("TabStitch", u"\u9501\u5b9a\u7f29\u653e", None))
-        self.checkBox_auto_zoom.setText(QCoreApplication.translate("TabStitch", u"\u81ea\u52a8\u7f29\u653e", None))
-        self.pushButton_reset_region.setText(QCoreApplication.translate("TabStitch", u"\u91cd\u7f6e\u7f29\u653e", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_view), QCoreApplication.translate("TabStitch", u"\u89c6\u56fe/\u64cd\u4f5c", None))
+        self.label_27.setText(QCoreApplication.translate("TabStitch", u"Stitch Direction:", None))
+        self.radioButton_stitch_direction_vertical.setText(QCoreApplication.translate("TabStitch", u"Vertical", None))
+        self.radioButton_stitch_direction_horizontal.setText(QCoreApplication.translate("TabStitch", u"Horizontal", None))
+        self.pushButton_start_stitiching.setText(QCoreApplication.translate("TabStitch", u"Start Stitch", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_clear_cache.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>Remove ScoreDetections.json which cached detected lines data, used to stitch images as reference.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.pushButton_clear_cache.setText(QCoreApplication.translate("TabStitch", u"Clear Line Cache", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_auto), QCoreApplication.translate("TabStitch", u"Auto", None))
+        self.label.setText(QCoreApplication.translate("TabStitch", u"Index:", None))
+#if QT_CONFIG(tooltip)
+        self.spinBox_stitch_points_index.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>The index of stitch points.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_2.setText(QCoreApplication.translate("TabStitch", u"Position:", None))
+#if QT_CONFIG(tooltip)
+        self.spinBox_stitch_points_value.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>The value of the stitch point.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_3.setText(QCoreApplication.translate("TabStitch", u"ScoreStitchData:", None))
+        self.pushButton_select_file.setText(QCoreApplication.translate("TabStitch", u"Open", None))
+        self.pushButton_save_file.setText(QCoreApplication.translate("TabStitch", u"Save", None))
+        self.pushButton_save_file_as.setText(QCoreApplication.translate("TabStitch", u"Save As", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_save_image.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>Save manual stitched image to reclip.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.pushButton_save_image.setText(QCoreApplication.translate("TabStitch", u"Save Image", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_manual), QCoreApplication.translate("TabStitch", u"Manual", None))
+        self.label_4.setText(QCoreApplication.translate("TabStitch", u"Mark Point Position:", None))
+#if QT_CONFIG(tooltip)
+        self.doubleSpinBox_location_mark_point.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>Position of the mark point. From 0 to 1 on the stitching line axis.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.checkBox_show_mark_point.setText(QCoreApplication.translate("TabStitch", u"Show Mark Point", None))
+#if QT_CONFIG(tooltip)
+        self.checkBox_lock_zoom.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>Lock the view zoom in the opposite direction of stitch direction.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.checkBox_lock_zoom.setText(QCoreApplication.translate("TabStitch", u"Lock Zoom", None))
+#if QT_CONFIG(tooltip)
+        self.checkBox_auto_zoom.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>Auto reset zoom and range when index or position changed.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.checkBox_auto_zoom.setText(QCoreApplication.translate("TabStitch", u"Auto Range", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_reset_region.setToolTip(QCoreApplication.translate("TabStitch", u"<html><head/><body><p>Reset the preview region to current stitching line area.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.pushButton_reset_region.setText(QCoreApplication.translate("TabStitch", u"Reset Zoom", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_view), QCoreApplication.translate("TabStitch", u"View", None))
     # retranslateUi
 

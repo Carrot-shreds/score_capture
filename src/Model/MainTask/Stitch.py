@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from fast_ssim import ssim
 from pydantic import PositiveInt, validate_call
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.const import StitchMethod
 from src.Model.Data.data import ImageData, ScoreDetections, ScoreStitchData
@@ -42,6 +43,8 @@ def stitch_image_task(
         log = logger
     os.chdir(working_dir)
     log.debug(f"Working dir: {working_dir}")
+    log.debug(f"Detector Settings: {detectorSettings}")
+    log.debug(f"Stitch Settings: {stitchSettings}")
 
     score_title: str = working_dir.name
     scoreDetections = ScoreDetections(directory=working_dir)
@@ -51,15 +54,19 @@ def stitch_image_task(
         try:
             scoreDetections: ScoreDetections = ScoreDetections.load_from_file(f)
             image_filenames = scoreDetections.get_image_filenames()
-            log.debug("成功读取缓存，跳过线段检测")
+            log.debug("Line cache read successfully, skip line detection.")
         except Exception:
-            log.warning(f"ScoreDetections load failed: {f}")
+            log.warning(
+                QApplication.translate(
+                    "Stitch", "ScoreDetections load failed: {}"
+                ).format(f)
+            )
     if (
         stitchSettings.method != "DIRECT"
         and scoreDetections.get_image_filenames() == []  # load failed
     ):
         # 获取检测数据
-        log.info("开始检测图像中的线段")
+        log.info(QApplication.translate("Stitch", "Detecting image lines"))
         for f in working_dir.glob("*image*-detected.*"):
             os.remove(f)
         for f in working_dir.glob("*image*"):
@@ -84,14 +91,19 @@ def stitch_image_task(
                 vertical_lines,
             )
             log.debug(
-                f"{f.name}-horizontal:{len(horizontal_lines)}-vertical:{len(vertical_lines)}"
+                f"{f.name}: Horizontal Lines:{len(horizontal_lines)} - Vertical Lines:{len(vertical_lines)}"
             )
         scoreDetections.save_to_file(working_dir / "ScoreDetections.json")
-        log.info("线段检测完毕，已生成对应预览图")
+        log.debug("Line detect completed, cache saved to: ScoreDetections.json")
     else:
         image_filenames = [f.name for f in working_dir.glob("*image*")]
     if len(image_filenames) < 2:
-        log.error("未发2现张或以上可供拼接的图像，请检查文件夹中image数目")
+        log.error(
+            QApplication.translate(
+                "Stitch",
+                "Available image* must >= 2, please check your working dir.",
+            )
+        )
         return
 
     # 获取排序后的图片名称
@@ -101,14 +113,18 @@ def stitch_image_task(
         cv2.cvtColor(i, cv2.COLOR_RGB2GRAY) for i in images
     ]
 
-    log.debug("Stitch method: " + stitchSettings.method)
-    log.debug("Stitch direction: " + stitchSettings.direction.str)
+    log.debug("Stitch Method: " + stitchSettings.method)
+    log.debug("Stitch Direction: " + stitchSettings.direction.str)
     # 获取mse最低时的拼接像素点
     if stitchSettings.method == "DIRECT":
-        log.info("直接拼接模式，跳过比对")
+        log.info(
+            QApplication.translate(
+                "Stitch", "Direct stitching mode, skip image compare."
+            )
+        )
         stitch_points = [0] * (len(images) - 1)
     else:
-        log.info("比对图片中")
+        log.info(QApplication.translate("Stitch", "Comparing images"))
         stitch_points: list[int] = []
         stitch_direction = stitchSettings.direction
         # 拼接参考线方向，与拼接方向相反
@@ -137,11 +153,11 @@ def stitch_image_task(
             )
 
             log.debug(
-                f"{stitch_direction.str}:{stitchSettings.method}-"
+                f"{stitch_direction.str}:{stitchSettings.method}: "
                 f"{image_names[name_index]}-{image_names[name_index + 1]}"
                 f"-stitch_point:{stitch_points[-1]}"
             )
-        log.info("图像比对完毕")
+        log.info(QApplication.translate("Stitch", "Image compare completed."))
 
     # 保存拼接点数据
     scoreStitchData = ScoreStitchData(stitch_settings=stitchSettings)
@@ -149,11 +165,15 @@ def stitch_image_task(
     scoreStitchData.save_to_file(working_dir / "ScoreStitchData.json")
 
     # 进行拼接
-    log.info("图像拼接中")
+    log.info(QApplication.translate("Stitch", "Stitching images."))
     final_image = stitch_images(images, stitch_points, stitchSettings.direction)
     saving_filename = score_title + "-stitched" + stitchSettings.saving_format
     save_image(working_dir / saving_filename, final_image)
-    log.info(f"图像拼接完毕，已生成预览图{working_dir / saving_filename}")
+    log.success(
+        QApplication.translate(
+            "Stitch", "Stitch completed, preview image saved: {}"
+        ).format(saving_filename)
+    )
 
 
 @validate_call
@@ -186,7 +206,10 @@ def get_stitch_index(
         stitch_index = []
     if stitch_index == []:  # 当img1，img2无重合特征线时
         log.warning(
-            f"{name_img1}与{name_img2}无重合特征线，将在中间区域进行比对"
+            QApplication.translate(
+                "Stitch",
+                "There are not overlaping lines between {} and {}, will try to stitch in the middle area.",
+            ).format(name_img1, name_img2)
         ) if log else None
         stitch_index = [  # 取中间3/5的区域
             i for i in range(int(stitch_length * 0.2), int(stitch_length * 0.8))

@@ -8,7 +8,6 @@
 #
 # You should have received a copy of the GNU General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
-
 import sys
 
 from loguru import logger as log
@@ -17,22 +16,51 @@ from src import __version__
 
 
 def show_main_window() -> None:
+    import os
+
     from PySide6 import QtCore
+    from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
     from PySide6.QtWidgets import QApplication
+
+    from src.Model.Data.settings import guiSettings
 
     # init qfile resource during import
     from src.resource import compiled_resource  # noqa:F401
     from src.ViewModel.MainWindow import MainWindow_VM
 
-    """主窗口进程函数"""
-    # dps缩放设定，详见https://doc.qt.io/qtforpython-6/PySide6/QtCore/Qt.html#PySide6.QtCore.Qt.HighDpiScaleFactorRoundingPolicy
+    # dpi scale setting，Reference: https://doc.qt.io/qtforpython-6/PySide6/QtCore/Qt.html#PySide6.QtCore.Qt.HighDpiScaleFactorRoundingPolicy
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )  # default
+    os.environ["QT_FONT_DPI"] = "96"
 
     # Ignore Error - "qt.qpa.window: SetProcessDpiAwarenessContext() failed"
     QtCore.QLoggingCategory.setFilterRules("qt.qpa.window.warning=false")
     app = QApplication(sys.argv)
+
+    # Load language files
+    path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+    translator = QTranslator(app)
+    if (
+        translator.load(QLocale.system(), "qtbase", "_", path)
+        if (lang := guiSettings.language) == ""
+        else translator.load("qtbase_" + lang, path)
+    ):
+        app.installTranslator(translator)
+    translator = QTranslator(app)
+    translation_path = ":/translations"
+    if (
+        translator.load(QLocale.system(), "", "", translation_path)
+        if (lang := guiSettings.language) == ""
+        else translator.load(lang, translation_path)
+    ):
+        app.installTranslator(translator)
+        if (lang := translator.language()) != guiSettings.language:
+            guiSettings.language = lang
+        log.debug(f"Loaded Language: {lang}")
+    else:
+        log.debug("Loaded Language: en (defult)")
+
     window = MainWindow_VM()
     window.show()
     window.activateWindow()
@@ -60,11 +88,11 @@ def load_config() -> None:
 
 def main() -> None:
     init_log()  # init log detour
-    log.debug("=====Main_starting=====")
-    log.debug(f"Current version: {__version__}")
+    log.debug("=====Main Starting=====")
+    log.debug(("Current version: {}").format(__version__))
     load_config()
     show_main_window()
-    log.debug("=====Main_finished=====")
+    log.debug("=====Main Finished=====")
 
 
 if __name__ == "__main__":

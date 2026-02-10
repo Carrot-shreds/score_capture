@@ -71,11 +71,6 @@ class Ui_DialogLocate(object):
 
         self.gridLayout_2.addItem(self.horizontalSpacer_4, 0, 10, 1, 3)
 
-        self.checkBox_live_locate = QCheckBox(self.frame)
-        self.checkBox_live_locate.setObjectName(u"checkBox_live_locate")
-
-        self.gridLayout_2.addWidget(self.checkBox_live_locate, 1, 6, 1, 1)
-
         self.horizontalSpacer_2 = QSpacerItem(86, 25, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.gridLayout_2.addItem(self.horizontalSpacer_2, 1, 12, 1, 1)
@@ -91,25 +86,15 @@ class Ui_DialogLocate(object):
 
         self.gridLayout_2.addWidget(self.label_8, 0, 8, 1, 1)
 
-        self.pushButton_close = QPushButton(self.frame)
-        self.pushButton_close.setObjectName(u"pushButton_close")
-
-        self.gridLayout_2.addWidget(self.pushButton_close, 1, 9, 1, 1)
-
         self.pushButton_locate = QPushButton(self.frame)
         self.pushButton_locate.setObjectName(u"pushButton_locate")
 
         self.gridLayout_2.addWidget(self.pushButton_locate, 1, 2, 1, 1)
 
-        self.pushButton_minimize = QPushButton(self.frame)
-        self.pushButton_minimize.setObjectName(u"pushButton_minimize")
+        self.checkBox_invert_image = QCheckBox(self.frame)
+        self.checkBox_invert_image.setObjectName(u"checkBox_invert_image")
 
-        self.gridLayout_2.addWidget(self.pushButton_minimize, 1, 8, 1, 1)
-
-        self.checkBox_reverse_image = QCheckBox(self.frame)
-        self.checkBox_reverse_image.setObjectName(u"checkBox_reverse_image")
-
-        self.gridLayout_2.addWidget(self.checkBox_reverse_image, 1, 4, 1, 1)
+        self.gridLayout_2.addWidget(self.checkBox_invert_image, 1, 4, 1, 1)
 
         self.spinBox_region_width = QSpinBox(self.frame)
         self.spinBox_region_width.setObjectName(u"spinBox_region_width")
@@ -171,6 +156,23 @@ class Ui_DialogLocate(object):
 
         self.gridLayout_2.addItem(self.horizontalSpacer_6, 0, 0, 1, 2)
 
+        self.checkBox_live_locate = QCheckBox(self.frame)
+        self.checkBox_live_locate.setObjectName(u"checkBox_live_locate")
+
+        self.gridLayout_2.addWidget(self.checkBox_live_locate, 1, 6, 1, 1)
+
+        self.pushButton_close = QPushButton(self.frame)
+        self.pushButton_close.setObjectName(u"pushButton_close")
+
+        self.gridLayout_2.addWidget(self.pushButton_close, 1, 9, 1, 1)
+
+        self.pushButton_minimize = QPushButton(self.frame)
+        self.pushButton_minimize.setObjectName(u"pushButton_minimize")
+        sizePolicy2.setHeightForWidth(self.pushButton_minimize.sizePolicy().hasHeightForWidth())
+        self.pushButton_minimize.setSizePolicy(sizePolicy2)
+
+        self.gridLayout_2.addWidget(self.pushButton_minimize, 1, 7, 1, 2)
+
 
         self.horizontalLayout.addWidget(self.frame)
 
@@ -185,16 +187,28 @@ class Ui_DialogLocate(object):
 
     def retranslateUi(self, DialogLocate):
         DialogLocate.setWindowTitle(QCoreApplication.translate("DialogLocate", u"Locate", None))
-        self.pushButton_preview.setText(QCoreApplication.translate("DialogLocate", u"\u9884\u89c8", None))
-        self.checkBox_dialog_always_on_top.setText(QCoreApplication.translate("DialogLocate", u"\u7a97\u53e3\u7f6e\u9876", None))
-        self.checkBox_live_locate.setText(QCoreApplication.translate("DialogLocate", u"\u5b9e\u65f6\u66f4\u65b0", None))
-        self.label_8.setText(QCoreApplication.translate("DialogLocate", u"\u9ad8:", None))
-        self.pushButton_close.setText(QCoreApplication.translate("DialogLocate", u"\u5173\u95ed", None))
-        self.pushButton_locate.setText(QCoreApplication.translate("DialogLocate", u"\u5b9a\u4f4d", None))
-        self.pushButton_minimize.setText(QCoreApplication.translate("DialogLocate", u"\u6700\u5c0f\u5316", None))
-        self.checkBox_reverse_image.setText(QCoreApplication.translate("DialogLocate", u"\u56fe\u7247\u53cd\u76f8", None))
-        self.label_7.setText(QCoreApplication.translate("DialogLocate", u"\u5bbd:", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_preview.setToolTip(QCoreApplication.translate("DialogLocate", u"<html><head/><body><p>Show preview in tab preview.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.pushButton_preview.setText(QCoreApplication.translate("DialogLocate", u"Preview", None))
+        self.checkBox_dialog_always_on_top.setText(QCoreApplication.translate("DialogLocate", u"Always on Top", None))
+        self.label_8.setText(QCoreApplication.translate("DialogLocate", u"Height:", None))
+#if QT_CONFIG(tooltip)
+        self.pushButton_locate.setToolTip(QCoreApplication.translate("DialogLocate", u"<html><head/><body><p>Update current location to region data.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.pushButton_locate.setText(QCoreApplication.translate("DialogLocate", u"Locate", None))
+#if QT_CONFIG(tooltip)
+        self.checkBox_invert_image.setToolTip(QCoreApplication.translate("DialogLocate", u"<html><head/><body><p><span style=\" font-family:'quote-cjk-patch','Inter','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Open Sans','Helvetica Neue','sans-serif'; font-size:16px; color:#0f1115; background-color:#ffffff;\">Converts image to its complementary colors.</span></p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.checkBox_invert_image.setText(QCoreApplication.translate("DialogLocate", u"Invert", None))
+        self.label_7.setText(QCoreApplication.translate("DialogLocate", u"Width:", None))
         self.label_11.setText(QCoreApplication.translate("DialogLocate", u"Y:", None))
         self.label_9.setText(QCoreApplication.translate("DialogLocate", u"X:", None))
+#if QT_CONFIG(tooltip)
+        self.checkBox_live_locate.setToolTip(QCoreApplication.translate("DialogLocate", u"<html><head/><body><p>Update region when window geometry changed.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.checkBox_live_locate.setText(QCoreApplication.translate("DialogLocate", u"Live Update", None))
+        self.pushButton_close.setText(QCoreApplication.translate("DialogLocate", u"Close", None))
+        self.pushButton_minimize.setText(QCoreApplication.translate("DialogLocate", u"Minimize", None))
     # retranslateUi
 

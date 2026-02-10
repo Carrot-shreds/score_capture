@@ -19,23 +19,28 @@ class DialogGlobImage(QDialog):
         self.setWindowFlag(
             QtCore.Qt.WindowType.WindowStaysOnTopHint, True
         )  # 置顶，必要
-        self.setWindowTitle("Glob Images")
+        self.setWindowTitle(self.tr("Glob Images"))
         self.resize(400, 100)
 
-        self.label_path = QLabel(self, text="Path:")
+        self.label_path = QLabel(self, text=self.tr("Path:"))
         self.label_path.setSizePolicy(
             QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
         )
         self.lineEdit_path = QLineEdit(self)
-        self.label_glob = QLabel(self, text="Glob:")
+        self.label_glob = QLabel(self, text=self.tr("Glob:"))
         self.label_glob.setSizePolicy(
             QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
         )
         self.pushButton_select_path = QPushButton(self)
-        self.pushButton_select_path.setText("Select")
+        self.pushButton_select_path.setText(self.tr("Browse"))
         self.pushButton_ok = QPushButton(self)
-        self.pushButton_ok.setText("OK")
+        self.pushButton_ok.setText(self.tr("OK"))
         self.comboBox_glob = QComboBox(self)
+        self.comboBox_glob.setToolTip(
+            self.tr(
+                "Unix style pathname pattern expansion.\nSee Python glob module doc."
+            )
+        )
         self.comboBox_glob.setEditable(True)
         self.comboBox_glob.addItem("image*[!a-z].*")
         self.comboBox_glob.addItem("image*")

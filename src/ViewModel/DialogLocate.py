@@ -43,7 +43,7 @@ class DialogLocate_VM(DialogLocate_View):
             self.locateSettings,
             "window_always_on_top",
         )
-        bind_data(self.checkBox_reverse_image, self.captureSettings, "if_reverse_image")
+        bind_data(self.checkBox_invert_image, self.captureSettings, "if_invert_image")
 
         self.locateSettings.region_data.add_observer_handlers(
             ["x", "y", "width", "height"],
@@ -89,11 +89,13 @@ class DialogLocate_VM(DialogLocate_View):
         try:
             self.locateSettings.region_data.region = region
         except ValidationError as e:
-            log.warning(f"Invalid region:{region}")
+            log.warning(self.tr("Invalid region: {}").format(region))
             log.debug(e)
             return
         if not self.locateSettings.live_locate:
-            log.success(f"update region: {tuple(int(r) for r in region)}")
+            log.success(
+                self.tr("Update region: {}").format(tuple(int(r) for r in region))
+            )
         if self.locateSettings.window_auto_close:
             self.close()
 
@@ -110,8 +112,10 @@ class DialogLocate_VM(DialogLocate_View):
             qrect2array(self.geometry()) - qrect2array(self.frameGeometry())
         )
         self.setGeometry(*self.locateSettings.region_data.region)
-        log.debug(f"Scrren scaling: {self.scaling}")
-        log.debug(f"Locate offset: {self.locateSettings.locate_offset}")
+        log.debug(self.tr("Screen scaling: {}").format(self.scaling))
+        log.debug(
+            self.tr("Locate offset: {}").format(self.locateSettings.locate_offset)
+        )
 
     def close(self, /) -> bool:
         self.setVisible(False)

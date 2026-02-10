@@ -29,6 +29,7 @@ from pydantic import (
     model_validator,
 )
 from pydantic_extra_types.color import Color
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.const import IMAGE_EXTENSIONS, Direction
 
@@ -46,7 +47,9 @@ def filename_validator(value: NonEmptyStr) -> NonEmptyStr:
     else:
         sanitized_value = sanitize_filename(value, platform=sys.platform)
         log.warning(
-            f"Invalid filename: {value}, automatically fix to {sanitized_value}"
+            QApplication.translate(
+                "filename_validator", "Invalid filename: {}, automatically fix to {}"
+            ).format(value, sanitized_value)
         )
         return sanitized_value
 
@@ -59,7 +62,7 @@ def filename_extension_validator(
     elif isinstance(value, Path):
         extension = "." + value.name.split(".")[-1]  # pyright:ignore
     else:
-        raise ValueError("value must be str or path")
+        raise ValueError("Value must be str or path")
     if extension not in extensions:
         raise ValueError(f"Wrong file extension:{extension}, expect for:{extensions}")
     return value
@@ -71,7 +74,9 @@ def filepath_validator(value: Path) -> Path:
     else:
         sanitized_value = sanitize_filepath(value, platform=sys.platform)
         log.warning(
-            f"Invalid filepath: {value}, automatically fix to {sanitized_value}"
+            QApplication.translate(
+                "filepath_validator", "Invalid filepath: {}, automatically fix to {}"
+            ).format(value, sanitized_value)
         )
         return sanitized_value
 
@@ -83,7 +88,11 @@ def resolve_path(value: Path) -> Path:
 def path_exist_validator(value: Path) -> Path:
     if value.exists():
         return value
-    raise ValueError(f"Path does not exist:{value}")
+    raise ValueError(
+        QApplication.translate(
+            "path_exist_validator", "Path does not exist: {}"
+        ).format(value)
+    )
 
 
 def not_none(v: Any) -> bool:
@@ -345,14 +354,14 @@ class Line(AlwaysValidateModel):
             self.point1[0] >= self.image_shape[1]
             or self.point1[1] >= self.image_shape[0]
         ):
-            raise ValueError("Line point1 out off the image bounds")
+            raise ValueError("Line point1 out of the image bounds")
         if (
             self.point2[0] >= self.image_shape[1]
             or self.point2[1] >= self.image_shape[0]
         ):
-            raise ValueError("Line point2 out off the image bounds")
+            raise ValueError("Line point2 out of the image bounds")
         if self.end_index >= self.image_shape[not_normal_direction]:
-            raise ValueError("Line out off the image bounds because it's too thick!!!")
+            raise ValueError("Line out of the image bounds because it's too thick!!!")
         return self
 
     def draw(self, img: np.ndarray | cv2.Mat, color: Color = Color("#00FF00")) -> None:
@@ -453,7 +462,7 @@ class RegionData(AlwaysValidateModel, OnValueChangeModel):
             )
             return
         else:
-            raise ValueError("Invaild RegionData paremeter")
+            raise ValueError("Invalid RegionData paremeter")
 
     @property
     def region(self) -> Region:
@@ -469,7 +478,11 @@ class RegionData(AlwaysValidateModel, OnValueChangeModel):
         with mss.mss() as sct:
             monitors = sct.monitors
             if self.monitor_num < 1 or self.monitor_num > len(monitors) - 1:
-                raise ValueError(f"Invalid monitor_num:{self.monitor_num}")
+                raise ValueError(
+                    QApplication.translate(
+                        "validate_region", "Invalid monitor_num: {}"
+                    ).format(self.monitor_num)
+                )
             monitor = monitors[self.monitor_num]
             if (
                 self.x < 0
@@ -478,7 +491,10 @@ class RegionData(AlwaysValidateModel, OnValueChangeModel):
                 or self.y + self.height > monitor["height"]
             ):
                 raise ValueError(
-                    f"Region-{self.region} out off num-({self.monitor_num}) screen bounds: {monitor}"
+                    QApplication.translate(
+                        "validate_region",
+                        "Region-{} out of num-({}) screen bounds: {}",
+                    ).format(self.region, self.monitor_num, monitor)
                 )
         return self
 

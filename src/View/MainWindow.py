@@ -19,11 +19,13 @@ from PySide6.QtWidgets import (
 
 from .ui.MainWindow_ui import Ui_MainWindow
 
+LANGUAGES: dict[str, str] = {"English": "en", "简体中文": "zh_CN"}
+
 
 class About(QDialog):
     def __init__(self, parent, version: str) -> None:
         super().__init__(parent)
-        self.setWindowTitle("About")
+        self.setWindowTitle(self.tr("About"))
         self.label_title = QLabel("Score capture")
         self.label_version = QLabel(f"Version: {version}")
         self.label_copyright = QLabel("Copyright © 2025 Carrot-shreds")
@@ -31,7 +33,7 @@ class About(QDialog):
             "<a href='https://github.com/Carrot-shreds/score_capture'>Open source repository</a>",
             openExternalLinks=True,
         )
-        self.button_license = QPushButton("View license")
+        self.button_license = QPushButton(self.tr("View license"))
         self.button_license.clicked.connect(lambda: License(self))
 
         self.boxlayout = QVBoxLayout(self)
@@ -48,7 +50,7 @@ class About(QDialog):
 class License(QDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent)
-        self.setWindowTitle("License")
+        self.setWindowTitle(self.tr("License"))
         self.resize(550, 600)
 
         license_file = QFile(":/license")
@@ -72,13 +74,16 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         # tool bar
         self.toolBar_path.clear()
         self.lineEdit_score_title = QLineEdit(self)
+        self.lineEdit_score_title.setToolTip(
+            self.tr("Also used as title of files and score.")
+        )
         self.toolBar_path.addSeparator()
-        self.toolBar_path.addWidget(QLabel("标题:"))
+        self.toolBar_path.addWidget(QLabel(self.tr("Folder Title:")))
         self.toolBar_path.addWidget(self.lineEdit_score_title)
         self.toolBar_path.addAction(self.action_select_folder)
         self.toolBar_path.addAction(self.action_rename_folder)
         self.toolBar_path.addAction(self.action_open_folder)
-        self.action_mainwindow_always_top = QAction("置顶窗口")
+        self.action_mainwindow_always_top = QAction(self.tr("Always on Top"))
         self.action_mainwindow_always_top.setCheckable(True)
 
         # shortcut
@@ -98,7 +103,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
             Qt.TextInteractionFlag.TextSelectableByMouse
         )
         self.statusbar.addPermanentWidget(self.label_version)  # 从右往左添加
-        self.statusbar.addWidget(QLabel("    "))
+        self.statusbar.addWidget(QLabel(self.tr("      Working Dir:")))
         self.label_working_dir = QLabel()
         self.label_working_dir.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextSelectableByMouse
@@ -165,31 +170,38 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
 
         # Create Docking Widget and tabs
         # Settings
-        dock_widget_settings = self.dock_manager.createDockWidget("Settings")
+        dock_widget_settings = self.dock_manager.createDockWidget(self.tr("Settings"))
         dock_widget_settings.setWidget(tab_settings)
+        dock_widget_settings.setObjectName(
+            "Settings"
+        )  # Obj name without tr for perspective saving
         dock_area_settings = self.dock_manager.addAutoHideDockWidget(
             QtAds.SideBarLeft, dock_widget_settings
         )
         dock_area_settings.setSize(self.frameGeometry().width() * 4 // 5)
         # Console
-        dock_widget_console = self.dock_manager.createDockWidget("Console")
+        dock_widget_console = self.dock_manager.createDockWidget(self.tr("Console"))
         dock_widget_console.setWidget(tab_console)
+        dock_widget_console.setObjectName("Console")
         dock_area_console = self.dock_manager.addDockWidget(  # noqa:F841
             QtAds.BottomDockWidgetArea, dock_widget_console
         )
         # Preview
-        dock_widget_preview = self.dock_manager.createDockWidget("Preview")
+        dock_widget_preview = self.dock_manager.createDockWidget(self.tr("Preview"))
         dock_widget_preview.setWidget(tab_preview)
+        dock_widget_preview.setObjectName("Preview")
         self.dock_manager.addDockWidgetTabToArea(dock_widget_preview, dock_area_central)
         # Stitch
-        self.dock_widget_stitch = self.dock_manager.createDockWidget("Stitch")
+        self.dock_widget_stitch = self.dock_manager.createDockWidget(self.tr("Stitch"))
         self.dock_widget_stitch.setWidget(tab_stitch)
+        self.dock_widget_stitch.setObjectName("Stitch")
         self.dock_manager.addDockWidgetTabToArea(
             self.dock_widget_stitch, dock_area_central
         )
         # Reclip
-        dock_widget_reclip = self.dock_manager.createDockWidget("Reclip")
+        dock_widget_reclip = self.dock_manager.createDockWidget(self.tr("Reclip"))
         dock_widget_reclip.setWidget(tab_reclip)
+        dock_widget_reclip.setObjectName("Reclip")
         self.dock_manager.addDockWidgetTabToArea(dock_widget_reclip, dock_area_central)
         dock_area_central.setCurrentDockWidget(dock_widget_preview)
 
@@ -207,9 +219,9 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
             self.new_docking_perspective("default")
 
     def create_docking_perspective(self):
-        save_perspective_action = QAction("保存当前", self)
+        save_perspective_action = QAction(self.tr("Save"), self)
         save_perspective_action.triggered.connect(self.handel_new_docking_perspective)
-        remove_perspective_action = QAction("删除当前", self)
+        remove_perspective_action = QAction(self.tr("Delete"), self)
         remove_perspective_action.triggered.connect(self.remove_docking_perspective)
         perspective_list_action = QWidgetAction(self)
         self.perspective_combobox = QComboBox(self)
@@ -223,11 +235,17 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
             self.dock_manager.openPerspective
         )
         perspective_list_action.setDefaultWidget(self.perspective_combobox)
+
+        perspective_list_action.setToolTip(self.tr("Docking system view preset."))
+        save_perspective_action.setToolTip(self.tr("Save current layout"))
+        remove_perspective_action.setToolTip(self.tr("Delete current using preset"))
+
         self.toolBar_view.addSeparator()
-        self.toolBar_view.addWidget(QLabel("布局预设:"))
+        self.toolBar_view.addWidget(QLabel(self.tr("Docking Perspective:")))
         self.toolBar_view.addAction(perspective_list_action)
         self.toolBar_view.addAction(save_perspective_action)
         self.toolBar_view.addAction(remove_perspective_action)
+        self.toolBar_view.addSeparator()
         self.toolBar_view.addAction(self.action_mainwindow_always_top)
 
     def remove_docking_perspective(self):
@@ -250,7 +268,9 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
 
     def handel_new_docking_perspective(self):
         perspective_name, ok = QInputDialog.getText(
-            self, "保存视图预设", "请输入唯一识别名称："
+            self,
+            self.tr("Save docking perspective"),
+            self.tr("Please input a unique name:"),
         )
         if not ok or not perspective_name:
             return

@@ -13,7 +13,7 @@ from pyqtgraph import ViewBox
 from PySide6 import QtGui
 from PySide6.QtCore import QSignalBlocker, Qt, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QFileDialog
+from PySide6.QtWidgets import QApplication, QFileDialog
 
 from src.Model.Data.const import Direction
 from src.Model.Data.data import ScoreStitchData
@@ -195,7 +195,7 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
 
     def unlock_view_zoom(self, viewbox: ViewBox | None = None):
         viewbox = self.imageViewer.imageView.getView() if viewbox is None else viewbox
-        # defalut value of state in ViewBox.__init__()
+        # default value of state in ViewBox.__init__()
         viewbox.setMouseEnabled(x=True, y=True)
         viewbox.setLimits(xMin=-1e307, xMax=+1e307, yMin=-1e307, yMax=+1e307)
         viewbox.setAutoVisible(x=False, y=False)
@@ -247,17 +247,28 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
     @model_validator(mode="after")
     def validator(self) -> Self:
         if self.stitch_points == []:
-            raise ValueError("Stitch points can not be empty")
+            raise ValueError(
+                QApplication.translate("ManualStitch", "Stitch points can not be empty")
+            )
         if self.image_names == []:
-            raise ValueError(f"{self.working_dir}下未发现image文件")
+            raise ValueError(
+                QApplication.translate(
+                    "ManualStitch", "Image* files not found in dir: {}"
+                ).format(self.working_dir)
+            )
         if self.current_index < 0 or self.current_index > len(self.stitch_points) - 1:
             raise ValueError(
-                f"current index{self.current_index} not in the correct region:0-{len(self.stitch_points) - 1}"
+                QApplication.translate(
+                    "ManualStitch", "Invalid stitch index: {}. Must in 0-{}"
+                ).format(self.current_index, len(self.stitch_points) - 1)
             )
         length_bound = self.image_length(self.current_index + 1)
         if self.current_point < 0 or self.current_point > length_bound:
             raise ValueError(
-                f"current stitch point:{self.current_point} out off bound of image, must in 0-{length_bound}"
+                QApplication.translate(
+                    "ManualStitch",
+                    "Invalild stitch point: {}. Must in image bound of 0-{}",
+                ).format(self.current_point, length_bound)
             )
         return self
 
@@ -396,7 +407,7 @@ class TabStitch_VM(TabStitch_View):
 
     def load_stitch_data(self, file: JsonPath) -> bool:
         if not file.exists():
-            log.error(f"ScoreStitchData Not Found:{file}")
+            log.error(self.tr("ScoreStitchData Not Found: {}").format(file))
             return False
         if file.parent != self.pathSettings.working_dir:
             self.pathSettings.working_dir = file.parent
@@ -428,10 +439,10 @@ class TabStitch_VM(TabStitch_View):
 
         self.ImageViewer.imageView.clear()  # clear screen,then flush_stitch_image will do autoHistogramRange using setImage()
         self.ImageViewer.set_label_text(
-            self.manualStitchData.working_dir.name + " Stitched Preview"
+            self.manualStitchData.working_dir.name + " " + self.tr("Stitched Preview")
         )
         self.working_stitchData_path = file
-        log.success(f"Loaded {file}")
+        log.success(self.tr("ScoreStitchData Loaded: {}").format(file))
         gc.collect()  # Necessary, solve the memory leak
 
         return True
@@ -460,7 +471,9 @@ class TabStitch_VM(TabStitch_View):
         self.manualStitchData.build_score_stitch_data().save_to_file(
             self.working_stitchData_path
         )
-        log.success(f"已保存拼接点数据至{self.working_stitchData_path}")
+        log.success(
+            self.tr("ScoreStitchData Saved: {}").format(self.working_stitchData_path)
+        )
 
     def handel_save_stitch_data_file_as(self) -> None:
         name = f"ScoreStitchData_{time.strftime('%Y-%m-%d_%H-%M-%S')}.json"
@@ -471,7 +484,7 @@ class TabStitch_VM(TabStitch_View):
         if file == "" or not self.manualStitchData:
             return
         self.manualStitchData.build_score_stitch_data().save_to_file(Path(file))
-        log.success(f"已保存拼接点数据至{file}")
+        log.success(self.tr("ScoreStitchData Saved: {}").format(file))
 
     def handel_save_stitched_image(self) -> None:
         if not self.manualStitchData:
@@ -480,7 +493,11 @@ class TabStitch_VM(TabStitch_View):
         save_image(
             self.pathSettings.working_dir / name, self.manualStitchData.image_stitched
         )
-        log.success(f"已保存拼接预览图像至{self.pathSettings.working_dir / name}")
+        log.success(
+            self.tr("Stitched-image saved: {}").format(
+                self.pathSettings.working_dir / name
+            )
+        )
 
     def handle_point_index_changed(self, index: int) -> None:
         if not self.manualStitchData:
@@ -513,7 +530,7 @@ class TabStitch_VM(TabStitch_View):
     def handle_clear_line_cache(self) -> None:
         if (path := self.pathSettings.working_dir / "ScoreDetections.json").exists():
             os.remove(path)
-            log.info(f"Line cache cleared: {path}")
+            log.info(self.tr("Line detect cache cleared: {}").format(path))
 
     def flush_stitch_preview(self):
         if not self.manualStitchData:
@@ -552,10 +569,12 @@ class TabStitch_VM(TabStitch_View):
 
     def start_stitch(self) -> None:
         if self.stitchThread:
-            log.warning("当前拼接任务仍未结束，请稍后重试")
+            log.warning(
+                self.tr("Current stitch task is not finished, please try again later.")
+            )
             return
         if not self.pathSettings.working_dir.exists():
-            log.warning(f"当前工作目录{self.pathSettings.working_dir}不存在")
+            log.warning(self.tr("Current working dir does not exist."))
             return
 
         self.stitchThread = StitchThread(

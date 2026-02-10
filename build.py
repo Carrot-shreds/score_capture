@@ -14,9 +14,9 @@ def build():
     if "src" in os.listdir(path):
         path += "\\src"
     else:
-        log.error("未在当前目录下发现src文件夹，请将build脚本置于src的上级目录")
+        log.error("No src folder found, please check your project tree")
         return
-    log.info(f"将编译{path}下的所有.py文件")
+    log.info(f"Will build score capture including all py files in {path}")
 
     files = []
     for fspath, dirs, fs in os.walk(path):

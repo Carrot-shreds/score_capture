@@ -19,7 +19,7 @@ from src.Model.image_process import (
     detect_horizontal_lines,
     detect_vertical_lines,
     image_pre_process,
-    reverse_image,
+    invert_image,
 )
 from src.Model.utils import order_path, read_image, save_image, screenshot
 from src.View import TabPreview_View
@@ -49,19 +49,19 @@ class TabPreview_VM(TabPreview_View):
             "coefficient_vertical",
         )
         bind_data(
-            self.spinBox_h_reverse_thickness_threshold,
+            self.spinBox_h_invert_thickness_threshold,
             self.detectorSettings,
-            "h_reverse_thickness_threshold",
+            "h_invert_thickness_threshold",
         )
         bind_data(
-            self.doubleSpinBox_h_reverse_pixel_threshold,
+            self.doubleSpinBox_h_invert_pixel_threshold,
             self.detectorSettings,
-            "h_reverse_pixel_threshold",
+            "h_invert_pixel_threshold",
         )
         bind_data(
-            self.checkBox_reverse_horizontal,
+            self.checkBox_invert_horizontal,
             self.previewSetting,
-            "show_reversed_horizontal",
+            "show_inverted_horizontal",
         )
         bind_data(
             self.comboBox_line_type,
@@ -77,7 +77,7 @@ class TabPreview_VM(TabPreview_View):
             "imageViewer_show_tools", self.ImageViewer.toggle_tools
         )
         self.previewSetting.add_observer_handlers(
-            ["preview_lines", "show_reversed_horizontal"],
+            ["preview_lines", "show_inverted_horizontal"],
             lambda v: self.preview_lines() if self.previewSetting.live_detect else None,
         )
         self.previewSetting.add_observer_handler(
@@ -89,7 +89,7 @@ class TabPreview_VM(TabPreview_View):
         self.lambda_preview_lines = lambda v: self.preview_lines()
         self.pushButton_update_image.clicked.connect(self.preview_region)
         self.pushButton_open_image.clicked.connect(self.select_image)
-        self.pushButton_reverse_image.clicked.connect(self.reverse_image)
+        self.pushButton_invert_image.clicked.connect(self.invert_image)
         self.pushButton_detect_lines.clicked.connect(self.preview_lines)
         self.pushButton_clear_lines.clicked.connect(self.clear_lines)
         self.pushButton_glob_image.clicked.connect(self.glob_image)
@@ -109,25 +109,26 @@ class TabPreview_VM(TabPreview_View):
                 lines += detect_horizontal_lines(
                     gray_image,
                     self.detectorSettings.coefficient_horizontal,
-                    self.previewSetting.show_reversed_horizontal,
-                    self.detectorSettings.h_reverse_pixel_threshold,
-                    self.detectorSettings.h_reverse_thickness_threshold,
+                    self.previewSetting.show_inverted_horizontal,
+                    self.detectorSettings.h_invert_pixel_threshold,
+                    self.detectorSettings.h_invert_thickness_threshold,
                 )
             case PreviewLines.ONLY_V:
-                if not self.previewSetting.show_reversed_horizontal:
+                if not self.previewSetting.show_inverted_horizontal:
                     lines += detect_vertical_lines(
                         gray_image,
+                        None,
                         coefficient=self.detectorSettings.coefficient_vertical,
                     )
             case PreviewLines.ALL:
                 h_lines = detect_horizontal_lines(
                     gray_image,
                     self.detectorSettings.coefficient_horizontal,
-                    self.previewSetting.show_reversed_horizontal,
-                    self.detectorSettings.h_reverse_pixel_threshold,
-                    self.detectorSettings.h_reverse_thickness_threshold,
+                    self.previewSetting.show_inverted_horizontal,
+                    self.detectorSettings.h_invert_pixel_threshold,
+                    self.detectorSettings.h_invert_thickness_threshold,
                 )
-                if not self.previewSetting.show_reversed_horizontal:
+                if not self.previewSetting.show_inverted_horizontal:
                     lines += detect_vertical_lines(
                         gray_image, h_lines, self.detectorSettings.coefficient_vertical
                     )
@@ -139,8 +140,9 @@ class TabPreview_VM(TabPreview_View):
             self.ImageViewer.block_SigImageChanged(True)  # block onImageChanged Signal
         self.ImageViewer.set_current_image(image_draw)
         self.ImageViewer.block_SigImageChanged(False)
-        label_text = self.ImageViewer.get_label_text().replace(" (reversed)", "")
-        label_text += " (detected)" if label_text.find("(detected)") >= 0 else ""
+        str_inverted, str_detected = self.tr("(inverted)"), self.tr("(detected)")
+        label_text = self.ImageViewer.get_label_text().replace(f" {str_inverted}", "")
+        label_text += f" {str_detected}" if label_text.find(str_detected) >= 0 else ""
         self.ImageViewer.set_label_text(label_text)
         if self.previewSetting.save_preview:
             save_image(
@@ -153,7 +155,7 @@ class TabPreview_VM(TabPreview_View):
             return
         self.ImageViewer.set_current_image(original)
         self.ImageViewer.set_label_text(
-            self.ImageViewer.get_label_text().replace(" (detected)", "")
+            self.ImageViewer.get_label_text().replace(" " + self.tr("(detected)"), "")
         )
 
     def toggle_live_preview(self, state: bool) -> None:
@@ -176,8 +178,8 @@ class TabPreview_VM(TabPreview_View):
                 [
                     "coefficient_horizontal",
                     "coefficient_vertical",
-                    "h_reverse_thickness_threshold",
-                    "h_reverse_pixel_threshold",
+                    "h_invert_thickness_threshold",
+                    "h_invert_pixel_threshold",
                 ],
                 self.lambda_preview_lines,
             )
@@ -189,8 +191,8 @@ class TabPreview_VM(TabPreview_View):
                     [
                         "coefficient_horizontal",
                         "coefficient_vertical",
-                        "h_reverse_thickness_threshold",
-                        "h_reverse_pixel_threshold",
+                        "h_invert_thickness_threshold",
+                        "h_invert_pixel_threshold",
                     ],
                     self.lambda_preview_lines,
                 )
@@ -201,17 +203,19 @@ class TabPreview_VM(TabPreview_View):
     def preview_region(self) -> None:
         """显示region区域的预览"""
         if not self.locateSettings.live_locate:
-            log.debug(f"preview region: {self.regionData.region}")
+            log.debug(self.tr("Preview region: {}").format(self.regionData.region))
         img = image_pre_process(
             screenshot(
                 region_data=self.regionData, capture_tool=self.captureSettings.tool
             ),
-            self.captureSettings.if_reverse_image,
+            self.captureSettings.if_invert_image,
         )
         if self.previewSetting.save_preview:
             save_image(self.pathSettings.main_out_dir / "preview.png", img)
         self.ImageViewer.show_images(img)
-        self.ImageViewer.set_label_text(f"Preview region: {self.regionData.region}")
+        self.ImageViewer.set_label_text(
+            self.tr("Preview region: {}").format(self.regionData.region)
+        )
 
     def open_image(self, image_path: ImagePath) -> None:
         self.ImageViewer.show_images(read_image(image_path))
@@ -224,16 +228,16 @@ class TabPreview_VM(TabPreview_View):
             return
         self.ImageViewer.show_images(*map(Path, path))
 
-    def reverse_image(self) -> None:
+    def invert_image(self) -> None:
         if self.ImageViewer.current_image is not None:
             self.ImageViewer.set_current_image(
-                reverse_image(self.ImageViewer.current_image)
+                invert_image(self.ImageViewer.current_image)
             )
-        reversed_str = " (reversed)"
-        if (current_text := self.ImageViewer.get_label_text()).find(reversed_str) >= 0:
-            self.ImageViewer.set_label_text(current_text.replace(reversed_str, ""))
+        inverted_str = " " + self.tr("(inverted)")
+        if (current_text := self.ImageViewer.get_label_text()).find(inverted_str) >= 0:
+            self.ImageViewer.set_label_text(current_text.replace(inverted_str, ""))
         else:
-            self.ImageViewer.set_label_text(current_text + reversed_str)
+            self.ImageViewer.set_label_text(current_text + inverted_str)
 
     def glob_image(self) -> None:
         def _ok():

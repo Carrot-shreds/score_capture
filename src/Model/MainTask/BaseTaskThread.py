@@ -35,7 +35,8 @@ class BaseTaskThread(QThread):
             logger = log.bind(thread_id=id)
             self.main(logger)  # 调用主函数
         except Exception as e:
-            logger.error(f"{__name__} error：{e.__repr__()}")
+            msg = self.tr("{} Error: {}").format(__name__, e.__repr__())
+            logger.error(msg)
             # logger.error(e)
         finally:
             logManager.remove_log_config(log_file)

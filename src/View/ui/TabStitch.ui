@@ -40,7 +40,7 @@
       </property>
       <widget class="QWidget" name="tab_auto">
        <attribute name="title">
-        <string>自动拼接</string>
+        <string>Auto</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
@@ -49,7 +49,7 @@
            <enum>Qt::LayoutDirection::LeftToRight</enum>
           </property>
           <property name="text">
-           <string>拼接点算法：</string>
+           <string>Stitch Method:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -63,6 +63,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SSIM: A bit slower but have way better result. Recommended.&lt;/p&gt;&lt;p&gt;MSE: Less cpu usage.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentText">
            <string>MSE</string>
@@ -85,9 +88,28 @@
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line_5">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label_27">
           <property name="text">
-           <string>拼接方向：</string>
+           <string>Stitch Direction:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -96,29 +118,63 @@
         </item>
         <item>
          <widget class="QRadioButton" name="radioButton_stitch_direction_vertical">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>纵向</string>
+           <string>Vertical</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioButton_stitch_direction_horizontal">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>横向</string>
+           <string>Horizontal</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_start_stitiching">
           <property name="text">
-           <string>开始拼接</string>
+           <string>Start Stitch</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_clear_cache">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove ScoreDetections.json which cached detected lines data, used to stitch images as reference.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>清除线段缓存</string>
+           <string>Clear Line Cache</string>
           </property>
          </widget>
         </item>
@@ -126,13 +182,13 @@
       </widget>
       <widget class="QWidget" name="tab_manual">
        <attribute name="title">
-        <string>手动调整</string>
+        <string>Manual</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>拼接点序号：</string>
+           <string>Index:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -140,26 +196,55 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox_stitch_points_index"/>
+         <widget class="QSpinBox" name="spinBox_stitch_points_index">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The index of stitch points.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>偏移像素值：</string>
+           <string>Position:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QSpinBox" name="spinBox_stitch_points_value">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The value of the stitch point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="stepType">
            <enum>QAbstractSpinBox::StepType::DefaultStepType</enum>
           </property>
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>拼接点数据：</string>
+           <string>ScoreStitchData:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -169,28 +254,50 @@
         <item>
          <widget class="QPushButton" name="pushButton_select_file">
           <property name="text">
-           <string>打开文件</string>
+           <string>Open</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_save_file">
           <property name="text">
-           <string>保存</string>
+           <string>Save</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_save_file_as">
           <property name="text">
-           <string>另存为</string>
+           <string>Save As</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_save_image">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save manual stitched image to reclip.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>保存拼接图像</string>
+           <string>Save Image</string>
           </property>
          </widget>
         </item>
@@ -198,13 +305,13 @@
       </widget>
       <widget class="QWidget" name="tab_view">
        <attribute name="title">
-        <string>视图/操作</string>
+        <string>View</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>标记点位置：</string>
+           <string>Mark Point Position:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -213,6 +320,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="doubleSpinBox_location_mark_point">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Position of the mark point. From 0 to 1 on the stitching line axis.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="minimum">
            <double>0.100000000000000</double>
           </property>
@@ -230,28 +340,56 @@
         <item>
          <widget class="QCheckBox" name="checkBox_show_mark_point">
           <property name="text">
-           <string>预览显示标记点</string>
+           <string>Show Mark Point</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_lock_zoom">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lock the view zoom in the opposite direction of stitch direction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>锁定缩放</string>
+           <string>Lock Zoom</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_auto_zoom">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Auto reset zoom and range when index or position changed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>自动缩放</string>
+           <string>Auto Range</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_reset_region">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset the preview region to current stitching line area.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>重置缩放</string>
+           <string>Reset Zoom</string>
           </property>
          </widget>
         </item>

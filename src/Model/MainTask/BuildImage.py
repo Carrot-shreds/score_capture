@@ -3,11 +3,12 @@ import os
 import cv2
 import numpy as np
 from pydantic import validate_call
+from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.data import CaptureData
 from src.Model.Data.settings import BuildImageSettings, CaptureSettings
 from src.Model.Data.type import DirectoryExisting
-from src.Model.image_process import compare_image, reverse_image
+from src.Model.image_process import compare_image, invert_image
 from src.Model.MainTask.BaseTaskThread import BaseTaskThread
 from src.Model.utils import get_numbered_image_names, read_image, save_image
 
@@ -80,7 +81,11 @@ def build_images(
             if diff_list[n] > buildImageSettings.compare_threshold
         ]
     else:
-        log.error(f"未知的比较方法: {buildImageSettings.compare_method}")
+        log.error(
+            QApplication.translate("BuildImages", "Invalid compare method {}").format(
+                buildImageSettings.compare_method
+            )
+        )
         return
     different_index.append(0)
     if captureSettings.if_keep_last:
@@ -91,7 +96,7 @@ def build_images(
         (file_names[different_index[n] + 1], file_names[different_index[n + 1] - 2])
         for n in range(len(different_index) - 1)
     ]
-    log.debug(f"capture_index-{image_names_couple}")
+    log.debug(f"{image_names_couple=}")
     capture_sequnce = [
         captures[different_index[n] : different_index[n + 1]]
         for n in range(len(different_index) - 1)
@@ -106,13 +111,13 @@ def build_images(
             ],  # 不要首尾两张
             axis=0,  # 保留图片形状
         ).astype(np.uint8)  # 转换回图片格式
-        if captureSettings.if_reverse_image:
-            image = reverse_image(image)
+        if captureSettings.if_invert_image:
+            image = invert_image(image)
         save_image(
             working_dir / f"image{image_count}{captureSettings.save_format}", image
         )
         image_count += 1
-    log.success("image重构建完成")
+    log.success(QApplication.translate("BuildImage", "Image build completed."))
 
 
 class BuildImageThread(BaseTaskThread):
