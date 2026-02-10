@@ -1,6 +1,6 @@
 import PySide6QtAds as QtAds
 from PySide6.QtCore import QFile, QIODevice, QSignalBlocker, Qt
-from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
+from PySide6.QtGui import QAction, QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -96,6 +96,16 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.action_rename_folder.setShortcut(QKeySequence("Ctrl+r"))
         self.action_mainwindow_always_top.setShortcut(QKeySequence("F12"))
         self.action_print_score.setShortcut(QKeySequence.StandardKey.Print)
+        perspective_shortcut = [QShortcut(self) for i in range(9)]
+        for i, k in enumerate(perspective_shortcut):
+            k.setKey(QKeySequence(f"ctrl+{i + 1}"))
+            k.activated.connect(
+                lambda s=i: self.perspective_combobox.setCurrentText(
+                    self.perspective_combobox.itemText(s)
+                )
+                if s < self.perspective_combobox.count()
+                else None
+            )
 
         # status bar
         self.label_version = QLabel()
@@ -211,9 +221,11 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.menu_view.addAction(dock_widget_preview.toggleViewAction())
         self.menu_view.addAction(self.dock_widget_stitch.toggleViewAction())
         self.menu_view.addAction(dock_widget_reclip.toggleViewAction())
+        self.menu_view.addSeparator()
 
         # Add docking perspective select
         self.create_docking_perspective()
+        self.menu_view.addAction(self.action_mainwindow_always_top)
         # add default perspective
         if "default" not in self.dock_manager.perspectiveNames():
             self.new_docking_perspective("default")
@@ -231,7 +243,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.perspective_combobox.setSizePolicy(
             QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
         )
-        self.perspective_combobox.textActivated.connect(
+        self.perspective_combobox.currentTextChanged.connect(
             self.dock_manager.openPerspective
         )
         perspective_list_action.setDefaultWidget(self.perspective_combobox)
