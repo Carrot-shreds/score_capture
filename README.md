@@ -81,15 +81,16 @@
 如果您使用Win10及以上的64位Windows系统，请下载最新 [release](https://github.com/Carrot-shreds/score_capture/releases/) 中的 `score_capture_xxx_win64.zip`。解压到合适的位置后，点击 `score_capture.exe` 即可启动。不需要进行额外的安装，所有配置和依赖都被打包到独立文件夹中，方便移动和卸载。  
 对于MacOS和Linux用户，目前并不提供预编译版本，请自行参考上文中的说明，并尝试从源码运行。
 
-## 文件命名约定
-    # 图片
+## 文件命名
+    ## 图片
     capture：截图保存的单张原始图片，按设置可能经过反色处理
     image：对capture分组进行均值的图片，供后续使用
     detected：在原始图像上叠加了线段检测的结果
     stitched：对image拼接后的图片
     barlines：仅小节线识别的预览，用于重分割
     reclip：重分割后的横向拼接图片，或与竖直拼接图片相同
-    # 数据文件(json)
+    
+    ## 数据文件(json)
     CaptureData：存储capture间的比较数据，用于重新生成image
     ScoreDetections：作为image的线段检测缓存，用于拼接
     StitchData：拼接点结果数据，可以从手动拼接窗口打开可视化编辑
@@ -117,21 +118,24 @@
 8. **（样式编辑）** 对 `title-reclip` 按打印比例切分，添加边距/标题/页码等样式，最终生成 `title*.*`，或保存到PDF。
 
 ## 快捷键
-    # 主界面
+    ## 主界面
     Ctrl 1-9：切换界面预设序号
     F12：切换窗口置顶状态
     F1-F5：主操作工具栏
-    # 文件
+    
+    ## 文件
     Ctrl-o：打开一个文件夹作为工作文件夹
     Ctrl-r：重命名当前文件夹
     Ctrl-p：打印当前的曲谱结果
-    # 定位
+    
+    ## 定位
     鼠标左键双击：切换显示模式
     鼠标右键双击：最小化窗口
     F12：切换窗口置顶状态
     l: 更新定位
     p: 显示预览
-    # 手动拼接页面
+    
+    ## 手动拼接页面
     上下方向键：切换拼接点
     左右方向键：调整当前拼接点数值
     方向键 + Ctrl/Shift：不同的调整步长
