@@ -11,6 +11,7 @@
 import sys
 
 from loguru import logger as log
+from PySide6.QtGui import QPixmap
 
 from src import __version__
 
@@ -37,6 +38,14 @@ def show_main_window() -> None:
     # Ignore Error - "qt.qpa.window: SetProcessDpiAwarenessContext() failed"
     QtCore.QLoggingCategory.setFilterRules("qt.qpa.window.warning=false")
     app = QApplication(sys.argv)
+    try:
+        from ctypes import windll  # Only exists on Windows.
+
+        appid = f"Carrot-shreds.Score_capture.{__version__}"
+        windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
+    except ImportError:
+        pass
+    app.setWindowIcon(QPixmap(":/icon"))
 
     # Load language files
     path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)

@@ -12,7 +12,7 @@ dependencies = [
     "mss>=10.1.0",
     "numpy>=2.4.0",
     "numpydantic>=1.7.0",
-    "opencv-python==4.11.0.86",
+    "opencv-python>=4.13.0.92",
     "pathvalidate>=3.3.1",
     "pillow>=11.2.1",
     "pydantic>=2.12.5",
@@ -24,6 +24,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "imageio>=2.37.2",
     "ipykernel>=7.1.0",
     "nuitka>=2.8.10",
     "pympler>=1.1",

@@ -20,6 +20,6 @@ def get_files(path: Path):
 
 
 get_files(src)
-cmd = ["pyside6-lupdate"] + files + ["-ts"] + ts_files
+cmd = ["pyside6-lupdate"] + files + ["-no-obsolete"] + ["-ts"] + ts_files
 print(f"files: {files}")
 subprocess.run(cmd)

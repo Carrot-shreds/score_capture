@@ -3,5 +3,7 @@
     <qresource>
         <file alias="license">../../LICENSE</file>
         <file>translations/zh_CN.qm</file>
+        <file>media/pjj-and-hairyone-freesoftwaresong.ogg</file>
+        <file alias="icon">media/score_capture.jpg</file>
     </qresource>
 </RCC>

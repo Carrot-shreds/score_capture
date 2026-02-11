@@ -30,19 +30,6 @@ from src.Model.Data.type import (
 )
 
 
-def timeit[T](func: T) -> T:
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)  # type:ignore
-        end_time = time.time()
-        print(
-            f"{func.__name__ if hasattr(func, '__name__') else ''} executed in {end_time - start_time:.6f} seconds"
-        )
-        return result
-
-    return wrapper  # type:ignore
-
-
 def is_valid_filename(filename: str) -> bool:
     """
     检查给定的文件名是否有效。

@@ -13,5 +13,8 @@
 /src/logs
 /src/config
 /src/binding
+/src/View/ui/*_ui.py
+/src/resource/compiled_resource.py
+/src/resource/translations/*.qm
 /config/
 /logs/

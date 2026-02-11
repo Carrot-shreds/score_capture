@@ -4,12 +4,12 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../../View/MainWindow.py" line="26"/>
+        <location filename="../../View/MainWindow.py" line="28"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="34"/>
+        <location filename="../../View/MainWindow.py" line="36"/>
         <source>View license</source>
         <translation>查看许可证</translation>
     </message>
@@ -177,10 +177,6 @@ See Python glob module doc.</source>
 <context>
     <name>DialogLocate_VM</name>
     <message>
-        <source>Locate offset: {self.locateSettings.locate_offset}</source>
-        <translation type="vanished">定位偏移值：{}</translation>
-    </message>
-    <message>
         <location filename="../../ViewModel/DialogLocate.py" line="92"/>
         <source>Invalid region: {}</source>
         <translation>无效屏幕区域：{}</translation>
@@ -230,27 +226,9 @@ See Python glob module doc.</source>
 <context>
     <name>License</name>
     <message>
-        <location filename="../../View/MainWindow.py" line="51"/>
+        <location filename="../../View/MainWindow.py" line="53"/>
         <source>License</source>
         <translation>许可证</translation>
-    </message>
-</context>
-<context>
-    <name>Main</name>
-    <message>
-        <location filename="../../../main.py" line="77"/>
-        <source>=====Main Starting=====</source>
-        <translation>=====主程序启动=====</translation>
-    </message>
-    <message>
-        <location filename="../../../main.py" line="78"/>
-        <source>Current version: {}</source>
-        <translation>当前版本：{}</translation>
-    </message>
-    <message>
-        <location filename="../../../main.py" line="81"/>
-        <source>=====Main Finished=====</source>
-        <translation>=====主程序结束=====</translation>
     </message>
 </context>
 <context>
@@ -271,162 +249,177 @@ See Python glob module doc.</source>
         <translation>帮助</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="39"/>
+        <location filename="../../View/ui/MainWindow.ui" line="37"/>
+        <source>Language</source>
+        <translation>语言</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/MainWindow.ui" line="45"/>
         <source>File</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="50"/>
+        <location filename="../../View/ui/MainWindow.ui" line="59"/>
         <source>Action</source>
         <translation>操作</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="66"/>
+        <location filename="../../View/ui/MainWindow.ui" line="75"/>
         <source>toolBar_main</source>
         <translation>主工具栏</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="86"/>
-        <location filename="../../View/ui/MainWindow.ui" line="100"/>
+        <location filename="../../View/ui/MainWindow.ui" line="95"/>
+        <location filename="../../View/ui/MainWindow.ui" line="109"/>
         <source>toolBar</source>
         <translation>路径工具栏</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="111"/>
+        <location filename="../../View/ui/MainWindow.ui" line="120"/>
         <source>Locate</source>
         <translation>定位</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="114"/>
+        <location filename="../../View/ui/MainWindow.ui" line="123"/>
         <source>Show locate window and update location.</source>
         <translation>打开定位窗口/更新定位数据。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="122"/>
+        <location filename="../../View/ui/MainWindow.ui" line="131"/>
         <source>Preview</source>
         <translation>预览</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="125"/>
+        <location filename="../../View/ui/MainWindow.ui" line="134"/>
         <source>Preview the capture region.</source>
         <translation>预览屏幕上的指定区域。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="136"/>
+        <location filename="../../View/ui/MainWindow.ui" line="145"/>
         <source>Capture</source>
         <translation>截图</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="139"/>
+        <location filename="../../View/ui/MainWindow.ui" line="148"/>
         <source>Start or stop capture.</source>
         <translation>启动/结束截图。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="147"/>
+        <location filename="../../View/ui/MainWindow.ui" line="156"/>
         <source>Stitch</source>
         <translation>拼接</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="150"/>
+        <location filename="../../View/ui/MainWindow.ui" line="159"/>
         <source>Stitch images.</source>
         <translation>拼接当前工作文件夹中的图像。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="158"/>
+        <location filename="../../View/ui/MainWindow.ui" line="167"/>
         <source>Reclip</source>
         <translation>分割</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="161"/>
+        <location filename="../../View/ui/MainWindow.ui" line="170"/>
         <source>Reclip stitched image and generate final image.</source>
         <translation>重新分割拼接图并编辑样式生成最终图像。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="169"/>
+        <location filename="../../View/ui/MainWindow.ui" line="178"/>
         <source>Open</source>
         <translation>选择</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="172"/>
+        <location filename="../../View/ui/MainWindow.ui" line="181"/>
         <source>Select a folder as working dir.</source>
         <translation>选择一个文件夹作为工作目录。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="180"/>
+        <location filename="../../View/ui/MainWindow.ui" line="189"/>
         <source>Reveal</source>
         <translation>打开</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="183"/>
+        <location filename="../../View/ui/MainWindow.ui" line="192"/>
         <source>Reveal current working dir in explorer.</source>
         <translation>在文件资源管理器中打开当前工作目录。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="191"/>
+        <location filename="../../View/ui/MainWindow.ui" line="200"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="194"/>
+        <location filename="../../View/ui/MainWindow.ui" line="203"/>
         <source>Rename the folder and all image names including title.</source>
         <translation>重命名文件夹标题，以及其中所有含有同名标题的文件。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="202"/>
-        <location filename="../../View/ui/MainWindow.ui" line="205"/>
+        <location filename="../../View/ui/MainWindow.ui" line="211"/>
+        <location filename="../../View/ui/MainWindow.ui" line="214"/>
         <source>Save PDF</source>
         <translation>保存 PDF</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="210"/>
+        <location filename="../../View/ui/MainWindow.ui" line="219"/>
         <source>Print</source>
         <translation>打印</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="215"/>
+        <location filename="../../View/ui/MainWindow.ui" line="224"/>
         <source>About</source>
         <translation>关于</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/MainWindow.ui" line="229"/>
+        <source>Minimize</source>
+        <translation>最小化</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/MainWindow.ui" line="234"/>
+        <source>Exit</source>
+        <translation>退出</translation>
     </message>
 </context>
 <context>
     <name>MainWindow_VM</name>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="150"/>
+        <location filename="../../ViewModel/MainWindow.py" line="197"/>
         <source>Current capture task is not finished. Please try again later.</source>
         <translation>当前截图任务尚未结束，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="160"/>
+        <location filename="../../ViewModel/MainWindow.py" line="207"/>
         <source>Working folder is not empty: {}</source>
         <translation>工作目录非空：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="165"/>
+        <location filename="../../ViewModel/MainWindow.py" line="212"/>
         <source>Clear folder</source>
         <translation>清空目录</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="166"/>
+        <location filename="../../ViewModel/MainWindow.py" line="213"/>
         <source>New folder</source>
         <translation>新建目录</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="169"/>
+        <location filename="../../ViewModel/MainWindow.py" line="216"/>
         <source>Clear current folder, or switch to a new folder named: {}</source>
         <translation>清空当前目录，或是切换到一个新建文件夹：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="173"/>
+        <location filename="../../ViewModel/MainWindow.py" line="220"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="183"/>
+        <location filename="../../ViewModel/MainWindow.py" line="230"/>
         <source>Folder cleared: {}</source>
         <translation>目录已清空：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="188"/>
+        <location filename="../../ViewModel/MainWindow.py" line="235"/>
         <source>Switched to new folder: {}</source>
         <translation>已切换至新目录：{}</translation>
     </message>
@@ -434,87 +427,87 @@ See Python glob module doc.</source>
 <context>
     <name>MainWindow_View</name>
     <message>
-        <location filename="../../View/MainWindow.py" line="77"/>
+        <location filename="../../View/MainWindow.py" line="79"/>
         <source>Also used as title of files and score.</source>
         <translation>同时作为文件夹和其中生成文件的标题。</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="79"/>
+        <location filename="../../View/MainWindow.py" line="81"/>
         <source>Folder Title:</source>
         <translation>标题：</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="84"/>
+        <location filename="../../View/MainWindow.py" line="86"/>
         <source>Always on Top</source>
         <translation>窗口置顶</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="104"/>
+        <location filename="../../View/MainWindow.py" line="116"/>
         <source>      Working Dir:</source>
         <translation>      工作目录：</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="171"/>
+        <location filename="../../View/MainWindow.py" line="183"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="178"/>
+        <location filename="../../View/MainWindow.py" line="193"/>
         <source>Console</source>
         <translation>控制台</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="184"/>
+        <location filename="../../View/MainWindow.py" line="200"/>
         <source>Preview</source>
         <translation>预览</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="188"/>
+        <location filename="../../View/MainWindow.py" line="205"/>
         <source>Stitch</source>
         <translation>拼接</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="194"/>
+        <location filename="../../View/MainWindow.py" line="212"/>
         <source>Reclip</source>
         <translation>分割</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="213"/>
+        <location filename="../../View/MainWindow.py" line="234"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="215"/>
+        <location filename="../../View/MainWindow.py" line="236"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="230"/>
+        <location filename="../../View/MainWindow.py" line="251"/>
         <source>Docking system view preset.</source>
         <translation>窗口停靠系统的布局预设。</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="231"/>
+        <location filename="../../View/MainWindow.py" line="252"/>
         <source>Save current layout</source>
         <translation>保存当前的窗口布局</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="232"/>
+        <location filename="../../View/MainWindow.py" line="253"/>
         <source>Delete current using preset</source>
         <translation>删除当前正在使用的布局预设</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="235"/>
+        <location filename="../../View/MainWindow.py" line="256"/>
         <source>Docking Perspective:</source>
         <translation>布局预设：</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="263"/>
+        <location filename="../../View/MainWindow.py" line="284"/>
         <source>Save docking perspective</source>
         <translation>保存视图布局</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="264"/>
+        <location filename="../../View/MainWindow.py" line="285"/>
         <source>Please input a unique name:</source>
         <translation>请输入一个唯一的识别名称：</translation>
     </message>
@@ -545,42 +538,42 @@ See Python glob module doc.</source>
 <context>
     <name>Reclip</name>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="61"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="62"/>
         <source>Image Not Found with wildcard {}, please do stitch first.</source>
         <translation>未找到符合通配符 {} 的图像，请先进行拼接操作。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="81"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="82"/>
         <source>Vertical stitched image detected, will skip reclip and try to style it directly.</source>
         <translation>检测到竖向拼接图像，将跳过重分割，尝试直接编辑样式。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="113"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="114"/>
         <source>Start detecting lines in stitched image.</source>
         <translation>开始检测拼接图像中的线段。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="139"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="140"/>
         <source>Start group barlines.</source>
         <translation>开始对小节线进行分组。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="161"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="162"/>
         <source>Start to reclip stitched image.</source>
         <translation>开始对拼接图进行重分割。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="217"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="218"/>
         <source>Reclip completed.</source>
         <translation>重分割完成。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="228"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="229"/>
         <source>Start restitching clips</source>
         <translation>开始重拼接切片</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="427"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="425"/>
         <source>Clip image {} failed.</source>
         <translation>图像分割失败：{}。</translation>
     </message>
@@ -590,17 +583,17 @@ See Python glob module doc.</source>
         <translation>这通常是因为曲谱切片高度超出了单页范围。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="436"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="435"/>
         <source>Check your cut_page_heights, and try lowering your invert horizontal line threshold.</source>
         <translation>请检查cut_page_heights，然后尝试降低反转水平线阈值。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="467"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="468"/>
         <source>Save final image to: {}</source>
         <translation>最终图像已保存至：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="471"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="472"/>
         <source>Style edit completed.</source>
         <translation>样式编辑完成。</translation>
     </message>
@@ -608,37 +601,37 @@ See Python glob module doc.</source>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../../Model/Data/settings.py" line="318"/>
+        <location filename="../../Model/Data/settings.py" line="319"/>
         <source>AppSettings Saving Failed: {}</source>
         <translation>应用设置保存失败：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="335"/>
+        <location filename="../../Model/Data/settings.py" line="336"/>
         <source>AppSettings load failed, settings json must be a dict</source>
         <translation>应用设置加载失败，设置json必须是一个字典</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="344"/>
+        <location filename="../../Model/Data/settings.py" line="345"/>
         <source>AppSettings load failed, {} Not Found, will use default settings.</source>
         <translation>应用设置加载失败，未发现配置文件{}，将使用默认设置。</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="367"/>
+        <location filename="../../Model/Data/settings.py" line="368"/>
         <source>Invalid field_value:{0} for {1} when loading {2} from json</source>
         <translation>从json加载 {2} 的 {1} 字段时，遇到无效的字段值：{0}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="373"/>
+        <location filename="../../Model/Data/settings.py" line="374"/>
         <source>Invalid field_name:{0} when loading {1} from json</source>
         <translation>从json加载 {1} 时遇到无效的字段名：{0}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="421"/>
+        <location filename="../../Model/Data/settings.py" line="422"/>
         <source>AppSettingsSavingConfig load failed, using default config with all true (save all settings)</source>
         <translation>AppSettingsSavingConfig加载失败，将使用默认配置（保存所有设置）</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="426"/>
+        <location filename="../../Model/Data/settings.py" line="427"/>
         <source>Config {} Not Found, using default config.</source>
         <translation>未发现配置文件{}， 将使用默认配置。</translation>
     </message>
@@ -689,17 +682,6 @@ See Python glob module doc.</source>
         <location filename="../../Model/MainTask/Stitch.py" line="212"/>
         <source>There are not overlaping lines between {} and {}, will try to stitch in the middle area.</source>
         <translation>{} 和 {}之间无重合特征线，将尝试使用中间区域进行拼接对比。</translation>
-    </message>
-</context>
-<context>
-    <name>StyleClips</name>
-    <message>
-        <source>Clip image {} failed.
-
-                    This may be caused by too large cut height that is out of the page bound.
-
-                    Check your cut_page_heights, and try lowering your invert horizontal line threshold.</source>
-        <translation type="vanished">图像分割失败。\n这通常是因为曲谱切片高度超出了单页范围。\n请检查你的cut_page_height，尝试调低你的反转水平线阈值。</translation>
     </message>
 </context>
 <context>
@@ -1203,6 +1185,19 @@ Please do reclip first</source>
         <translation>截图间对比数据的缓存，用来从capture图像构建Image</translation>
     </message>
     <message>
+        <location filename="../../View/ui/TabSettings.ui" line="252"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MSS: cross-platform, supports multiple screens. But doesn&apos;t work on Wayland.&lt;/p&gt;&lt;p&gt;Spectacle: KDE default CLI capture tool.&lt;/p&gt;&lt;p&gt;Grim: Alternative wayland capture tool.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>MSS：支持跨平台与多屏幕，目前不支持Wayland
+Spectacle：KDE原生命令行截图工具，兼容Wayland
+Grim：另一个可选的Wayland工具包</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/TabSettings.ui" line="316"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reorder and rename image filenames.&lt;/p&gt;&lt;p&gt;This is needed when you doesn&apos;t want some image and deleted them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>重新排序并重命名Image文件
+适用于当你不需要其中几张并删除了他们时</translation>
+    </message>
+    <message>
         <location filename="../../View/ui/TabSettings.ui" line="613"/>
         <source>Y:</source>
         <translation>Y：</translation>
@@ -1343,13 +1338,6 @@ Please do reclip first</source>
         <translation>截图</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="252"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MSS: cross-platform, supports multiple screens. But don&apos;t work on Wayland.&lt;/p&gt;&lt;p&gt;Spectacle: KDE default CLI capture tool.&lt;/p&gt;&lt;p&gt;Grim: Alternative wayland capture tool.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>MSS：支持跨平台与多屏幕，但是不支持Wayland环境
-Spectacle：KDE自带的截图工具
-Grim：另一个可选的Wayland截图工具</translation>
-    </message>
-    <message>
         <location filename="../../View/ui/TabSettings.ui" line="256"/>
         <source>mss</source>
         <translation>mss</translation>
@@ -1373,12 +1361,6 @@ Grim：另一个可选的Wayland截图工具</translation>
         <location filename="../../View/ui/TabSettings.ui" line="294"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Capture inverval (Seconds)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>截图间隔（秒）</translation>
-    </message>
-    <message>
-        <location filename="../../View/ui/TabSettings.ui" line="316"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reorder and rename image filenames.&lt;/p&gt;&lt;p&gt;This is needed when you don&apos;t want some image and deleted them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>重新排序并重命名Image图像
-这可以被用在当你不想要其中几张Image并删除它们时</translation>
     </message>
     <message>
         <location filename="../../View/ui/TabSettings.ui" line="319"/>
@@ -1831,7 +1813,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>get_gap_line_index</name>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="306"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="307"/>
         <source>Empty lines of sheet gaps! Please try to turn down your invert horizontal line thresholds</source>
         <translation>曲谱行间隔线检测结果为空，请尝试调低反转水平线阈值</translation>
     </message>
@@ -1886,7 +1868,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>style_restitched_clips</name>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="325"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="326"/>
         <source>Editing score style</source>
         <translation>正在编辑曲谱样式</translation>
     </message>

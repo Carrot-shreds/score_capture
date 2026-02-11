@@ -8,63 +8,59 @@ from loguru import logger as log
 
 from src import __version__ as version
 
+delete_files = [
+    "qt6network.dll",
+    "qt6qml.dll",
+    "qt6qmlmodels.dll",
+    "qt6quick.dll",
+    "cv2/opencv_videoio_ffmpeg4130_64.dll",
+]
+
 
 def build():
-    path = os.getcwd()
-    if "src" in os.listdir(path):
-        path += "\\src"
-    else:
-        log.error("No src folder found, please check your project tree")
-        return
-    log.info(f"Will build score capture including all py files in {path}")
-
-    files = []
-    for fspath, dirs, fs in os.walk(path):
-        for f in fs:
-            files.append(os.path.join(fspath, f))
-    files = [f for f in files if os.path.isfile(f) and f.split(".")[-1] == "py"]
-    log.info(files)
-
     command = [
         "cmd",
         "/c",
         "nuitka",
         "--standalone",
-        # "--disable-console",
+        "--windows-console-mode=disable",
         "--clang",
         "--msvc=latest",
         "--enable-plugin=pyside6",
-        "--remove-output",
+        # "--remove-output",
         "--output-dir=build",
         "--report=build/build_report.xml",
         "--output-filename=score_capture.exe",
+        "--windows-icon-from-ico=./src/resource/media/score_capture.jpg",
+        "--macos-app-icon=./src/resource/media/score_capture.jpg",
         "--include-qt-plugins=platforminputcontexts",
-        "--include-module="
-        + ",".join(
-            ["src"]
-            # [
-            #     os.path.split(i)[-1].split(".")[0]
-            #     for i in files
-            #     if not i.count("main.py")
-            # ]
-        ),
+        "--include-module=src",
         "main.py",
     ]
     log.info(command)
 
     subprocess.run(command)
-    if not (Path(".") / "build" / "main.dist" / "score_capture.exe").exists():
-        rmtree(Path(".") / "build" / "main.dist")
+
+    # if compile failed
+    if (
+        Path("./build/main.dist").exists()
+        and not Path("./build/main.dist/score_capture.exe").exists()
+    ):
+        rmtree(Path("./build/main.dist"))
         return
 
     folder_name = f"score_capture-{version}-build-" + datetime.datetime.now().strftime(
         "%y%m%d_%H%M"
     )
-    if "main.dist" in os.listdir(os.getcwd() + "\\build\\"):
-        os.rename(
-            os.getcwd() + "\\build\\main.dist", os.getcwd() + f"\\build\\{folder_name}"
-        )
-    log.info("output: " + os.getcwd() + f"\\build\\{folder_name}")
+    if Path("./build/main.dist").exists():
+        out_path = Path(f"./build/{folder_name}")
+        Path("./build/main.dist").rename(out_path)
+        log.info("output: " + out_path.as_posix())
+        for d in delete_files:
+            if (file := (out_path / d)).exists():
+                os.remove(file)
+                log.debug(f"File Removed: {d}")
+
     log.info("build finished")
 
 
