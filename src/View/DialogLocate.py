@@ -62,6 +62,7 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
         # shortcut
         self.pushButton_locate.setShortcut(QKeySequence("l"))
         self.pushButton_preview.setShortcut(QKeySequence("p"))
+        self.checkBox_dialog_always_on_top.setShortcut(QKeySequence("F12"))
 
         # 自定义边框鼠标事件
         self.m_drag_start_pos: QPoint | None = None
@@ -146,6 +147,8 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.toggle_mini_mode()
         if event.button() == Qt.MouseButton.RightButton:
             self.showMinimized()
 

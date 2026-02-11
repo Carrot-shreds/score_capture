@@ -128,6 +128,8 @@ It is recommended to frequently back up the configuration files to avoid acciden
     Mouse-left-double-click: Switch showing mode.
     Mouse-right-double-click: Minimize window.
     F12: Toggle window always-on-top state.
+    l: Update location.
+    p: Preview region.
     # Manual Stitching Tab
     Up/Down Arrow: Switch between stitching points.
     Left/Right Arrow: Adjust the value of the current stitching point.
