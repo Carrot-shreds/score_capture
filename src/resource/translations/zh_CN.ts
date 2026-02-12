@@ -4,12 +4,12 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../../View/MainWindow.py" line="28"/>
+        <location filename="../../View/MainWindow.py" line="59"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="36"/>
+        <location filename="../../View/MainWindow.py" line="67"/>
         <source>View license</source>
         <translation>查看许可证</translation>
     </message>
@@ -191,26 +191,21 @@ See Python glob module doc.</source>
         <source>Screen scaling: {}</source>
         <translation>屏幕缩放：{}</translation>
     </message>
-    <message>
-        <location filename="../../ViewModel/DialogLocate.py" line="117"/>
-        <source>Locate offset: {}</source>
-        <translation>定位偏移量：{}</translation>
-    </message>
 </context>
 <context>
     <name>DialogLocate_View</name>
     <message>
-        <location filename="../../View/DialogLocate.py" line="78"/>
+        <location filename="../../View/DialogLocate.py" line="79"/>
         <source>Toggle mini mode.</source>
         <translation>切换紧凑模式。</translation>
     </message>
     <message>
-        <location filename="../../View/DialogLocate.py" line="83"/>
+        <location filename="../../View/DialogLocate.py" line="84"/>
         <source>Toggle capture state</source>
         <translation>启动/停止截图</translation>
     </message>
     <message>
-        <location filename="../../View/DialogLocate.py" line="87"/>
+        <location filename="../../View/DialogLocate.py" line="88"/>
         <source>Folder title</source>
         <translation>当前保存文件夹标题</translation>
     </message>
@@ -226,7 +221,7 @@ See Python glob module doc.</source>
 <context>
     <name>License</name>
     <message>
-        <location filename="../../View/MainWindow.py" line="53"/>
+        <location filename="../../View/MainWindow.py" line="85"/>
         <source>License</source>
         <translation>许可证</translation>
     </message>
@@ -254,131 +249,136 @@ See Python glob module doc.</source>
         <translation>语言</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="45"/>
+        <location filename="../../View/ui/MainWindow.ui" line="46"/>
         <source>File</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="59"/>
+        <location filename="../../View/ui/MainWindow.ui" line="60"/>
         <source>Action</source>
         <translation>操作</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="75"/>
+        <location filename="../../View/ui/MainWindow.ui" line="76"/>
         <source>toolBar_main</source>
         <translation>主工具栏</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="95"/>
-        <location filename="../../View/ui/MainWindow.ui" line="109"/>
+        <location filename="../../View/ui/MainWindow.ui" line="96"/>
+        <location filename="../../View/ui/MainWindow.ui" line="110"/>
         <source>toolBar</source>
         <translation>路径工具栏</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="120"/>
+        <location filename="../../View/ui/MainWindow.ui" line="121"/>
         <source>Locate</source>
         <translation>定位</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="123"/>
+        <location filename="../../View/ui/MainWindow.ui" line="124"/>
         <source>Show locate window and update location.</source>
         <translation>打开定位窗口/更新定位数据。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="131"/>
+        <location filename="../../View/ui/MainWindow.ui" line="132"/>
         <source>Preview</source>
         <translation>预览</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="134"/>
+        <location filename="../../View/ui/MainWindow.ui" line="135"/>
         <source>Preview the capture region.</source>
         <translation>预览屏幕上的指定区域。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="145"/>
+        <location filename="../../View/ui/MainWindow.ui" line="146"/>
         <source>Capture</source>
         <translation>截图</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="148"/>
+        <location filename="../../View/ui/MainWindow.ui" line="149"/>
         <source>Start or stop capture.</source>
         <translation>启动/结束截图。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="156"/>
+        <location filename="../../View/ui/MainWindow.ui" line="157"/>
         <source>Stitch</source>
         <translation>拼接</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="159"/>
+        <location filename="../../View/ui/MainWindow.ui" line="160"/>
         <source>Stitch images.</source>
         <translation>拼接当前工作文件夹中的图像。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="167"/>
+        <location filename="../../View/ui/MainWindow.ui" line="168"/>
         <source>Reclip</source>
         <translation>分割</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="170"/>
+        <location filename="../../View/ui/MainWindow.ui" line="171"/>
         <source>Reclip stitched image and generate final image.</source>
         <translation>重新分割拼接图并编辑样式生成最终图像。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="178"/>
+        <location filename="../../View/ui/MainWindow.ui" line="179"/>
         <source>Open</source>
         <translation>选择</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="181"/>
+        <location filename="../../View/ui/MainWindow.ui" line="182"/>
         <source>Select a folder as working dir.</source>
         <translation>选择一个文件夹作为工作目录。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="189"/>
+        <location filename="../../View/ui/MainWindow.ui" line="190"/>
         <source>Reveal</source>
         <translation>打开</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="192"/>
+        <location filename="../../View/ui/MainWindow.ui" line="193"/>
         <source>Reveal current working dir in explorer.</source>
         <translation>在文件资源管理器中打开当前工作目录。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="200"/>
+        <location filename="../../View/ui/MainWindow.ui" line="201"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="203"/>
+        <location filename="../../View/ui/MainWindow.ui" line="204"/>
         <source>Rename the folder and all image names including title.</source>
         <translation>重命名文件夹标题，以及其中所有含有同名标题的文件。</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="211"/>
-        <location filename="../../View/ui/MainWindow.ui" line="214"/>
+        <location filename="../../View/ui/MainWindow.ui" line="212"/>
+        <location filename="../../View/ui/MainWindow.ui" line="215"/>
         <source>Save PDF</source>
         <translation>保存 PDF</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="219"/>
+        <location filename="../../View/ui/MainWindow.ui" line="220"/>
         <source>Print</source>
         <translation>打印</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="224"/>
+        <location filename="../../View/ui/MainWindow.ui" line="225"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="229"/>
+        <location filename="../../View/ui/MainWindow.ui" line="230"/>
         <source>Minimize</source>
         <translation>最小化</translation>
     </message>
     <message>
-        <location filename="../../View/ui/MainWindow.ui" line="234"/>
+        <location filename="../../View/ui/MainWindow.ui" line="235"/>
         <source>Exit</source>
         <translation>退出</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/MainWindow.ui" line="240"/>
+        <source>Manual</source>
+        <translation>手册</translation>
     </message>
 </context>
 <context>
@@ -427,87 +427,87 @@ See Python glob module doc.</source>
 <context>
     <name>MainWindow_View</name>
     <message>
-        <location filename="../../View/MainWindow.py" line="79"/>
+        <location filename="../../View/MainWindow.py" line="117"/>
         <source>Also used as title of files and score.</source>
         <translation>同时作为文件夹和其中生成文件的标题。</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="81"/>
+        <location filename="../../View/MainWindow.py" line="119"/>
         <source>Folder Title:</source>
         <translation>标题：</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="86"/>
+        <location filename="../../View/MainWindow.py" line="124"/>
         <source>Always on Top</source>
         <translation>窗口置顶</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="116"/>
+        <location filename="../../View/MainWindow.py" line="154"/>
         <source>      Working Dir:</source>
         <translation>      工作目录：</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="183"/>
+        <location filename="../../View/MainWindow.py" line="221"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="193"/>
+        <location filename="../../View/MainWindow.py" line="231"/>
         <source>Console</source>
         <translation>控制台</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="200"/>
+        <location filename="../../View/MainWindow.py" line="238"/>
         <source>Preview</source>
         <translation>预览</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="205"/>
+        <location filename="../../View/MainWindow.py" line="243"/>
         <source>Stitch</source>
         <translation>拼接</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="212"/>
+        <location filename="../../View/MainWindow.py" line="250"/>
         <source>Reclip</source>
         <translation>分割</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="234"/>
+        <location filename="../../View/MainWindow.py" line="272"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="236"/>
+        <location filename="../../View/MainWindow.py" line="274"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="251"/>
+        <location filename="../../View/MainWindow.py" line="289"/>
         <source>Docking system view preset.</source>
         <translation>窗口停靠系统的布局预设。</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="252"/>
+        <location filename="../../View/MainWindow.py" line="290"/>
         <source>Save current layout</source>
         <translation>保存当前的窗口布局</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="253"/>
+        <location filename="../../View/MainWindow.py" line="291"/>
         <source>Delete current using preset</source>
         <translation>删除当前正在使用的布局预设</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="256"/>
+        <location filename="../../View/MainWindow.py" line="294"/>
         <source>Docking Perspective:</source>
         <translation>布局预设：</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="284"/>
+        <location filename="../../View/MainWindow.py" line="322"/>
         <source>Save docking perspective</source>
         <translation>保存视图布局</translation>
     </message>
     <message>
-        <location filename="../../View/MainWindow.py" line="285"/>
+        <location filename="../../View/MainWindow.py" line="323"/>
         <source>Please input a unique name:</source>
         <translation>请输入一个唯一的识别名称：</translation>
     </message>
@@ -1829,17 +1829,17 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>rename_files</name>
     <message>
-        <location filename="../../Model/utils.py" line="90"/>
+        <location filename="../../Model/utils.py" line="77"/>
         <source>Old and New filenames list have different length.</source>
         <translation>新旧文件名列表长度不一致。</translation>
     </message>
     <message>
-        <location filename="../../Model/utils.py" line="102"/>
+        <location filename="../../Model/utils.py" line="89"/>
         <source>There are no file needed to rename.</source>
         <translation>没有需要重命名的文件。</translation>
     </message>
     <message>
-        <location filename="../../Model/utils.py" line="115"/>
+        <location filename="../../Model/utils.py" line="102"/>
         <source>Renamed file {} -&gt; {}</source>
         <translation>文件已重命名：{} -&gt; {}</translation>
     </message>
@@ -1847,7 +1847,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>reorder_image_files</name>
     <message>
-        <location filename="../../Model/utils.py" line="136"/>
+        <location filename="../../Model/utils.py" line="123"/>
         <source>No {} related file found.</source>
         <translation>未找到 {} 相关的文件。</translation>
     </message>
@@ -1855,12 +1855,12 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>screenshot</name>
     <message>
-        <location filename="../../Model/utils.py" line="290"/>
+        <location filename="../../Model/utils.py" line="277"/>
         <source>Capture Failed using {}: {}</source>
         <translation>使用{}工具时截图失败：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/utils.py" line="303"/>
+        <location filename="../../Model/utils.py" line="290"/>
         <source>Invalid Monitor Number</source>
         <translation>无效的显示器编号</translation>
     </message>

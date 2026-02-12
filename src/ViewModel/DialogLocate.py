@@ -113,9 +113,9 @@ class DialogLocate_VM(DialogLocate_View):
         )
         self.setGeometry(*self.locateSettings.region_data.region)
         log.debug(self.tr("Screen scaling: {}").format(self.scaling))
-        log.debug(
-            self.tr("Locate offset: {}").format(self.locateSettings.locate_offset)
-        )
+        # log.debug(
+        #     self.tr("Locate offset: {}").format(self.locateSettings.locate_offset)
+        # )
 
     def close(self, /) -> bool:
         self.setVisible(False)

@@ -418,12 +418,15 @@ def get_sysfonts() -> dict[str, Path]:
         for file in Path(d).iterdir():
             if file.suffix.lower() != ".ttf":
                 continue
-            font = TTFont(file)
-            name_table = font["name"]
-            for i in name_table.names:
-                if i.nameID == 1:
-                    font_name = i.toStr()
-            font_info[font_name] = file
+            try:
+                font = TTFont(file)
+                name_table = font["name"]
+                for i in name_table.names:
+                    if i.nameID == 1:
+                        font_name = i.toStr()
+                font_info[font_name] = file
+            except Exception:
+                pass
     return font_info
 
 

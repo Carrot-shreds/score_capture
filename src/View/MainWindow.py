@@ -1,6 +1,15 @@
+import time
+
 import PySide6QtAds as QtAds
 from PySide6.QtCore import QFile, QIODevice, QSignalBlocker, Qt
-from PySide6.QtGui import QAction, QCloseEvent, QKeySequence, QShortcut
+from PySide6.QtGui import (
+    QAction,
+    QCloseEvent,
+    QDesktopServices,
+    QKeySequence,
+    QMouseEvent,
+    QShortcut,
+)
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -22,6 +31,28 @@ from .ui.MainWindow_ui import Ui_MainWindow
 LANGUAGES: dict[str, str] = {"English": "en", "简体中文": "zh_CN"}
 
 
+class GPLLabel(QLabel):
+    def __init__(self):
+        super().__init__("Free software under GPLv3")
+        self.click_times: int = 0
+        self.start_time: int = 0
+
+    def play(self):
+        pass
+
+    def mousePressEvent(self, ev: QMouseEvent) -> None:
+        self.click_times += 1
+        if self.start_time == 0:
+            self.start_time = int(time.time())
+        elif int(time.time()) - self.start_time > 3:
+            self.click_times = 0
+            self.start_time = 0
+        elif self.click_times >= 7:
+            self.play()
+            self.click_times = 0
+            self.start_time = 0
+
+
 class About(QDialog):
     def __init__(self, parent, version: str) -> None:
         super().__init__(parent)
@@ -35,13 +66,14 @@ class About(QDialog):
         )
         self.button_license = QPushButton(self.tr("View license"))
         self.button_license.clicked.connect(lambda: License(self))
+        self.label_gpl = GPLLabel()
 
         self.boxlayout = QVBoxLayout(self)
         self.boxlayout.addWidget(self.label_title)
         self.boxlayout.addWidget(self.label_version)
         self.boxlayout.addWidget(self.label_copyright)
         self.boxlayout.addWidget(self.label_repo)
-        self.boxlayout.addWidget(QLabel("Free software under GPLv3"))
+        self.boxlayout.addWidget(self.label_gpl)
         self.boxlayout.addWidget(self.button_license)
         self.show()
         self.setFixedSize(self.size())
@@ -70,6 +102,12 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setupUi(self)
+
+        self.actionManual.triggered.connect(
+            lambda: QDesktopServices().openUrl(
+                "https://github.com/Carrot-shreds/score_capture"
+            )
+        )
 
         # tool bar
         self.toolBar_path.clear()

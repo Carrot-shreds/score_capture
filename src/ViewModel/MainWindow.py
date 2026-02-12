@@ -112,7 +112,7 @@ class MainWindow_VM(MainWindow_View):
         )
 
         self.dialog_locate.pushButton_preview.clicked.connect(
-            self.tab_preview.preview_region
+            lambda: [self.activateWindow(), self.tab_preview.preview_region()]
         )
 
         self.load_dock_perspective()

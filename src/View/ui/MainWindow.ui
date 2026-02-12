@@ -38,6 +38,7 @@
      </property>
     </widget>
     <addaction name="menuLanguage"/>
+    <addaction name="actionManual"/>
     <addaction name="action_about"/>
    </widget>
    <widget class="QMenu" name="menu_file">
@@ -232,6 +233,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionManual">
+   <property name="text">
+    <string>Manual</string>
    </property>
   </action>
  </widget>

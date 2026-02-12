@@ -50,7 +50,8 @@ Capture, Detect, Stitch and Reclip music score/TAB from scrolling video to gener
 
 Install the uv environment.
 
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    curl -LsSf https://astral.sh/uv/install.sh | sh  (Linux/MacOS)
+    winget install --id=astral-sh.uv  -e  (Windows)
     or
     pip install uv
 

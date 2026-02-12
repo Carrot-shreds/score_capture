@@ -82,7 +82,7 @@ class SettingsModel(AlwaysValidateModel, OnValueChangeModel):
 
 class LocateSettings(SettingsModel):
     locate_offset: tuple[int, int, int, int] = Field(default=(0, 0, 0, 0))
-    window_opacity: ZeroToOneOpen = 0.4
+    window_opacity: ZeroToOneOpen = 0.7
     window_always_on_top: bool = False
     window_auto_close: bool = False
     window_limit_move: bool = True
@@ -93,7 +93,7 @@ class LocateSettings(SettingsModel):
 class CaptureSettings(SettingsModel):
     tool: CaptureTool = Field(default_factory=default_tool_factory)
     save_format: ImageSavingFormat = ImageSavingFormat.JPEG
-    delay_time: PositiveFloat = 0.7  # seconds
+    delay_time: PositiveFloat = 0.6  # seconds
     if_keep_last: bool = True
     if_invert_image: bool = False
     capture_data_filename: JsonFileName = "CaptureData.json"
@@ -128,7 +128,7 @@ class BuildImageSettings(SettingsModel):
 
 
 class StitchSettings(SettingsModel):
-    method: StitchMethod = StitchMethod.MSE
+    method: StitchMethod = StitchMethod.SSIM
     direction: Direction = Direction.HORIZONTAL
     saving_format: ImageSavingFormat = ImageSavingFormat.JPEG
     ui_lock_zoom: bool = False
@@ -138,7 +138,7 @@ class StitchSettings(SettingsModel):
 
 
 class ReclipSettings(SettingsModel):
-    method: ReclipMethod = ReclipMethod.FIXED_BAR_NUM
+    method: ReclipMethod = ReclipMethod.FILL_MAX_WIDTH
     bar_num_each_line: PositiveInt = 4
     bar_num_line_max_length: PositiveInt = 4
     clip_align: Align = Align.LEFT
@@ -180,7 +180,7 @@ class LogSettings(SettingsModel):
 class LineDetectorSettings(SettingsModel):
     coefficient_horizontal: Annotated[float, Gt(0), Le(1)] = 0.7
     coefficient_vertical: Annotated[float, Gt(0), Le(1)] = 0.8
-    h_invert_pixel_threshold: Annotated[float, Gt(0), Le(255)] = 255
+    h_invert_pixel_threshold: Annotated[float, Gt(0), Le(255)] = 254.5
     h_invert_thickness_threshold: Annotated[int, Gt(0)] = 10
 
 
@@ -258,7 +258,7 @@ class ShortcutSettings(SettingsModel):
 
 class GUISettings(SettingsModel):
     language: str = ""
-    mainWindow_always_on_top: bool = True
+    mainWindow_always_on_top: bool = False
     mainWindow_dock_perspective: str = "default"
     imageViewer_show_tools: bool = False
 
