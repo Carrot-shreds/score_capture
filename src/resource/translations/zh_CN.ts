@@ -177,17 +177,17 @@ See Python glob module doc.</source>
 <context>
     <name>DialogLocate_VM</name>
     <message>
-        <location filename="../../ViewModel/DialogLocate.py" line="92"/>
+        <location filename="../../ViewModel/DialogLocate.py" line="97"/>
         <source>Invalid region: {}</source>
         <translation>无效屏幕区域：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/DialogLocate.py" line="97"/>
+        <location filename="../../ViewModel/DialogLocate.py" line="102"/>
         <source>Update region: {}</source>
         <translation>更新区域数据：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/DialogLocate.py" line="115"/>
+        <location filename="../../ViewModel/DialogLocate.py" line="120"/>
         <source>Screen scaling: {}</source>
         <translation>屏幕缩放：{}</translation>
     </message>
@@ -195,17 +195,17 @@ See Python glob module doc.</source>
 <context>
     <name>DialogLocate_View</name>
     <message>
-        <location filename="../../View/DialogLocate.py" line="79"/>
+        <location filename="../../View/DialogLocate.py" line="82"/>
         <source>Toggle mini mode.</source>
         <translation>切换紧凑模式。</translation>
     </message>
     <message>
-        <location filename="../../View/DialogLocate.py" line="84"/>
+        <location filename="../../View/DialogLocate.py" line="87"/>
         <source>Toggle capture state</source>
         <translation>启动/停止截图</translation>
     </message>
     <message>
-        <location filename="../../View/DialogLocate.py" line="88"/>
+        <location filename="../../View/DialogLocate.py" line="91"/>
         <source>Folder title</source>
         <translation>当前保存文件夹标题</translation>
     </message>
@@ -384,42 +384,42 @@ See Python glob module doc.</source>
 <context>
     <name>MainWindow_VM</name>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="197"/>
+        <location filename="../../ViewModel/MainWindow.py" line="204"/>
         <source>Current capture task is not finished. Please try again later.</source>
         <translation>当前截图任务尚未结束，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="207"/>
+        <location filename="../../ViewModel/MainWindow.py" line="214"/>
         <source>Working folder is not empty: {}</source>
         <translation>工作目录非空：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="212"/>
+        <location filename="../../ViewModel/MainWindow.py" line="219"/>
         <source>Clear folder</source>
         <translation>清空目录</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="213"/>
+        <location filename="../../ViewModel/MainWindow.py" line="220"/>
         <source>New folder</source>
         <translation>新建目录</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="216"/>
+        <location filename="../../ViewModel/MainWindow.py" line="223"/>
         <source>Clear current folder, or switch to a new folder named: {}</source>
         <translation>清空当前目录，或是切换到一个新建文件夹：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="220"/>
+        <location filename="../../ViewModel/MainWindow.py" line="227"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="230"/>
+        <location filename="../../ViewModel/MainWindow.py" line="237"/>
         <source>Folder cleared: {}</source>
         <translation>目录已清空：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/MainWindow.py" line="235"/>
+        <location filename="../../ViewModel/MainWindow.py" line="242"/>
         <source>Switched to new folder: {}</source>
         <translation>已切换至新目录：{}</translation>
     </message>
@@ -601,37 +601,37 @@ See Python glob module doc.</source>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../../Model/Data/settings.py" line="319"/>
+        <location filename="../../Model/Data/settings.py" line="335"/>
         <source>AppSettings Saving Failed: {}</source>
         <translation>应用设置保存失败：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="336"/>
+        <location filename="../../Model/Data/settings.py" line="352"/>
         <source>AppSettings load failed, settings json must be a dict</source>
         <translation>应用设置加载失败，设置json必须是一个字典</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="345"/>
+        <location filename="../../Model/Data/settings.py" line="361"/>
         <source>AppSettings load failed, {} Not Found, will use default settings.</source>
         <translation>应用设置加载失败，未发现配置文件{}，将使用默认设置。</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="368"/>
+        <location filename="../../Model/Data/settings.py" line="384"/>
         <source>Invalid field_value:{0} for {1} when loading {2} from json</source>
         <translation>从json加载 {2} 的 {1} 字段时，遇到无效的字段值：{0}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="374"/>
+        <location filename="../../Model/Data/settings.py" line="390"/>
         <source>Invalid field_name:{0} when loading {1} from json</source>
         <translation>从json加载 {1} 时遇到无效的字段名：{0}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="422"/>
+        <location filename="../../Model/Data/settings.py" line="438"/>
         <source>AppSettingsSavingConfig load failed, using default config with all true (save all settings)</source>
         <translation>AppSettingsSavingConfig加载失败，将使用默认配置（保存所有设置）</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="427"/>
+        <location filename="../../Model/Data/settings.py" line="443"/>
         <source>Config {} Not Found, using default config.</source>
         <translation>未发现配置文件{}， 将使用默认配置。</translation>
     </message>
@@ -1180,40 +1180,40 @@ Please do reclip first</source>
         <translation>.png</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="215"/>
+        <location filename="../../View/ui/TabSettings.ui" line="218"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cached diff between captures, used to build images from captures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>截图间对比数据的缓存，用来从capture图像构建Image</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="252"/>
+        <location filename="../../View/ui/TabSettings.ui" line="281"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MSS: cross-platform, supports multiple screens. But doesn&apos;t work on Wayland.&lt;/p&gt;&lt;p&gt;Spectacle: KDE default CLI capture tool.&lt;/p&gt;&lt;p&gt;Grim: Alternative wayland capture tool.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>MSS：支持跨平台与多屏幕，目前不支持Wayland
 Spectacle：KDE原生命令行截图工具，兼容Wayland
 Grim：另一个可选的Wayland工具包</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="316"/>
+        <location filename="../../View/ui/TabSettings.ui" line="345"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reorder and rename image filenames.&lt;/p&gt;&lt;p&gt;This is needed when you doesn&apos;t want some image and deleted them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>重新排序并重命名Image文件
 适用于当你不需要其中几张并删除了他们时</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="613"/>
+        <location filename="../../View/ui/TabSettings.ui" line="642"/>
         <source>Y:</source>
         <translation>Y：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="519"/>
+        <location filename="../../View/ui/TabSettings.ui" line="548"/>
         <source>X:</source>
         <translation>X：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="422"/>
+        <location filename="../../View/ui/TabSettings.ui" line="451"/>
         <source>SSIM</source>
         <translation>SSIM</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="427"/>
+        <location filename="../../View/ui/TabSettings.ui" line="456"/>
         <source>MSE</source>
         <translation>MSE</translation>
     </message>
@@ -1313,156 +1313,166 @@ Grim：另一个可选的Wayland工具包</translation>
         <translation>其他</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="186"/>
+        <location filename="../../View/ui/TabSettings.ui" line="247"/>
         <source>Show ImageViewer tools</source>
         <translation>显示预览工具</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="199"/>
+        <location filename="../../View/ui/TabSettings.ui" line="192"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cached detected lines data, used to stitch images as reference.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>线段检测缓存，用作拼接时的参考数据</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="202"/>
+        <location filename="../../View/ui/TabSettings.ui" line="195"/>
         <source>Clear ScoreDetections</source>
         <translation>清除ScoreDetections</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="218"/>
+        <location filename="../../View/ui/TabSettings.ui" line="202"/>
+        <source>Ui Scaling:</source>
+        <translation>界面缩放：</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/TabSettings.ui" line="221"/>
         <source>Clear CaptureData</source>
         <translation>清除CaptureData</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="234"/>
+        <location filename="../../View/ui/TabSettings.ui" line="228"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The scaling of user interface. The actual scaling will be mulitplied by the system scaling. &lt;span style=&quot; font-family:&apos;quote-cjk-patch&apos;,&apos;Inter&apos;,&apos;system-ui&apos;,&apos;-apple-system&apos;,&apos;BlinkMacSystemFont&apos;,&apos;Segoe UI&apos;,&apos;Roboto&apos;,&apos;Oxygen&apos;,&apos;Ubuntu&apos;,&apos;Cantarell&apos;,&apos;Open Sans&apos;,&apos;Helvetica Neue&apos;,&apos;sans-serif&apos;; font-size:16px; color:#0f1115; background-color:#ffffff;&quot;&gt;Takes effect after restart.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>界面元素尺寸的缩放，实际缩放值将乘以系统缩放。重启后生效</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/TabSettings.ui" line="263"/>
         <source>Capture</source>
         <translation>截图</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="256"/>
+        <location filename="../../View/ui/TabSettings.ui" line="285"/>
         <source>mss</source>
         <translation>mss</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="261"/>
+        <location filename="../../View/ui/TabSettings.ui" line="290"/>
         <source>spectacle</source>
         <translation>spectacle</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="266"/>
+        <location filename="../../View/ui/TabSettings.ui" line="295"/>
         <source>grim</source>
         <translation>grim</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="277"/>
+        <location filename="../../View/ui/TabSettings.ui" line="306"/>
         <source>Capture Tool:</source>
         <translation>截图工具：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="294"/>
+        <location filename="../../View/ui/TabSettings.ui" line="323"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Capture inverval (Seconds)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>截图间隔（秒）</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="319"/>
+        <location filename="../../View/ui/TabSettings.ui" line="348"/>
         <source>Reorder Image</source>
         <translation>重编号Image</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="326"/>
+        <location filename="../../View/ui/TabSettings.ui" line="355"/>
         <source>Interval (s):</source>
         <translation>截图间隔(秒/s):</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="346"/>
+        <location filename="../../View/ui/TabSettings.ui" line="375"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When compare result of previous two captures exceeds the threshold. We think that the screen switch to a new different image, then we build a new image from these captures by average them.&lt;/p&gt;&lt;p&gt;SSIM: 0-1 (usually in 0.93-0.97)&lt;/p&gt;&lt;p&gt;MSE: 0-65535&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>当最近两次截图的差异值超过阈值时，则认为屏幕内容已切换至新图像。随后对这些截图取平均以生成一张新Image。
 SSIM：0-1（通常在0.93-0.97之间）
 MSE：0-65535</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="359"/>
+        <location filename="../../View/ui/TabSettings.ui" line="388"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-family:&apos;quote-cjk-patch&apos;,&apos;Inter&apos;,&apos;system-ui&apos;,&apos;-apple-system&apos;,&apos;BlinkMacSystemFont&apos;,&apos;Segoe UI&apos;,&apos;Roboto&apos;,&apos;Oxygen&apos;,&apos;Ubuntu&apos;,&apos;Cantarell&apos;,&apos;Open Sans&apos;,&apos;Helvetica Neue&apos;,&apos;sans-serif&apos;; font-size:16px; color:#0f1115; background-color:#ffffff;&quot;&gt;Converts image to its complementary colors.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>是否在截图时对图像进行反色处理</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="362"/>
+        <location filename="../../View/ui/TabSettings.ui" line="391"/>
         <source>Invert Images</source>
         <translation>反色图像</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="369"/>
+        <location filename="../../View/ui/TabSettings.ui" line="398"/>
         <source>Threshold:</source>
         <translation>截至差异阈值：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="376"/>
+        <location filename="../../View/ui/TabSettings.ui" line="405"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether keep the last group capture as a image when capture stopped.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>是否保留截图结束时剩余的最后一组图像</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="379"/>
+        <location filename="../../View/ui/TabSettings.ui" line="408"/>
         <source>Keep Last group</source>
         <translation>保留最后一组</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="392"/>
+        <location filename="../../View/ui/TabSettings.ui" line="421"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compare captures and rebuild images using current settings.&lt;/p&gt;&lt;p&gt;This can be used to manually clean some captures to get better image.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>使用当前的设置对比capture*图像并构建生成Image*图像
 当你想要手动清理部分截图时以得到更好的效果时，这会很有用</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="395"/>
+        <location filename="../../View/ui/TabSettings.ui" line="424"/>
         <source>Rebuild Image</source>
         <translation>重构建Image</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="418"/>
+        <location filename="../../View/ui/TabSettings.ui" line="447"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SSIM: A bit slower but have way better result. Recommended.&lt;/p&gt;&lt;p&gt;MSE: Less cpu usage.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>SSIM：稍微慢一点，但效果好得多，推荐
 MSE： 更少的CPU占用</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="435"/>
+        <location filename="../../View/ui/TabSettings.ui" line="464"/>
         <source>Compare Method:</source>
         <translation>对比方法：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="448"/>
+        <location filename="../../View/ui/TabSettings.ui" line="477"/>
         <source>Locate</source>
         <translation>定位</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="454"/>
+        <location filename="../../View/ui/TabSettings.ui" line="483"/>
         <source>Window Opacity:</source>
         <translation>窗口透明度：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="490"/>
+        <location filename="../../View/ui/TabSettings.ui" line="519"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Auto close when click locate button and updated region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>当点击定位按钮，更新完成后，自动关闭窗口</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="493"/>
+        <location filename="../../View/ui/TabSettings.ui" line="522"/>
         <source>Auto Close</source>
         <translation>自动关闭</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="529"/>
+        <location filename="../../View/ui/TabSettings.ui" line="558"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Limit the window movement, make it can not out of the screen.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>将定位窗口的移动范围完全限制在屏幕内</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="532"/>
+        <location filename="../../View/ui/TabSettings.ui" line="561"/>
         <source>Limit on Screen</source>
         <translation>限制移动</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="555"/>
+        <location filename="../../View/ui/TabSettings.ui" line="584"/>
         <source>Width:</source>
         <translation>宽：</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="584"/>
+        <location filename="../../View/ui/TabSettings.ui" line="613"/>
         <source>Height:</source>
         <translation>高：</translation>
     </message>
@@ -1876,12 +1886,12 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>validate_compare_threshold</name>
     <message>
-        <location filename="../../Model/Data/settings.py" line="116"/>
+        <location filename="../../Model/Data/settings.py" line="130"/>
         <source>Compare_threshold must in 0-1 when using SSIM</source>
         <translation>使用SSIM算法时，比较阈值必须介于0到1之间</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="125"/>
+        <location filename="../../Model/Data/settings.py" line="139"/>
         <source>Compare_threshold must in 0-65025 when using MSE</source>
         <translation>使用MSE算法时，比较阈值必须介于0到65025之间</translation>
     </message>

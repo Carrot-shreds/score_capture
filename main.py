@@ -33,7 +33,8 @@ def show_main_window() -> None:
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )  # default
-    os.environ["QT_FONT_DPI"] = "96"
+    os.environ["QT_SCALE_FACTOR"] = str(guiSettings.ui_scaling)
+    log.debug(f"Ui Scaling: {guiSettings.ui_scaling}")
 
     # Ignore Error - "qt.qpa.window: SetProcessDpiAwarenessContext() failed"
     QtCore.QLoggingCategory.setFilterRules("qt.qpa.window.warning=false")

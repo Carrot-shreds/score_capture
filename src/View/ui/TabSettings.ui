@@ -38,6 +38,12 @@
           <string>Global</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
+          <property name="leftMargin">
+           <number>18</number>
+          </property>
+          <property name="rightMargin">
+           <number>18</number>
+          </property>
           <item row="3" column="3">
            <widget class="QPushButton" name="pushButton_select_folder">
             <property name="toolTip">
@@ -139,6 +145,9 @@
             <property name="text">
              <string>Saving Format:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item row="3" column="2">
@@ -180,13 +189,12 @@
           <string>Others</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="checkBox_imageViewer_show_tools">
-            <property name="text">
-             <string>Show ImageViewer tools</string>
-            </property>
-           </widget>
-          </item>
+          <property name="leftMargin">
+           <number>18</number>
+          </property>
+          <property name="rightMargin">
+           <number>18</number>
+          </property>
           <item row="2" column="0">
            <widget class="QPushButton" name="pushButton_clear_score_detections">
             <property name="sizePolicy">
@@ -200,6 +208,19 @@
             </property>
             <property name="text">
              <string>Clear ScoreDetections</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" alignment="Qt::AlignmentFlag::AlignRight">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Ui Scaling:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -216,6 +237,41 @@
             </property>
             <property name="text">
              <string>Clear CaptureData</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" alignment="Qt::AlignmentFlag::AlignLeft">
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_ui_scaling">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The scaling of user interface. The actual scaling will be mulitplied by the system scaling. &lt;span style=&quot; font-family:'quote-cjk-patch','Inter','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Open Sans','Helvetica Neue','sans-serif'; font-size:16px; color:#0f1115; background-color:#ffffff;&quot;&gt;Takes effect after restart.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="minimum">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>2.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2" alignment="Qt::AlignmentFlag::AlignHCenter">
+           <widget class="QCheckBox" name="checkBox_imageViewer_show_tools">
+            <property name="text">
+             <string>Show ImageViewer tools</string>
             </property>
            </widget>
           </item>
@@ -234,6 +290,12 @@
           <string>Capture</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <property name="leftMargin">
+           <number>18</number>
+          </property>
+          <property name="rightMargin">
+           <number>18</number>
+          </property>
           <item row="1" column="2">
            <widget class="QComboBox" name="comboBox_capture_tool">
             <property name="sizePolicy">
@@ -317,6 +379,9 @@
             </property>
             <property name="text">
              <string>Reorder Image</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -448,6 +513,12 @@
           <string>Locate</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>18</number>
+          </property>
+          <property name="rightMargin">
+           <number>18</number>
+          </property>
           <item row="1" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">

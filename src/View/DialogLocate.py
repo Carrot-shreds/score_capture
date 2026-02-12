@@ -59,6 +59,9 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)  # 去掉默认边框
 
+        self.scaling = self.screen().devicePixelRatio()  # 获取缩放比例
+        self.screen_size = self.screen().size()  # Virtual Size
+
         # shortcut
         self.pushButton_locate.setShortcut(QKeySequence("l"))
         self.pushButton_preview.setShortcut(QKeySequence("p"))
@@ -186,7 +189,7 @@ class DialogLocate_View(QDialog, Ui_DialogLocate):
             )
             if width < self.minimumWidth() or height < self.minimumHeight():
                 return
-            self.setGeometry(x, y, width, height)
+            self.setGeometry(*[round(n * self.scaling) for n in [x, y, width, height]])
         else:
             # 窗口拖动
             new_pos = self.pos() + delta

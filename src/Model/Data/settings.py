@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Annotated, Any, Literal, Self
 
-from annotated_types import Gt, Le
+from annotated_types import Ge, Gt, Le
 from loguru import logger as log
 from pydantic import (
     BaseModel,
@@ -66,6 +66,20 @@ def get_exec_main_dir() -> DirectoryExisting:
         return Path(sys.argv[0]).resolve().parent  # 当编译后运行时，返回exe文件的路径
     else:
         return Path(sys.argv[0]).resolve().parent  # 脚本运行时
+
+
+def get_screen_scale() -> float:
+    try:
+        from ctypes import windll
+
+        user32 = windll.user32
+        gdi32 = windll.gdi32
+        user32.SetProcessDPIAware()
+        hDC = user32.GetDC(0)
+        dpi = gdi32.GetDeviceCaps(hDC, 90)
+        return dpi / 96
+    except Exception:
+        return 1.0
 
 
 ###########################################################
@@ -258,8 +272,10 @@ class ShortcutSettings(SettingsModel):
 
 class GUISettings(SettingsModel):
     language: str = ""
+    ui_scaling: Annotated[float, Ge(0.5)] = Field(default_factory=get_screen_scale)
     mainWindow_always_on_top: bool = False
     mainWindow_dock_perspective: str = "default"
+    mainWindow_size: tuple[PositiveInt, PositiveInt] = (1300, 800)
     imageViewer_show_tools: bool = False
 
 

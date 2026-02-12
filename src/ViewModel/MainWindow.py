@@ -13,6 +13,7 @@ from src import __version__
 from src.Model.Data.settings import (
     appSettings,
     appSettingsSavingConfig,
+    guiSettings,
 )
 from src.Model.MainTask.Capture import CaptureThread
 from src.Model.utils import get_unused_filename
@@ -116,6 +117,12 @@ class MainWindow_VM(MainWindow_View):
         )
 
         self.load_dock_perspective()
+        resize_ratio = (
+            guiSettings.ui_scaling
+            if guiSettings.ui_scaling >= (ratio := self.screen().devicePixelRatio())
+            else ratio
+        )
+        self.resize(*[int(s / resize_ratio) for s in self.guiSettings.mainWindow_size])
         self.toolBar_path.setFocus()
         self.appSettings.notice_all_observers()
 

@@ -8,7 +8,12 @@ from pydantic import ValidationError
 from PySide6.QtCore import QPoint, QRect
 from PySide6.QtGui import QMoveEvent, QResizeEvent
 
-from src.Model.Data.settings import captureSettings, locateSettings, pathSettings
+from src.Model.Data.settings import (
+    captureSettings,
+    guiSettings,
+    locateSettings,
+    pathSettings,
+)
 from src.Model.utils import qrect2array, set_window_always_on_top
 from src.View import DialogLocate_View
 from src.ViewModel.binding.bind_data import bind_data
@@ -17,11 +22,11 @@ from src.ViewModel.binding.bind_data import bind_data
 class DialogLocate_VM(DialogLocate_View):
     def __init__(self, parent=None):
         super().__init__()
-        self.scaling = self.screen().devicePixelRatio()  # 获取缩放比例
 
         self.locateSettings = locateSettings
         self.captureSettings = captureSettings
         self.pathSettings = pathSettings
+        self.guiSettings = guiSettings
 
         bind_data(self.spinBox_region_x, self.locateSettings.region_data, "x")
         bind_data(self.spinBox_region_y, self.locateSettings.region_data, "y")
@@ -81,7 +86,7 @@ class DialogLocate_VM(DialogLocate_View):
             tuple[int, int, int, int],
             tuple(
                 int(i)
-                for i in np.ceil(qrect2array(self.frameGeometry()) * self.scaling)
+                for i in np.around(qrect2array(self.frameGeometry()) * self.scaling)
             ),
         )
         if region == self.locateSettings.region_data.region:
@@ -144,15 +149,13 @@ class DialogLocate_VM(DialogLocate_View):
             point = x
 
         if self.locateSettings.window_limit_move:
-            with mss.mss() as sct:
-                monitor = sct.monitors[self.locateSettings.region_data.monitor_num]
-                if (
-                    point.x() < 0
-                    or point.y() < 0
-                    or point.x() + self.width() > monitor["width"]
-                    or point.y() + self.height() > monitor["height"]
-                ):
-                    return
+            if (
+                point.x() < 0
+                or point.y() < 0
+                or point.x() + self.width() > self.screen_size.width()
+                or point.y() + self.height() > self.screen_size.height()
+            ):
+                return
         super().move(point)
 
     def setGeometry(

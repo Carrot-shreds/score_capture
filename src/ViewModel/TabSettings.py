@@ -80,6 +80,7 @@ class TabSettings_VM(TabSettings_View):
             self.guiSettings,
             "imageViewer_show_tools",
         )
+        bind_data(self.doubleSpinBox_ui_scaling, self.guiSettings, "ui_scaling")
 
         self.guiSettings.add_observer_handler(
             "mainWindow_always_on_top",
