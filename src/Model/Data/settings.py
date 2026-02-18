@@ -68,6 +68,16 @@ def get_exec_main_dir() -> DirectoryExisting:
         return Path(sys.argv[0]).resolve().parent  # 脚本运行时
 
 
+def get_default_window_size() -> tuple[PositiveInt, PositiveInt]:
+    import mss
+
+    with mss.mss() as sct:
+        monitor = sct.monitors[0]
+        width = int(monitor["width"] * 0.83)
+        height = int(monitor["height"] * 0.75)
+    return (width, height)
+
+
 def get_screen_scale() -> float:
     try:
         from ctypes import windll
@@ -272,10 +282,12 @@ class ShortcutSettings(SettingsModel):
 
 class GUISettings(SettingsModel):
     language: str = ""
-    ui_scaling: Annotated[float, Ge(0.5)] = Field(default_factory=get_screen_scale)
+    ui_scaling: Annotated[float, Ge(0.5)] = 1.25
     mainWindow_always_on_top: bool = False
     mainWindow_dock_perspective: str = "default"
-    mainWindow_size: tuple[PositiveInt, PositiveInt] = (1300, 800)
+    mainWindow_size: tuple[PositiveInt, PositiveInt] = Field(
+        default_factory=get_default_window_size
+    )
     imageViewer_show_tools: bool = False
 
 

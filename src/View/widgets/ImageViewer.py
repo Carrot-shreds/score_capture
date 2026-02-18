@@ -68,7 +68,12 @@ class ImageViewer(QWidget, Ui_ImageViewer):
 
     @validate_call
     def show_images(
-        self, *image_files: ImageArray | Path, autoRange: bool = True
+        self,
+        *image_files: ImageArray | Path,
+        autoRange: bool = True,
+        autoHistogramRange=True,
+        autoLevels=True,
+        levels=None,
     ) -> None:
         if not image_files:
             return
@@ -89,7 +94,13 @@ class ImageViewer(QWidget, Ui_ImageViewer):
                 )
             )
         )
-        self.imageView.setImage(img, autoRange=autoRange)
+        self.imageView.setImage(
+            img,
+            autoRange=autoRange,
+            autoLevels=autoLevels,
+            autoHistogramRange=autoHistogramRange,
+            levels=levels,
+        )
         self.change_view_background()
         self.flush_showing_name()
 

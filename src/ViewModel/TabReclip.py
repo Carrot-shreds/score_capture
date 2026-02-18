@@ -124,9 +124,8 @@ class TabReclip_VM(TabReclip_View):
         if not (images := self.get_final_images()):
             return
         name = working_dir.name
-        if (style_data := working_dir / "StyleData.json").exists():
-            data = StyleData.load_from_file(style_data)
-            name = data.title if data.add_title else name
+        if self.styleData and self.styleData.add_title:
+            name = self.styleData.title
         path = working_dir / name
         path, _ = QFileDialog.getSaveFileName(dir=path.as_posix(), filter=" (*.pdf)")
         if path == "":

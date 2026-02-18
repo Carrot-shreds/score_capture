@@ -212,7 +212,16 @@ class TabPreview_VM(TabPreview_View):
         )
         if self.previewSetting.save_preview:
             save_image(self.pathSettings.main_out_dir / "preview.png", img)
-        self.ImageViewer.show_images(img)
+        if self.previewSetting.live_preview:
+            self.ImageViewer.show_images(
+                img,
+                autoHistogramRange=False,
+                autoRange=False,
+                autoLevels=False,
+                levels=(0, 255),
+            )
+        else:
+            self.ImageViewer.show_images(img)
         self.ImageViewer.set_label_text(
             self.tr("Preview region: {}").format(self.regionData.region)
         )

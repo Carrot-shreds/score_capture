@@ -1,7 +1,6 @@
 from typing import cast
 
 import mss
-import mss.factory
 import numpy as np
 from loguru import logger as log
 from pydantic import ValidationError
@@ -53,7 +52,7 @@ class DialogLocate_VM(DialogLocate_View):
         self.locateSettings.region_data.add_observer_handlers(
             ["x", "y", "width", "height"],
             lambda v: self.setGeometry(*self.locateSettings.region_data.region)
-            if not self.m_drag_edge or self.m_drag_edge == (0, 0, 0, 0)
+            if not self.m_drag_edge  # When not moving the window
             else None,
         )
         self.locateSettings.add_observer_handler(
@@ -85,8 +84,8 @@ class DialogLocate_VM(DialogLocate_View):
         region = cast(
             tuple[int, int, int, int],
             tuple(
-                int(i)
-                for i in np.around(qrect2array(self.frameGeometry()) * self.scaling)
+                int(np.around(i))  # 取整方式与setgeometry统一
+                for i in qrect2array(self.frameGeometry()) * self.scaling
             ),
         )
         if region == self.locateSettings.region_data.region:
@@ -98,9 +97,7 @@ class DialogLocate_VM(DialogLocate_View):
             log.debug(e)
             return
         if not self.locateSettings.live_locate:
-            log.success(
-                self.tr("Update region: {}").format(tuple(int(r) for r in region))
-            )
+            log.success(self.tr("Update region: {}").format(region))
         if self.locateSettings.window_auto_close:
             self.close()
 
@@ -118,9 +115,6 @@ class DialogLocate_VM(DialogLocate_View):
         )
         self.setGeometry(*self.locateSettings.region_data.region)
         log.debug(self.tr("Screen scaling: {}").format(self.scaling))
-        # log.debug(
-        #     self.tr("Locate offset: {}").format(self.locateSettings.locate_offset)
-        # )
 
     def close(self, /) -> bool:
         self.setVisible(False)
@@ -167,7 +161,14 @@ class DialogLocate_VM(DialogLocate_View):
         else:
             rect = QRect(a0, a1, a2, a3)
 
-        if rect == self.frameGeometry():
+        processed_rect = QRect(
+            *[
+                int(np.around(i))  # 取整方式与locate统一
+                for i in qrect2array(rect) / self.scaling
+                + np.asarray(self.locateSettings.locate_offset)
+            ]
+        )
+        if processed_rect == self.frameGeometry():
             return
         if self.locateSettings.window_limit_move:
             with mss.mss() as sct:
@@ -180,9 +181,4 @@ class DialogLocate_VM(DialogLocate_View):
                 ):
                     return
 
-        super().setGeometry(
-            *(
-                qrect2array(rect) / self.scaling
-                + np.asarray(self.locateSettings.locate_offset)
-            ).astype(int)
-        )
+        super().setGeometry(processed_rect)
