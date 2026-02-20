@@ -41,7 +41,7 @@ def start_capture_loop(
     image_count: int = -1  # 去重后输出的单张图像数量
     temp_count: int = -1  # 每轮阈值相同的循环
     total_count: int = -1  # 总截图张数
-    time.sleep(captureSettings.delay_time)  # 略微延时
+    time.sleep(captureSettings.interval_time)  # 略微延时
     while True:  # 图片截取主循环
         temp_list.append(
             image_pre_process(
@@ -58,7 +58,7 @@ def start_capture_loop(
         if total_count == 0:
             log.info(QApplication.translate("Capture", "=====Start Capture====="))
         if temp_count == 0:  # 不过第一张图像不进行对比
-            time.sleep(captureSettings.delay_time)  # 延时
+            time.sleep(captureSettings.interval_time)  # 延时
             continue
 
         # 将temp图像与上一张进行对比
@@ -128,7 +128,7 @@ def start_capture_loop(
                 working_dir / captureSettings.capture_data_filename
             )
             return
-        time.sleep(captureSettings.delay_time)  # 延时
+        time.sleep(captureSettings.interval_time)  # 延时
 
 
 class CaptureThread(BaseTaskThread):

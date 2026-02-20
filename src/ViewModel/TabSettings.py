@@ -12,6 +12,8 @@ from src.Model.Data.settings import (
     guiSettings,
     locateSettings,
     pathSettings,
+    reclipSettings,
+    stitchSettings,
 )
 from src.Model.MainTask.BuildImage import BuildImageThread
 from src.Model.utils import (
@@ -58,13 +60,17 @@ class TabSettings_VM(TabSettings_View):
             "compare_threshold",
         )
         self.captureSettings = captureSettings
-        bind_data(self.doubleSpinBox_capture_delay, self.captureSettings, "delay_time")
+        bind_data(
+            self.doubleSpinBox_capture_delay, self.captureSettings, "interval_time"
+        )
         bind_data(self.comboBox_capture_tool, self.captureSettings, "tool")
         bind_data(self.checkBox_keep_last, self.captureSettings, "if_keep_last")
         bind_data(self.checkBox_invert_image, self.captureSettings, "if_invert_image")
 
         # Locate Settings
         self.locateSettings = locateSettings
+        self.stitchSettings = stitchSettings
+        self.reclipSettings = reclipSettings
         bind_data(self.doubleSpinBox_opacity, self.locateSettings, "window_opacity")
         bind_data(self.checkBox_auto_close, self.locateSettings, "window_auto_close")
         bind_data(self.checkBox_limit_move, self.locateSettings, "window_limit_move")
@@ -73,6 +79,8 @@ class TabSettings_VM(TabSettings_View):
         bind_data(self.spinBox_region_width, self.locateSettings.region_data, "width")
         bind_data(self.spinBox_region_height, self.locateSettings.region_data, "height")
         bind_data(self.comboBox_save_format, self.captureSettings, "save_format")
+        bind_data(self.comboBox_save_format, self.stitchSettings, "saving_format")
+        bind_data(self.comboBox_save_format, self.reclipSettings, "saving_format")
 
         # Others
         bind_data(

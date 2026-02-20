@@ -582,6 +582,8 @@ class TabStitch_VM(TabStitch_View):
             self.detectorSettings,
             self.pathSettings.working_dir,
         )
-        self.stitchThread.finished.connect(self.flush_stitch_preview)
+        self.stitchThread.finished.connect(
+            self.handel_load_current_folder_stitch_data_file
+        )
         self.stitchThread.destroyed.connect(lambda: setattr(self, "stitchThread", None))
         self.stitchThread.start()

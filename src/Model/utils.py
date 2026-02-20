@@ -19,7 +19,7 @@ from PySide6.QtCore import QRect
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication, QDialog, QMainWindow
 
-from src.Model.Data.const import CaptureTool
+from src.Model.Data.const import CaptureTool, ImageSavingFormat
 from src.Model.Data.type import (
     DirectoryExisting,
     FileName,
@@ -137,6 +137,15 @@ def save_image(imagepath: ImagePath, img: ImageArray) -> None:
     """支持中文路径的cv图片存储"""
     image_format = "." + imagepath.name.split(".")[-1]  # 获取文件格式
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    if imagepath.suffix == ImageSavingFormat.JPEG and (
+        img.shape[0] > 65500 or img.shape[1] > 65500
+    ):  # JPG has Maximum length of 65500, using png instead
+        raise ValueError(
+            QApplication.translate(
+                "save_image",
+                "Saving jpg image failed, image shape out of the maximum of jpg format. Please change your saving format to png.",
+            )
+        )
     cv2.imencode(image_format, np.asarray(img))[1].tofile(imagepath)
 
 

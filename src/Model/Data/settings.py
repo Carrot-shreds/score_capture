@@ -116,8 +116,8 @@ class LocateSettings(SettingsModel):
 
 class CaptureSettings(SettingsModel):
     tool: CaptureTool = Field(default_factory=default_tool_factory)
-    save_format: ImageSavingFormat = ImageSavingFormat.JPEG
-    delay_time: PositiveFloat = 0.6  # seconds
+    save_format: ImageSavingFormat = ImageSavingFormat.PNG
+    interval_time: PositiveFloat = 0.6  # seconds
     if_keep_last: bool = True
     if_invert_image: bool = False
     capture_data_filename: JsonFileName = "CaptureData.json"
@@ -154,7 +154,7 @@ class BuildImageSettings(SettingsModel):
 class StitchSettings(SettingsModel):
     method: StitchMethod = StitchMethod.SSIM
     direction: Direction = Direction.HORIZONTAL
-    saving_format: ImageSavingFormat = ImageSavingFormat.JPEG
+    saving_format: ImageSavingFormat = ImageSavingFormat.PNG
     ui_lock_zoom: bool = False
     ui_auto_zoom: bool = False
     add_mark_point: bool = True
@@ -169,7 +169,7 @@ class ReclipSettings(SettingsModel):
     clip_margin: NonNegativeInt = 4
     clip_resize: bool = True
     clip_resize_threshold: ZeroToOneOpen = 0.5
-    saving_format: ImageSavingFormat = ImageSavingFormat.JPEG
+    saving_format: ImageSavingFormat = ImageSavingFormat.PNG
     live_preview: bool = False
     font_name: str = ""
 
