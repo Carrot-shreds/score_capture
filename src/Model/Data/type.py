@@ -27,6 +27,7 @@ from pydantic import (
     PositiveInt,
     ValidationError,
     model_validator,
+    validate_call,
 )
 from pydantic_extra_types.color import Color
 from PySide6.QtWidgets import QApplication
@@ -232,11 +233,15 @@ class OnValueChangeModel(BaseModel):
     def __init__(self, /, **data: Any) -> None:
         super().__init__(**data)
         self._observer_handler: dict[str, list[Callable[[Any], None]]] = {}
+        self._no_notify: bool = False
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Set pydantic field name to attribute object"""
         super().__setattr__(name, value)
-        self.call_oberser_handlers(name, value)
+        if hasattr(self, "_no_notify") and self._no_notify:
+            return
+        else:
+            self.call_oberser_handlers(name, value)
 
     def setattr_block_observer(self, name: str, value: Any) -> None:
         """setattr with no handler call"""
@@ -431,7 +436,55 @@ class Line(AlwaysValidateModel):
         return (int(rgb_color.b * 255), int(rgb_color.g * 255), int(rgb_color.r * 255))
 
 
-class RegionData(AlwaysValidateModel, OnValueChangeModel):
+class ImageRegionData(AlwaysValidateModel, OnValueChangeModel):
+    x: NonNegativeInt = 10
+    y: NonNegativeInt = 10
+    width: PositiveInt = 100
+    height: PositiveInt = 100
+
+    def __init__(self, **data) -> None:
+        super().__init__(**data)
+        self._image_shape: tuple[int, int] | None = None
+
+    @property
+    def image_shape(self) -> tuple[int, int] | None:
+        return self._image_shape if hasattr(self, "_image_shape") else None
+
+    @image_shape.setter
+    @validate_call
+    def image_shape(self, shape: tuple[int, int] | None):
+        self._image_shape = shape
+
+    @property
+    def region(self) -> Region:
+        return (self.x, self.y, self.width, self.height)
+
+    @region.setter
+    def region(self, value: Region):
+        with self.delay_validate():
+            self.x, self.y, self.width, self.height = value
+
+    @model_validator(mode="after")
+    def validate_region(self) -> Self:
+        if self.image_shape is None:
+            return self
+        height, width = self.image_shape
+        if (
+            self.x < 0
+            or self.y < 0
+            or self.x + self.width > width
+            or self.y + self.height > height
+        ):
+            raise ValueError(
+                QApplication.translate(
+                    "validate_region",
+                    "Region-{} out of image bounds: {}",
+                ).format(self.region, self.image_shape)
+            )
+        return self
+
+
+class ScreenRegionData(AlwaysValidateModel, OnValueChangeModel):
     monitor_num: PositiveInt = 1
     x: Annotated[NonNegativeInt, AfterValidator(lambda v: int(v))]
     y: Annotated[NonNegativeInt, AfterValidator(lambda v: int(v))]

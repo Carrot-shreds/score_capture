@@ -686,6 +686,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pyffmpeg"
+version = "2.5.2.3.1"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/c6/d5169a67ddfbeda6d5a0368b22198f9d98ef39f60d73112b67a8938a7859/pyffmpeg-2.5.2.3.1-py3-none-macosx_10_9_universal2.whl", hash = "sha256:47fa229c9b93b8bb707d5043e354a13cbd9eb3a9296abf5ebfd000465c948b12", size = 18937365, upload-time = "2025-10-15T16:50:46.488Z" },
+    { url = "https://files.pythonhosted.org/packages/15/1f/adabeed97ae27e0e61795ebb1c31c4ef2dd73f4da096ec865249e88ff821/pyffmpeg-2.5.2.3.1-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:df71c11d5109563e95ad29cc3abeeb68fa23946c2c8b467d7617cdd712999dde", size = 18937365, upload-time = "2025-10-15T16:50:49.743Z" },
+    { url = "https://files.pythonhosted.org/packages/93/28/00ef9a91e4a01a8c7e522a4643373217eca526813ea36535f367ef2b0cb9/pyffmpeg-2.5.2.3.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:fd412a6361ed3f50701ae82a07af64d931d06a288fbadd3b5e304c531eabee7e", size = 18937365, upload-time = "2025-10-15T16:50:51.931Z" },
+    { url = "https://files.pythonhosted.org/packages/83/0f/4d97e41d44a8f81cf451ea579e99a7370204c03091a0fc90e6a494b30a57/pyffmpeg-2.5.2.3.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:de53ebbb9af8c5d09f6d4e3449eec7fa505d5bddcad9656ded987bcfa36a97d5", size = 43264784, upload-time = "2025-10-15T16:51:20.902Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/70/78dcaaa807a98f4e4a89308fdae00d969c2076033222df8d102aeb4a67b0/pyffmpeg-2.5.2.3.1-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:52913bc820823ae932beb37ed39b50df0f7f8079c0e62c9283f26e3f1ec44a1b", size = 43264784, upload-time = "2025-10-15T16:51:25.492Z" },
+    { url = "https://files.pythonhosted.org/packages/26/d7/58b220b255f5ba2ef7c8770a186c94a6787a6a5d2d85b7bc20a9d2c2702a/pyffmpeg-2.5.2.3.1-py3-none-win_amd64.whl", hash = "sha256:bbf0d97e90811355e8e1a5c8b1f273149f5bc7c1e25c78dd859ee9b430e1c608", size = 42532899, upload-time = "2025-10-15T16:53:51.361Z" },
+]
+
+[[package]]
 name = "pygments"
 version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -867,6 +880,7 @@ dependencies = [
     { name = "pillow" },
     { name = "pydantic" },
     { name = "pydantic-extra-types" },
+    { name = "pyffmpeg" },
     { name = "pyqtgraph" },
     { name = "pyside6" },
     { name = "pyside6-qtads" },
@@ -893,6 +907,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=11.2.1" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-extra-types", specifier = ">=2.10.6" },
+    { name = "pyffmpeg", specifier = ">=2.5.2.3.1" },
     { name = "pyqtgraph", specifier = "==0.13.7" },
     { name = "pyside6", specifier = "==6.9.0" },
     { name = "pyside6-qtads", specifier = "==4.4.0" },

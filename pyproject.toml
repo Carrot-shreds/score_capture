@@ -17,6 +17,7 @@ dependencies = [
     "pillow>=11.2.1",
     "pydantic>=2.12.5",
     "pydantic-extra-types>=2.10.6",
+    "pyffmpeg>=2.5.2.3.1",
     "pyqtgraph==0.13.7",
     "pyside6==6.9.0",
     "pyside6-qtads==4.4.0",

@@ -19,7 +19,7 @@ from src import __version__
 def show_main_window() -> None:
     import os
 
-    from PySide6 import QtCore
+    from PySide6 import QtAsyncio, QtCore
     from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
     from PySide6.QtWidgets import QApplication
 
@@ -74,7 +74,7 @@ def show_main_window() -> None:
     window = MainWindow_VM()
     window.show()
     window.activateWindow()
-    app.exec()
+    QtAsyncio.run()  # Replace app.exec() to support asyncio
 
 
 def init_log() -> None:

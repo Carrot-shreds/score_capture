@@ -37,7 +37,11 @@ class LogToGui(QObject):
 
 class Stderr2loguru(TextIO):
     def write(self, text):
-        if text != "":
+        if text == "":
+            return
+        if "pyffmpeg" in text:
+            log.debug(text.strip())
+        else:
             log.error(text.strip())
 
     def flush(self) -> None:

@@ -28,6 +28,7 @@ from src.ViewModel import (
     TabStitch_VM,
 )
 from src.ViewModel.binding.bind_data import bind_data
+from src.ViewModel.TabCrop import TabCrop_VM
 
 
 class MainWindow_VM(MainWindow_View):
@@ -54,12 +55,14 @@ class MainWindow_VM(MainWindow_View):
         self.tab_preview = TabPreview_VM(self)
         self.tab_stitch = TabStitch_VM(self)
         self.tab_reclip = TabReclip_VM(self)
+        self.tab_crop = TabCrop_VM(self)
         self.create_docking_system(
             tab_console=self.tab_console,
             tab_settings=self.tab_settings,
             tab_preview=self.tab_preview,
             tab_stitch=self.tab_stitch,
             tab_reclip=self.tab_reclip,
+            tab_crop=self.tab_crop,
         )
         self.dialog_locate = DialogLocate_VM(self)
 
@@ -98,6 +101,9 @@ class MainWindow_VM(MainWindow_View):
         self.action_capture.toggled.connect(self.toggle_capture)
         self.dialog_locate.pushButton_toggle_capture.clicked.connect(
             self.action_capture.toggle
+        )
+        self.tab_crop.pushButton_build_images.pressed.connect(
+            self.tab_settings.rebuild_images
         )
         self.action_rename_folder.triggered.connect(self.tab_settings.rename_folder)
         self.action_about.triggered.connect(lambda: About(self, __version__))
@@ -188,23 +194,7 @@ class MainWindow_VM(MainWindow_View):
         )
         self.dock_manager.openPerspective(self.guiSettings.mainWindow_dock_perspective)
 
-    def toggle_capture(self, state: bool) -> None:
-        """切换截图开始状态"""
-        if not state:
-            if not self.captureThread:
-                return
-            self.action_capture.setDisabled(True)  # 暂时禁用按钮
-            self.dialog_locate.pushButton_toggle_capture.setDisabled(True)
-            self.captureThread.stop_flag.set(True)  # 发送停止信号
-            return
-
-        if self.captureThread:
-            log.warning(
-                self.tr("Current capture task is not finished. Please try again later.")
-            )
-            self.action_capture.setChecked(False)
-            return
-
+    def check_working_dir(self) -> bool:
         if self.pathSettings.working_dir.exists():  # 解决文件夹重名问题
             new_title = get_unused_filename(
                 self.pathSettings.score_title, self.pathSettings.main_out_dir
@@ -244,11 +234,32 @@ class MainWindow_VM(MainWindow_View):
                     )
                 )
             self.action_capture.setChecked(False)
-            return  # break out
+            return False  # break out
 
         if not self.pathSettings.main_out_dir.exists():
             self.pathSettings.main_out_dir.mkdir()
         self.pathSettings.working_dir.mkdir()
+        return True
+
+    def toggle_capture(self, state: bool) -> None:
+        """切换截图开始状态"""
+        if not state:
+            if not self.captureThread:
+                return
+            self.action_capture.setDisabled(True)  # 暂时禁用按钮
+            self.dialog_locate.pushButton_toggle_capture.setDisabled(True)
+            self.captureThread.stop_flag.set(True)  # 发送停止信号
+            return
+
+        if self.captureThread:
+            log.warning(
+                self.tr("Current capture task is not finished. Please try again later.")
+            )
+            self.action_capture.setChecked(False)
+            return
+        if not self.check_working_dir():
+            return
+
         self.captureThread = CaptureThread(
             self.captureSettings,
             self.buildImageSettings,
@@ -284,6 +295,7 @@ class MainWindow_VM(MainWindow_View):
     def closeEvent(self, event: QCloseEvent):
         self.dialog_locate.close()
         self.tab_reclip.close()  # To emit tab's close event
+        self.tab_crop.close()  # To emit tab's close event
 
         self.dock_manager.savePerspectives(self.dockSettings)
         self.dockSettings.sync()

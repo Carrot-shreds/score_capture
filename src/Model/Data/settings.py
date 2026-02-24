@@ -11,6 +11,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    NonNegativeFloat,
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
@@ -38,9 +39,10 @@ from src.Model.Data.type import (
     Directory,
     DirectoryExisting,
     FileName,
+    ImageRegionData,
     JsonFileName,
     OnValueChangeModel,
-    RegionData,
+    ScreenRegionData,
     TxtPath,
     ZeroToOneOpen,
 )
@@ -111,7 +113,7 @@ class LocateSettings(SettingsModel):
     window_auto_close: bool = False
     window_limit_move: bool = True
     live_locate: bool = False
-    region_data: RegionData = RegionData(0, 0, 514, 114, 1)
+    region_data: ScreenRegionData = ScreenRegionData(0, 0, 514, 114, 1)
 
 
 class CaptureSettings(SettingsModel):
@@ -172,6 +174,13 @@ class ReclipSettings(SettingsModel):
     saving_format: ImageSavingFormat = ImageSavingFormat.PNG
     live_preview: bool = False
     font_name: str = ""
+
+
+class VideoCropSettings(SettingsModel):
+    crop_region: ImageRegionData = ImageRegionData()
+    start_time: NonNegativeFloat = 1
+    videos_dir: Directory = Field(default_factory=get_exec_main_dir)
+    skip_nonkey_frames: bool = False
 
 
 class LogSettings(SettingsModel):
@@ -312,6 +321,7 @@ class AppSettings(SettingsModel):
     stitch_settings: StitchSettings = StitchSettings()
     recip_settings: ReclipSettings = ReclipSettings()
     line_detector_settings: LineDetectorSettings = LineDetectorSettings()
+    video_crop_settings: VideoCropSettings = VideoCropSettings()
 
     def notice_all_observers(self) -> None:
         for model_name in self.__class__.model_fields.keys():
@@ -372,6 +382,9 @@ class AppSettings(SettingsModel):
                     "AppSettings load failed, {} Not Found, will use default settings.",
                 ).format(file_path)
             )
+            return self
+        except Exception as e:
+            log.warning(e)
             return self
 
 
@@ -484,6 +497,8 @@ def load_all_settings() -> None:
     reclipSettings = appSettings.recip_settings
     global lineDetectorSettings
     lineDetectorSettings = appSettings.line_detector_settings
+    global videoCropSettings
+    videoCropSettings = appSettings.video_crop_settings
 
 
 appSettings = AppSettings()
@@ -499,5 +514,6 @@ buildImageSettings = appSettings.build_image_settings
 stitchSettings = appSettings.stitch_settings
 reclipSettings = appSettings.recip_settings
 lineDetectorSettings = appSettings.line_detector_settings
+videoCropSettings = appSettings.video_crop_settings
 
 appSettingsSavingConfig = AppSettingsSavingConfig()

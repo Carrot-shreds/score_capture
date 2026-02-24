@@ -179,6 +179,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         tab_preview: QWidget,
         tab_stitch: QWidget,
         tab_reclip: QWidget,
+        tab_crop: QWidget,
     ) -> None:
         # Central Widget
         central_widget = QWidget()
@@ -251,6 +252,11 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         dock_widget_reclip.setWidget(tab_reclip)
         dock_widget_reclip.setObjectName("Reclip")
         self.dock_manager.addDockWidgetTabToArea(dock_widget_reclip, dock_area_central)
+        # Crop
+        dock_widget_crop = self.dock_manager.createDockWidget(self.tr("CropVideo"))
+        dock_widget_crop.setWidget(tab_crop)
+        dock_widget_crop.setObjectName("CropVideo")
+        self.dock_manager.addDockWidgetTabToArea(dock_widget_crop, dock_area_central)
         dock_area_central.setCurrentDockWidget(dock_widget_preview)
 
         # Add actions
@@ -259,6 +265,7 @@ class MainWindow_View(QMainWindow, Ui_MainWindow):
         self.menu_view.addAction(dock_widget_preview.toggleViewAction())
         self.menu_view.addAction(self.dock_widget_stitch.toggleViewAction())
         self.menu_view.addAction(dock_widget_reclip.toggleViewAction())
+        self.menu_view.addAction(dock_widget_crop.toggleViewAction())
         self.menu_view.addSeparator()
 
         # Add docking perspective select

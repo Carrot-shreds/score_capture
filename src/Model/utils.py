@@ -26,7 +26,7 @@ from src.Model.Data.type import (
     ImageArray,
     ImageFileName,
     ImagePath,
-    RegionData,
+    ScreenRegionData,
 )
 
 
@@ -143,7 +143,7 @@ def save_image(imagepath: ImagePath, img: ImageArray) -> None:
         raise ValueError(
             QApplication.translate(
                 "save_image",
-                "Saving jpg image failed, image shape out of the maximum of jpg format. Please change your saving format to png.",
+                "Saving jpg image failed, image shape exceed the limit of jpg format. Please change your saving format to png.",
             )
         )
     cv2.imencode(image_format, np.asarray(img))[1].tofile(imagepath)
@@ -254,7 +254,7 @@ def qrect2array(rect: QRect) -> np.ndarray:
 
 @validate_call
 def screenshot(
-    region_data: RegionData, capture_tool: CaptureTool = CaptureTool.MSS
+    region_data: ScreenRegionData, capture_tool: CaptureTool = CaptureTool.MSS
 ) -> ImageArray:
     """截取屏幕指定区域的截图"""
     # mss暂时不支持Wayland桌面环境
@@ -439,11 +439,20 @@ def get_sysfonts() -> dict[str, Path]:
     return font_info
 
 
-def ndarray2qimage(img: ImageArray) -> QImage:
-    return QImage(
-        img.data,
-        img.shape[1],
-        img.shape[0],
-        img.shape[1] * 3,
-        QImage.Format.Format_RGB888,
-    )
+def ndarray2qimage(img: ImageArray, format: Literal["RGB", "RGBA"] = "RGB") -> QImage:
+    if format == "RGB":
+        return QImage(
+            img.data,
+            img.shape[1],
+            img.shape[0],
+            img.shape[1] * 3,
+            QImage.Format.Format_RGB888,
+        )
+    elif format == "RGBA":
+        return QImage(
+            img.data,
+            img.shape[1],
+            img.shape[0],
+            img.shape[1] * 4,
+            QImage.Format.Format_RGBA8888,
+        )

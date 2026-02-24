@@ -337,7 +337,7 @@ class TabStitch_VM(TabStitch_View):
         self.pointIndexChanged.connect(self.handle_point_index_changed)
         self.pointValueChanged.connect(self.handle_point_value_changed)
 
-        shortcut_save = QShortcut(self.tab_manual)
+        shortcut_save = QShortcut(self)
         shortcut_save.setKey(QKeySequence.StandardKey.Save)
         shortcut_save.activated.connect(
             lambda: [

@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QApplication
 
 from src.Model.Data.data import CaptureData
 from src.Model.Data.settings import BuildImageSettings, CaptureSettings
-from src.Model.Data.type import Directory, Flag, RegionData
+from src.Model.Data.type import Directory, Flag, ScreenRegionData
 from src.Model.image_process import compare_image, image_pre_process
 from src.Model.MainTask.BaseTaskThread import BaseTaskThread
 from src.Model.utils import save_image, screenshot
@@ -18,7 +18,7 @@ from src.Model.utils import save_image, screenshot
 def start_capture_loop(
     captureSettings: CaptureSettings,
     buildImageSettings: BuildImageSettings,
-    regionData: RegionData,
+    regionData: ScreenRegionData,
     working_dir: Directory,
     stop_flag: Flag,
     logger=None,
@@ -139,13 +139,13 @@ class CaptureThread(BaseTaskThread):
         self,
         captureSettings: CaptureSettings,
         buildImageSettings: BuildImageSettings,
-        region_data: RegionData,
+        region_data: ScreenRegionData,
         working_dir: Directory,
     ) -> None:
         super().__init__()
         self.captureSettings: CaptureSettings = captureSettings
         self.buildImageSettings: BuildImageSettings = buildImageSettings
-        self.regionData: RegionData = region_data
+        self.regionData: ScreenRegionData = region_data
         self.working_dir = working_dir
         self.stop_flag: Flag = Flag(False)  # 中止线程信号
 
