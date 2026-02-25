@@ -322,6 +322,7 @@ class TabStitch_VM(TabStitch_View):
         self.stitchSettings.add_observer_handlers(
             ["add_mark_point", "location_mark_point"],
             lambda v: self.flush_stitch_preview(),
+            False,
         )
         self.stitchSettings.add_observer_handler(
             "ui_lock_zoom",
@@ -440,10 +441,10 @@ class TabStitch_VM(TabStitch_View):
             self.spinBox_stitch_points_value, self.manualStitchData, "current_point"
         )
         self.manualStitchData.add_observer_handler(
-            "current_index", self.pointIndexChanged.emit
+            "current_index", self.pointIndexChanged.emit, False
         )
         self.manualStitchData.add_observer_handler(
-            "current_point", self.pointValueChanged.emit
+            "current_point", self.pointValueChanged.emit, False
         )
 
         self.ImageViewer.imageView.clear()  # clear screen,then flush_stitch_image will do autoHistogramRange using setImage()

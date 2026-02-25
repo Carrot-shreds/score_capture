@@ -253,18 +253,28 @@ class OnValueChangeModel(BaseModel):
         if field_name in self._observer_handler.keys():
             [f(value) for f in self._observer_handler[field_name]]
 
-    def add_observer_handler(self, field_name: str, func: Callable[[Any], None]):
+    def add_observer_handler(
+        self,
+        field_name: str,
+        func: Callable[[Any], None],
+        call_immediately: bool = True,
+    ):
         if not hasattr(self, field_name):
             raise ValueError(f"{field_name} not in model_fields")
         if not self._observer_handler.get(field_name):
             self._observer_handler[field_name] = []
         self._observer_handler[field_name].append(func)
+        if call_immediately:
+            func(getattr(self, field_name))
 
     def add_observer_handlers(
-        self, field_names: list[str], func: Callable[[Any], None]
+        self,
+        field_names: list[str],
+        func: Callable[[Any], None],
+        call_immediately: bool = True,
     ):
         for name in field_names:
-            self.add_observer_handler(name, func)
+            self.add_observer_handler(name, func, call_immediately)
 
     def remove_observer_handler(self, field_name: str, func: Callable[[Any], None]):
         if not hasattr(self, field_name):

@@ -73,20 +73,21 @@ class TabPreview_VM(TabPreview_View):
         bind_data(self.checkBox_live_preview, self.previewSetting, "live_preview")
         bind_data(self.checkBox_live_detect, self.previewSetting, "live_detect")
 
+        self.lambda_preview_region = lambda v: self.preview_region()
+        self.lambda_preview_lines = lambda v: self.preview_lines()
         guiSettings.add_observer_handler(
             "imageViewer_show_tools", self.ImageViewer.toggle_tools
         )
         self.previewSetting.add_observer_handlers(
             ["preview_lines", "show_inverted_horizontal"],
             lambda v: self.preview_lines() if self.previewSetting.live_detect else None,
+            False,
         )
         self.previewSetting.add_observer_handler(
             "live_preview", self.toggle_live_preview
         )
         self.previewSetting.add_observer_handler("live_detect", self.toggle_live_detect)
 
-        self.lambda_preview_region = lambda v: self.preview_region()
-        self.lambda_preview_lines = lambda v: self.preview_lines()
         self.pushButton_update_image.clicked.connect(self.preview_region)
         self.pushButton_open_image.clicked.connect(self.select_image)
         self.pushButton_invert_image.clicked.connect(self.invert_image)
@@ -161,7 +162,7 @@ class TabPreview_VM(TabPreview_View):
     def toggle_live_preview(self, state: bool) -> None:
         """切换启用实时预览"""
         if state:
-            self.regionData.add_observer_handler("region", self.lambda_preview_region)
+            self.regionData.add_observer_handler("region", self.lambda_preview_region, False)
             self.preview_region()
         else:
             try:
@@ -182,6 +183,7 @@ class TabPreview_VM(TabPreview_View):
                     "h_invert_pixel_threshold",
                 ],
                 self.lambda_preview_lines,
+                False,
             )
             self.ImageViewer.onImageChanged.connect(self.preview_lines)
             self.preview_lines()

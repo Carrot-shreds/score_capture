@@ -54,7 +54,9 @@ class DialogLocate_VM(DialogLocate_View):
             lambda v: self.setGeometry(*self.locateSettings.region_data.region)
             if not self.m_drag_edge  # When not moving the window
             else None,
+            False,
         )
+        self.setGeometry(*self.locateSettings.region_data.region)
         self.locateSettings.add_observer_handler(
             "window_opacity", lambda v: self.setWindowOpacity(v)
         )

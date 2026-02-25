@@ -74,7 +74,7 @@ class TabCrop_VM(TabCrop_View):
         )
 
         self.crop_region.add_observer_handlers(
-            ["x", "y", "width", "height"], lambda v: self.flush_overlay()
+            ["x", "y", "width", "height"], lambda v: self.flush_overlay(), False
         )
         self.videoCropSettings.add_observer_handler(
             "start_time",
@@ -82,6 +82,7 @@ class TabCrop_VM(TabCrop_View):
                 asyncio.ensure_future(self.extract_preview_frame()),
                 self.flush_preview(),
             ],
+            False,
         )
 
         self.pushButton_open_video.pressed.connect(

@@ -130,7 +130,6 @@ class MainWindow_VM(MainWindow_View):
         )
         self.resize(*[int(s / resize_ratio) for s in self.guiSettings.mainWindow_size])
         self.toolBar_path.setFocus()
-        self.appSettings.notice_all_observers()
 
     def add_language_switch(self) -> None:
         from src.View.MainWindow import LANGUAGES

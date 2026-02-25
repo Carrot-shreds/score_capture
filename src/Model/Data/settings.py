@@ -108,7 +108,7 @@ class SettingsModel(AlwaysValidateModel, OnValueChangeModel):
 
 class LocateSettings(SettingsModel):
     locate_offset: tuple[int, int, int, int] = Field(default=(0, 0, 0, 0))
-    window_opacity: ZeroToOneOpen = 0.7
+    window_opacity: Annotated[float, Gt(0), Le(1)] = 0.7
     window_always_on_top: bool = False
     window_auto_close: bool = False
     window_limit_move: bool = True
