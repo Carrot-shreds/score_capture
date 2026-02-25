@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from loguru import logger as log
 from pyqtgraph import ImageItem
-from PySide6.QtCore import QLineF, QObject, QPoint, QRectF, Qt
+from PySide6.QtCore import QLineF, QPoint, QRectF, Qt
 from PySide6.QtWidgets import QFileDialog
 
 from src.Model.Data.settings import (
@@ -19,26 +19,6 @@ from src.Model.Data.type import ImageArray
 from src.Model.utils import read_image
 from src.View.TabCrop import CropViewBox, TabCrop_View
 from src.ViewModel.binding.bind_data import bind_data
-
-
-class FFmpegWorker(QObject):
-    def load_ffmpeg(self) -> None:
-        if hasattr(self, "ffmpeg"):
-            return
-
-        from pyffmpeg import FFmpeg, Paths
-
-        ff_path = Paths()
-        ff_exec_path = Path(ff_path.bin_path) / ("ffmpeg" + ff_path._ffmpeg_ext)
-        if not ff_exec_path.exists():
-            log.info(self.tr("Extracting FFmpeg to {}").format(ff_exec_path))
-        self.ffmpeg = FFmpeg()
-
-    def run_cmd(self, options: list[str]) -> None:
-        if not hasattr(self, "ffmpeg"):
-            return
-
-        self.ffmpeg.options(" ".join(options))
 
 
 class TabCrop_VM(TabCrop_View):

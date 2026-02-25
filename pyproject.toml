@@ -8,8 +8,10 @@ requires-python = ">=3.13"
 dependencies = [
     "fast-ssim>=1.1.0",
     "fonttools>=4.59.2",
+    "joblib>=1.5.3",
     "loguru>=0.7.3",
     "mss>=10.1.0",
+    "numba>=0.64.0",
     "numpy>=2.4.0",
     "numpydantic>=1.7.0",
     "opencv-python>=4.13.0.92",

@@ -387,12 +387,12 @@ def stitch_images(
     match direction:
         case Direction.HORIZONTAL:
             image_clips = [images[0]] + [
-                images[i + 1][:, points[i] :] for i in range(len(images) - 1)
+                img[:, point:] for img, point in zip(images[1:], points)
             ]
             final_image = np.concatenate(image_clips, axis=1)  # 延水平方向拼接
         case Direction.VERTICAL:
             image_clips = [images[0]] + [
-                images[i + 1][points[i] :, :] for i in range(len(images) - 1)
+                img[point:, :] for img, point in zip(images[1:], points)
             ]
             final_image = np.concatenate(image_clips, axis=0)  # 延垂直方向拼接
     return final_image

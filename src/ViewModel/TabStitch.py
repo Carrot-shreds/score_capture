@@ -55,13 +55,19 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
     image_origins: list[ImageArray]
     image_stitched: ImageArray
 
-    def __init__(self, stitch_data_path: JsonPath, imageviewer: ImageViewer) -> None:
+    def __init__(
+        self,
+        stitch_data_path: JsonPath,
+        imageviewer: ImageViewer,
+        use_RGB: bool = False,
+    ) -> None:
         score_stitch_data = ScoreStitchData.load_from_file(stitch_data_path)
         stitch_points = score_stitch_data.stitch_points
         working_dir = stitch_data_path.parent
         image_names = get_numbered_image_names(working_dir, "image")
-        image_origins = read_images(working_dir, image_names)
-        image_stitched = stitch_images(
+        image_color = "RGB" if use_RGB else "GRAY"
+        image_origins = read_images.raw_function(working_dir, image_names, image_color)  # type:ignore
+        image_stitched = stitch_images.raw_function(  # type:ignore (use no validation version)
             image_origins, stitch_points, score_stitch_data.stitch_settings.direction
         )
         super().__init__(
@@ -161,7 +167,7 @@ class ManualStitchData(AlwaysValidateModel, OnValueChangeModel):
         return new_data
 
     def update_image_stitched(self) -> None:
-        self.image_stitched = stitch_images(
+        self.image_stitched = stitch_images.raw_function(  # type:ignore (use no validation version)
             self.image_origins, self.stitch_points, self.direction
         )
 
@@ -305,6 +311,7 @@ class TabStitch_VM(TabStitch_View):
             "location_mark_point",
         )
         bind_data(self.checkBox_auto_zoom, self.stitchSettings, "ui_auto_zoom")
+        bind_data(self.checkBox_use_RGB, self.stitchSettings, "ui_use_rgb")
 
         guiSettings.add_observer_handler(
             "imageViewer_show_tools", self.ImageViewer.toggle_tools
@@ -417,7 +424,9 @@ class TabStitch_VM(TabStitch_View):
             self.spinBox_stitch_points_index.valueChanged.disconnect()
             self.spinBox_stitch_points_value.valueChanged.disconnect()
 
-        self.manualStitchData = ManualStitchData(file, self.ImageViewer)
+        self.manualStitchData = ManualStitchData(
+            file, self.ImageViewer, self.stitchSettings.ui_use_rgb
+        )
         self.spinBox_stitch_points_index.setMaximum(
             len(self.manualStitchData.stitch_points) - 1
         )
@@ -442,7 +451,7 @@ class TabStitch_VM(TabStitch_View):
             self.manualStitchData.working_dir.name + " " + self.tr("Stitched Preview")
         )
         self.working_stitchData_path = file
-        log.success(self.tr("ScoreStitchData Loaded: {}").format(file))
+        log.info(self.tr("ScoreStitchData Loaded: {}").format(file))
         gc.collect()  # Necessary, solve the memory leak
 
         return True
@@ -564,7 +573,9 @@ class TabStitch_VM(TabStitch_View):
                 self.stitchSettings.ui_lock_zoom
             )
         else:
-            self.ImageViewer.imageView.imageItem.updateImage(image)
+            self.ImageViewer.imageView.imageItem.updateImage(
+                image, autoRange=False, autoLevels=False, levels=[0, 255]
+            )
         self.manualStitchData.set_view_region(self.stitchSettings.ui_auto_zoom)
 
     def start_stitch(self) -> None:

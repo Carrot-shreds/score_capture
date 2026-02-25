@@ -159,6 +159,7 @@ class StitchSettings(SettingsModel):
     saving_format: ImageSavingFormat = ImageSavingFormat.PNG
     ui_lock_zoom: bool = False
     ui_auto_zoom: bool = False
+    ui_use_rgb: bool = True  # use rgb image for manual stitch preview
     add_mark_point: bool = True
     location_mark_point: ZeroToOneOpen = 0.35
 

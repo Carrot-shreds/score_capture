@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Literal, overload
 
 import cv2
+import joblib
 import mss
 import numpy as np
 from fontTools.ttLib import TTFont
@@ -182,25 +183,39 @@ def get_numbered_image_names(
 
 @overload
 def read_images(
-    path: DirectoryExisting, filenames: list[ImageFileName]
+    path: DirectoryExisting,
+    filenames: list[ImageFileName],
+    color: Literal["RGB", "GRAY"] = "RGB",
 ) -> list[ImageArray]: ...
 
 
 @overload
-def read_images(path: list[ImagePath]) -> list[ImageArray]: ...
+def read_images(
+    path: list[ImagePath], color: Literal["RGB", "GRAY"] = "RGB"
+) -> list[ImageArray]: ...
 
 
 @validate_call
 def read_images(
     path: DirectoryExisting | list[ImagePath],
     filenames: list[ImageFileName] | None = None,
+    color: Literal["RGB", "GRAY"] = "RGB",
 ) -> list[ImageArray]:
-    if isinstance(path, Path) and filenames:
-        return [read_image(path / f) for f in filenames]
-    elif isinstance(path, list):
-        return [read_image(p) for p in path]
-    else:
-        raise ValueError("Invalid Input Arguments")
+    with joblib.Parallel(
+        -1, backend="threading"
+    ) as parallel:  # Use all cpu cores for IO task.
+        if isinstance(path, Path) and filenames:
+            return parallel(
+                joblib.delayed(read_image.raw_function)(path / f, color)  # type:ignore
+                for f in filenames
+            )
+        elif isinstance(path, list):
+            return parallel(
+                joblib.delayed(read_image.raw_function)(p, color)  # type:ignore
+                for p in path
+            )
+        else:
+            raise ValueError("Invalid Input Arguments")
 
 
 @validate_call
@@ -216,7 +231,7 @@ def read_numbered_images(
         filenames = image_file_names
     if filenames == []:
         return []
-    return read_images(path, filenames)
+    return read_images.raw_function(path, filenames)  # type:ignore
 
 
 @validate_call

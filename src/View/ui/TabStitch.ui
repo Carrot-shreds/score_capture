@@ -345,6 +345,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="checkBox_use_RGB">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Using RGB color images for manual stitch preview. Will be slower when loading and stitching images.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Use Color Images</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="Line" name="line_3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

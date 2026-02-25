@@ -3,6 +3,7 @@
 /build/
 /score_capture.code-workspace
 /**/config.ini
+/**/*.profile
 
 /**/__pycache__/
 /**/output/

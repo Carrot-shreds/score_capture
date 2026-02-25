@@ -205,7 +205,7 @@ class TabPreview_VM(TabPreview_View):
         if not self.locateSettings.live_locate:
             log.debug(self.tr("Preview region: {}").format(self.regionData.region))
         img = image_pre_process(
-            screenshot(
+            screenshot.raw_function(  # type:ignore
                 region_data=self.regionData, capture_tool=self.captureSettings.tool
             ),
             self.captureSettings.if_invert_image,

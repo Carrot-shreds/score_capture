@@ -19,6 +19,7 @@ from src import __version__
 def show_main_window() -> None:
     import os
 
+    import pyqtgraph
     from PySide6 import QtAsyncio, QtCore
     from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
     from PySide6.QtWidgets import QApplication
@@ -28,6 +29,8 @@ def show_main_window() -> None:
     # init qfile resource during import
     from src.resource import compiled_resource  # noqa:F401
     from src.ViewModel.MainWindow import MainWindow_VM
+
+    pyqtgraph.setConfigOption("useNumba", True)  # Speed up for image render.
 
     # dpi scale setting，Reference: https://doc.qt.io/qtforpython-6/PySide6/QtCore/Qt.html#PySide6.QtCore.Qt.HighDpiScaleFactorRoundingPolicy
     QApplication.setHighDpiScaleFactorRoundingPolicy(
