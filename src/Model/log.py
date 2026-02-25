@@ -1,3 +1,4 @@
+import logging
 import sys
 from typing import Any, Callable, TextIO
 
@@ -6,7 +7,23 @@ from PySide6.QtCore import QObject, Signal
 
 from src.Model.Data.const import LogLevel
 from src.Model.Data.settings import LogSettings
-from src.Model.Data.type import Singleton, TxtPath
+from src.Model.Data.type import LogPath, Singleton
+
+
+class LoggingInterceptHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+
+    def emit(self, record: logging.LogRecord):
+        try:  # Get the log level
+            level = log.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+        if "pyffmpeg" in record.name:
+            level = LogLevel.DEBUG  # show all ffmpeg logs as debug
+
+        # detour logging message to loguru
+        log.log(level, record.getMessage())
 
 
 class LogToGui(QObject):
@@ -35,25 +52,46 @@ class LogToGui(QObject):
             self.buffer_mode = False
 
 
-class Stderr2loguru(TextIO):
+class MyStdout(TextIO):
+    def __init__(self, original: TextIO, output_level=LogLevel.DEBUG):
+        super().__init__()
+        self.original: TextIO = original
+        self.output_level = output_level
+        self._buffer: str = ""
+
     def write(self, text):
-        if text == "":
-            return
-        if "pyffmpeg" in text:
-            log.debug(text.strip())
-        else:
-            log.error(text.strip())
+        self._buffer += text
+        if "\n" in self._buffer:
+            lines = self._buffer.split("\n")
+            for line in lines[:-1]:  # The final line may be not finished
+                if line:  # Ignore empty lines
+                    log.log(self.output_level, line)
+            self._buffer = lines[-1]  # Keep last part
 
     def flush(self) -> None:
-        pass
+        if self._buffer:
+            log.log(self.output_level, self._buffer)
+            self._buffer = ""
 
 
 @Singleton
 class LogManager:
     def __init__(self) -> None:
-        sys.stderr = Stderr2loguru()
+        sys.stdout = MyStdout(sys.stdout)
+        self.detour_logging()
         self.logToGui = LogToGui()
         self.log_settings = None
+
+    def detour_logging(self) -> None:
+        from pyffmpeg import logger
+
+        for handler in logger.handlers[:]:  # use slice copy for loop
+            logger.removeHandler(handler)  # remove pyffmpeg's stderr handler
+        logging.basicConfig(  # detour logging output, no debug log
+            handlers=[LoggingInterceptHandler()],
+            level=logging.INFO,
+            force=True,  # Remove the default stderr output
+        )
 
     @property
     def log_config(self) -> dict[str, list[dict[str, Any]]]:
@@ -75,8 +113,8 @@ class LogManager:
         return {
             "handlers": [
                 {
-                    "sink": sys.stdout,
-                    "level": self.log_settings.show_level,
+                    "sink": sys.stderr,
+                    "level": LogLevel.DEBUG,
                     "format": self.log_settings.show_format,
                 },
                 {
@@ -98,7 +136,7 @@ class LogManager:
 
     def add_log_config(
         self,
-        sink: TxtPath | TextIO | LogToGui,
+        sink: LogPath | TextIO | LogToGui,
         filter: Callable | None = None,
         level: LogLevel | None = None,
         format: str | None = None,
@@ -114,14 +152,14 @@ class LogManager:
             "format": format if level is not None else self.log_settings.save_format,
             "filter": filter,
         }
-        if sink is TxtPath:
+        if sink is LogPath:
             handler["encoding"] = "UTF-8"
             handler["enqueue"] = True
         config["handlers"].append(handler)
         self.log_config = config
 
     def remove_log_config(
-        self, sink: TxtPath | TextIO | LogToGui, config: dict | None = None
+        self, sink: LogPath | TextIO | LogToGui, config: dict | None = None
     ) -> None:
         if not config:
             config = self.log_config

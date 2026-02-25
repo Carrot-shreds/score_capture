@@ -284,7 +284,7 @@ class TabReclip_VM(TabReclip_View):
         working_dir = self.pathSettings.working_dir
         if self.style_data_path == (working_dir / "StyleData.json"):
             return
-        if self.style_data_path:
+        if self.style_data_path and self.style_data_path.exists():
             self.styleData.save_to_file(self.style_data_path)
             self.style_data_path = None
         if (path := (working_dir / "StyleData.json")).exists():

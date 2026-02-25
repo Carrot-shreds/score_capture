@@ -6,11 +6,8 @@ from enum import IntEnum, StrEnum
 MAIN_WINDOW_SIZE: tuple[int, int] = (800, 500)  # width, height
 IMAGE_EXTENSIONS: tuple[str, ...] = (
     ".jpg",
-    ".JPG",
     ".jpeg",
-    ".JPEG",
     ".png",
-    ".PNG",
 )
 
 

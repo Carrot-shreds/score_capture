@@ -197,7 +197,6 @@ class TabCrop_VM(TabCrop_View):
         self.pathSettings.score_title = self.video_path.with_suffix("").name
         log.info(self.tr("Using video path: {}").format(self.video_path))
         await self.extract_preview_frame()
-        log.info("Extracted")
         self.flush_overlay()
         self.flush_preview(autoRange=True)
 

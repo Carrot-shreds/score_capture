@@ -40,7 +40,6 @@ def reclip_image(
     log.debug(f"Working dir: {working_dir}")
     log.debug(f"Reclip Settings: {reclipSettings}")
     log.debug(f"Detector Settings: {detectorSettings}")
-    log.info
 
     if style_data:
         pass

@@ -41,9 +41,10 @@ from src.Model.Data.type import (
     FileName,
     ImageRegionData,
     JsonFileName,
+    LogFileName,
+    LogPath,
     OnValueChangeModel,
     ScreenRegionData,
-    TxtPath,
     ZeroToOneOpen,
 )
 
@@ -192,9 +193,12 @@ class LogSettings(SettingsModel):
         warning: Color = Color("orange")
         error: Color = Color("red")
 
-    log_path: TxtPath = Field(
-        default_factory=lambda: get_exec_main_dir() / "logs" / "main_log.txt"
-    )
+    @property
+    def log_path(self) -> LogPath:
+        return self.log_dir / self.log_filename
+
+    log_dir: Directory = Field(default_factory=lambda: get_exec_main_dir() / "logs")
+    log_filename: LogFileName = "score_capture_main.log"
     log_main_rotation: str = "1MB"  # When to create a new log file
     log_main_retention: str | int = 5  # When delete old log file
     save_level: LogLevel = LogLevel.DEBUG

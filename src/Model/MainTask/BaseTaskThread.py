@@ -33,10 +33,12 @@ class BaseTaskThread(QThread):
                 filter=lambda v: log_fliter_thread_id(v, id),
             )
             logger = log.bind(thread_id=id)
-            self.main(logger)  # 调用主函数
+            self.main(logger)  # Call Main Function
         except Exception as e:
-            msg = self.tr("{} Error: {}").format(__name__, e.__repr__())
-            logger.error(msg)
-            # logger.error(e)
+            import traceback
+
+            title = self.tr("{} Error: {}").format(type(self).__name__, e.__repr__())
+            logger.error(title)
+            logger.error(traceback.format_exc())
         finally:
             logManager.remove_log_config(log_file)

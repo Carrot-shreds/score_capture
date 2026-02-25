@@ -3,7 +3,7 @@ import sys
 import threading
 from copy import deepcopy
 from pathlib import Path
-from typing import Annotated, Any, Callable, Optional, Self
+from typing import Annotated, Any, Callable, Optional, Self, Sequence
 
 import cv2
 import mss
@@ -56,7 +56,7 @@ def filename_validator(value: NonEmptyStr) -> NonEmptyStr:
 
 
 def filename_extension_validator(
-    value: NonEmptyStr | Path, extensions: tuple[str, ...]
+    value: NonEmptyStr | Path, extensions: Sequence[str] | str
 ) -> NonEmptyStr | Path:
     if isinstance(value, str):
         extension = "." + value.split(".")[-1]  # pyright:ignore
@@ -64,7 +64,12 @@ def filename_extension_validator(
         extension = "." + value.name.split(".")[-1]  # pyright:ignore
     else:
         raise ValueError("Value must be str or path")
-    if extension not in extensions:
+    extensions = (
+        extensions.lower()
+        if isinstance(extensions, str)
+        else [e.lower() for e in extensions]
+    )
+    if extension.lower() not in extensions:
         raise ValueError(f"Wrong file extension:{extension}, expect for:{extensions}")
     return value
 
@@ -134,11 +139,15 @@ type ImageFileName = Annotated[
 ]
 type JsonFileName = Annotated[
     FileName,
-    AfterValidator(lambda v: filename_extension_validator(v, (".json", ".JSON"))),
+    AfterValidator(lambda v: filename_extension_validator(v, (".json"))),
+]
+type LogFileName = Annotated[
+    FileName,
+    AfterValidator(lambda v: filename_extension_validator(v, (".log", ".txt"))),
 ]
 type IniFileName = Annotated[
     FileName,
-    AfterValidator(lambda v: filename_extension_validator(v, (".ini", ".INI"))),
+    AfterValidator(lambda v: filename_extension_validator(v, (".ini"))),
 ]
 
 # Path ######################
@@ -151,15 +160,19 @@ type ImagePath = Annotated[
 ]
 type TxtPath = Annotated[
     FilePath,
-    AfterValidator(lambda v: filename_extension_validator(v, (".txt", ".TXT"))),
+    AfterValidator(lambda v: filename_extension_validator(v, (".txt"))),
+]
+type LogPath = Annotated[
+    FilePath,
+    AfterValidator(lambda v: filename_extension_validator(v, (".txt", ".log"))),
 ]
 type JsonPath = Annotated[
     FilePath,
-    AfterValidator(lambda v: filename_extension_validator(v, (".json", ".JSON"))),
+    AfterValidator(lambda v: filename_extension_validator(v, (".json"))),
 ]
 type IniPath = Annotated[
     FilePath,
-    AfterValidator(lambda v: filename_extension_validator(v, (".ini", ".INI"))),
+    AfterValidator(lambda v: filename_extension_validator(v, (".ini"))),
 ]
 
 # Directory #################
