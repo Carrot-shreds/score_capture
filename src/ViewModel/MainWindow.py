@@ -114,7 +114,9 @@ class MainWindow_VM(MainWindow_View):
         self.pathSettings.add_observer_handlers(
             ["main_out_dir", "score_title"],
             lambda v: self.label_working_dir.setText(
-                self.pathSettings.working_dir.as_posix()
+                p[:100] + " ......"  # Limit the max lenght
+                if len(p := self.pathSettings.working_dir.as_posix()) > 100
+                else p
             ),
         )
 
