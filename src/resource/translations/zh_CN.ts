@@ -17,7 +17,7 @@
 <context>
     <name>BaseTaskThread</name>
     <message>
-        <location filename="../../Model/MainTask/BaseTaskThread.py" line="38"/>
+        <location filename="../../Model/MainTask/BaseTaskThread.py" line="40"/>
         <source>{} Error: {}</source>
         <translation>{} 线程错误：{}</translation>
     </message>
@@ -321,7 +321,7 @@ See Python glob module doc.</source>
     </message>
     <message>
         <location filename="../../View/ui/MainWindow.ui" line="179"/>
-        <source>Open</source>
+        <source>Select</source>
         <translation>选择</translation>
     </message>
     <message>
@@ -332,7 +332,7 @@ See Python glob module doc.</source>
     <message>
         <location filename="../../View/ui/MainWindow.ui" line="190"/>
         <source>Reveal</source>
-        <translation>打开</translation>
+        <translation>显示</translation>
     </message>
     <message>
         <location filename="../../View/ui/MainWindow.ui" line="193"/>
@@ -543,62 +543,62 @@ See Python glob module doc.</source>
 <context>
     <name>Reclip</name>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="62"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="61"/>
         <source>Image Not Found with wildcard {}, please do stitch first.</source>
         <translation>未找到符合通配符 {} 的图像，请先进行拼接操作。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="82"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="81"/>
         <source>Vertical stitched image detected, will skip reclip and try to style it directly.</source>
         <translation>检测到竖向拼接图像，将跳过重分割，尝试直接编辑样式。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="114"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="113"/>
         <source>Start detecting lines in stitched image.</source>
         <translation>开始检测拼接图像中的线段。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="140"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="139"/>
         <source>Start group barlines.</source>
         <translation>开始对小节线进行分组。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="162"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="161"/>
         <source>Start to reclip stitched image.</source>
         <translation>开始对拼接图进行重分割。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="218"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="217"/>
         <source>Reclip completed.</source>
         <translation>重分割完成。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="229"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="228"/>
         <source>Start restitching clips</source>
         <translation>开始重拼接切片</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="425"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="424"/>
         <source>Clip image {} failed.</source>
         <translation>图像分割失败：{}。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="432"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="431"/>
         <source>This may be caused by too large cut height that is out of the page bound.</source>
         <translation>这通常是因为曲谱切片高度超出了单页范围。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="435"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="434"/>
         <source>Check your cut_page_heights, and try lowering your invert horizontal line threshold.</source>
         <translation>请检查cut_page_heights，然后尝试降低反转水平线阈值。</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="468"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="467"/>
         <source>Save final image to: {}</source>
         <translation>最终图像已保存至：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="472"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="471"/>
         <source>Style edit completed.</source>
         <translation>样式编辑完成。</translation>
     </message>
@@ -606,37 +606,37 @@ See Python glob module doc.</source>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../../Model/Data/settings.py" line="358"/>
+        <location filename="../../Model/Data/settings.py" line="362"/>
         <source>AppSettings Saving Failed: {}</source>
         <translation>应用设置保存失败：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="375"/>
+        <location filename="../../Model/Data/settings.py" line="379"/>
         <source>AppSettings load failed, settings json must be a dict</source>
         <translation>应用设置加载失败，设置json必须是一个字典</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="384"/>
+        <location filename="../../Model/Data/settings.py" line="388"/>
         <source>AppSettings load failed, {} Not Found, will use default settings.</source>
         <translation>应用设置加载失败，未发现配置文件{}，将使用默认设置。</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="410"/>
+        <location filename="../../Model/Data/settings.py" line="414"/>
         <source>Invalid field_value:{0} for {1} when loading {2} from json</source>
         <translation>从json加载 {2} 的 {1} 字段时，遇到无效的字段值：{0}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="416"/>
+        <location filename="../../Model/Data/settings.py" line="420"/>
         <source>Invalid field_name:{0} when loading {1} from json</source>
         <translation>从json加载 {1} 时遇到无效的字段名：{0}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="464"/>
+        <location filename="../../Model/Data/settings.py" line="468"/>
         <source>AppSettingsSavingConfig load failed, using default config with all true (save all settings)</source>
         <translation>AppSettingsSavingConfig加载失败，将使用默认配置（保存所有设置）</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="469"/>
+        <location filename="../../Model/Data/settings.py" line="473"/>
         <source>Config {} Not Found, using default config.</source>
         <translation>未发现配置文件{}， 将使用默认配置。</translation>
     </message>
@@ -838,27 +838,27 @@ See Python glob module doc.</source>
 <context>
     <name>TabCrop_VM</name>
     <message>
-        <location filename="../../ViewModel/TabCrop.py" line="176"/>
+        <location filename="../../ViewModel/TabCrop.py" line="259"/>
         <source>Extracting FFmpeg to {}</source>
         <translation>正在提取FFmpeg至：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/TabCrop.py" line="198"/>
+        <location filename="../../ViewModel/TabCrop.py" line="281"/>
         <source>Using video path: {}</source>
         <translation>正在使用视频路径：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/TabCrop.py" line="226"/>
+        <location filename="../../ViewModel/TabCrop.py" line="308"/>
         <source>Video Path is None. Please open a video first.</source>
         <translation>视频路径为空，请先打开一个视频。</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/TabCrop.py" line="247"/>
+        <location filename="../../ViewModel/TabCrop.py" line="329"/>
         <source>Running FFmepg command: {}</source>
         <translation>正在运行FFmpeg命令：{}</translation>
     </message>
     <message>
-        <location filename="../../ViewModel/TabCrop.py" line="254"/>
+        <location filename="../../ViewModel/TabCrop.py" line="336"/>
         <source>Cropping finished, {} captures saved</source>
         <translation>切取结束，已保存 {} 张`capture`图象</translation>
     </message>
@@ -1359,11 +1359,6 @@ Grim：另一个可选的Wayland工具包</translation>
         <translation>打开一个文件夹作为工作目录</translation>
     </message>
     <message>
-        <location filename="../../View/ui/TabSettings.ui" line="53"/>
-        <source>Open</source>
-        <translation>打开</translation>
-    </message>
-    <message>
         <location filename="../../View/ui/TabSettings.ui" line="60"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Browse and open a folder as the main out directory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>浏览并打开一个文件夹作为主输出目录</translation>
@@ -1386,12 +1381,12 @@ Grim：另一个可选的Wayland工具包</translation>
     <message>
         <location filename="../../View/ui/TabSettings.ui" line="80"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reveal working dir in file explorer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>在文件资源管理器中显示</translation>
+        <translation>在文件资源管理器中显示当前工作目录</translation>
     </message>
     <message>
         <location filename="../../View/ui/TabSettings.ui" line="83"/>
         <source>Reveal</source>
-        <translation>打开</translation>
+        <translation>显示</translation>
     </message>
     <message>
         <location filename="../../View/ui/TabSettings.ui" line="90"/>
@@ -1452,6 +1447,11 @@ Grim：另一个可选的Wayland工具包</translation>
         <location filename="../../View/ui/TabSettings.ui" line="207"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cached detected lines data, used to stitch images as reference.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>线段检测缓存，用作拼接时的参考数据</translation>
+    </message>
+    <message>
+        <location filename="../../View/ui/TabSettings.ui" line="53"/>
+        <source>Select</source>
+        <translation>选择</translation>
     </message>
     <message>
         <location filename="../../View/ui/TabSettings.ui" line="210"/>
@@ -1956,7 +1956,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>filepath_validator</name>
     <message>
-        <location filename="../../Model/Data/type.py" line="80"/>
+        <location filename="../../Model/Data/type.py" line="85"/>
         <source>Invalid filepath: {}, automatically fix to {}</source>
         <translation>无效的路径：{}，已自动修正为：{}</translation>
     </message>
@@ -1964,7 +1964,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>get_gap_line_index</name>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="307"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="306"/>
         <source>Empty lines of sheet gaps! Please try to turn down your invert horizontal line thresholds</source>
         <translation>曲谱行间隔线检测结果为空，请尝试调低反转水平线阈值</translation>
     </message>
@@ -1972,7 +1972,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>path_exist_validator</name>
     <message>
-        <location filename="../../Model/Data/type.py" line="95"/>
+        <location filename="../../Model/Data/type.py" line="100"/>
         <source>Path does not exist: {}</source>
         <translation>路径不存在：{}</translation>
     </message>
@@ -2027,7 +2027,7 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>style_restitched_clips</name>
     <message>
-        <location filename="../../Model/MainTask/Reclip.py" line="326"/>
+        <location filename="../../Model/MainTask/Reclip.py" line="325"/>
         <source>Editing score style</source>
         <translation>正在编辑曲谱样式</translation>
     </message>
@@ -2035,12 +2035,12 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>validate_compare_threshold</name>
     <message>
-        <location filename="../../Model/Data/settings.py" line="142"/>
+        <location filename="../../Model/Data/settings.py" line="143"/>
         <source>Compare_threshold must in 0-1 when using SSIM</source>
         <translation>使用SSIM算法时，比较阈值必须介于0到1之间</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/settings.py" line="151"/>
+        <location filename="../../Model/Data/settings.py" line="152"/>
         <source>Compare_threshold must in 0-65025 when using MSE</source>
         <translation>使用MSE算法时，比较阈值必须介于0到65025之间</translation>
     </message>
@@ -2048,17 +2048,17 @@ MSE： 更少的CPU占用</translation>
 <context>
     <name>validate_region</name>
     <message>
-        <location filename="../../Model/Data/type.py" line="492"/>
+        <location filename="../../Model/Data/type.py" line="513"/>
         <source>Region-{} out of image bounds: {}</source>
         <translation>区域数据-{} 超出了图像范围：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/type.py" line="547"/>
+        <location filename="../../Model/Data/type.py" line="568"/>
         <source>Invalid monitor_num: {}</source>
         <translation>无效的显示器编号：{}</translation>
     </message>
     <message>
-        <location filename="../../Model/Data/type.py" line="560"/>
+        <location filename="../../Model/Data/type.py" line="581"/>
         <source>Region-{} out of num-({}) screen bounds: {}</source>
         <translation>定位区域-{} 超出了屏幕#{} 的边界：{}</translation>
     </message>

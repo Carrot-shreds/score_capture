@@ -176,7 +176,7 @@
   </action>
   <action name="action_select_folder">
    <property name="text">
-    <string>Open</string>
+    <string>Select</string>
    </property>
    <property name="toolTip">
     <string>Select a folder as working dir.</string>

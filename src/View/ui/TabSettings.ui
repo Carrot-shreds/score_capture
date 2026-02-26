@@ -50,7 +50,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open a folder as working dir.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>Open</string>
+             <string>Select</string>
             </property>
            </widget>
           </item>
