@@ -27,6 +27,7 @@ def build():
         "--clang",
         "--msvc=latest",
         "--enable-plugin=pyside6",
+        # "--debug",
         # "--remove-output",
         "--output-dir=build",
         "--include-data-files=LICENSE=LICENSE",

@@ -81,6 +81,7 @@ class LogManager:
         self.detour_logging()
         self.logToGui = LogToGui()
         self.log_settings = None
+        self.myStderr = MyStdout(sys.stderr, LogLevel.ERROR)
 
     def detour_logging(self) -> None:
         from pyffmpeg import logger
@@ -106,6 +107,8 @@ class LogManager:
         self.log_settings = log_settings
         self._log_config = self.generate_config()
         self.apply_log_config()
+        # Hook stderr after loguru add the original stderr sink.
+        sys.stderr = self.myStderr
 
     def generate_config(self):
         if not self.log_settings:
@@ -113,7 +116,7 @@ class LogManager:
         return {
             "handlers": [
                 {
-                    "sink": sys.stderr,
+                    "sink": self.myStderr.original,
                     "level": LogLevel.DEBUG,
                     "format": self.log_settings.show_format,
                 },
