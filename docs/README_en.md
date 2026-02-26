@@ -150,6 +150,8 @@ It is recommended to frequently back up the configuration files to avoid acciden
 Yes! This project is based on Python and PySide (Python bindings for Qt) and is designed to support cross-platform desktop use on Windows, MacOS, and Linux. However, testing on non-Windows platforms is currently limited, and there may be some compatibility issues.
 ### Why can't it run on Windows 7?
 The official Python support for Windows 7 ended after version 3.9, requiring community ports. There are currently no plans for this.
+### Why is the title displayed as blank when editing styles?
+Make sure to select the correct font that includes the character set required for displaying the title. Also, check that the "Add Title" option is enabled and ensure that a sufficient "Title Height" is set.
 ### Why can't I type with my fcitx input method?
 When running on Linux, please launch the main program using `bash main.sh` to ensure the libfcitx5 plugin is loaded. If the pre-compiled plugin fails to load, try recompiling it with `bash fcitx5-qt.sh`.
 ### Does it support [xxx] type of sheet music?
