@@ -939,6 +939,7 @@ dev = [
     { name = "ipykernel" },
     { name = "nuitka" },
     { name = "pympler" },
+    { name = "zstandard" },
 ]
 
 [package.metadata]
@@ -968,6 +969,7 @@ dev = [
     { name = "ipykernel", specifier = ">=7.1.0" },
     { name = "nuitka", specifier = ">=2.8.10" },
     { name = "pympler", specifier = ">=1.1" },
+    { name = "zstandard", specifier = ">=0.25.0" },
 ]
 
 [[package]]

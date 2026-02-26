@@ -42,7 +42,7 @@ def run_script(name: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("cmd", help="Update translation source to ts files.")
+    parser.add_argument("cmd", help=f"Support commands: {list(SCRIPTS_PATH.keys())}")
     args = parser.parse_args()
     if (cmd := args.cmd) in SCRIPTS_PATH.keys():
         run_script(cmd)
