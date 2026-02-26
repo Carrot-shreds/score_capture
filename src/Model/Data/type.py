@@ -209,7 +209,7 @@ class AlwaysValidateModel(BaseModel):
             self.call_oberser_handlers(name, value)
 
     @contextlib.contextmanager
-    def delay_validate(self, notice_observer: bool = True):
+    def delay_validate(self):
         self._no_validate = True
         try:
             yield
@@ -255,6 +255,14 @@ class OnValueChangeModel(BaseModel):
             return
         else:
             self.call_oberser_handlers(name, value)
+
+    @contextlib.contextmanager
+    def no_notify(self):
+        self._no_notify = True
+        try:
+            yield
+        finally:
+            self._no_notify = False
 
     def setattr_block_observer(self, name: str, value: Any) -> None:
         """setattr with no handler call"""

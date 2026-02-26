@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from loguru import logger as log
 from pyqtgraph import ImageItem
-from PySide6.QtCore import QLineF, QPoint, QRectF, Qt
+from PySide6.QtCore import QLineF, QPoint, QPointF, QRectF, Qt
 from PySide6.QtWidgets import QFileDialog
 
 from src.Model.Data.settings import (
@@ -40,13 +40,17 @@ class TabCrop_VM(TabCrop_View):
         self.crop_region = self.videoCropSettings.crop_region
         self.line_thickness = 4  # Must be an even number
         self.drag_anchor_radius = 10
-        self.draging_anchor_num: int | None = None
+        # [0,1,2,3] -> TopLeft,TopRight,BottomLeft,BottomRight Archor
+        # [-1] -> Draging the line (the rect border)
+        self.dragging_anchor_num: int | None = None
+        self.dragging_last_point: QPointF | None = None
 
         self.viewBox = cast(CropViewBox, self.ImageViewer.imageView.view)
         self.viewBox.dragStarted.connect(self.handle_draging_start)
         self.viewBox.dragMoved.connect(self.handle_draging_move)
         self.viewBox.dragFinished.connect(self.handle_draging_finish)
         self.viewBox.regionSelected.connect(self.handle_region_select)
+        self.viewBox.hoverMoved.connect(self.handle_hover_moved)
         self.overlay_item = ImageItem()
         self.last_overlay_region = None
         self.viewBox.addItem(self.overlay_item)
@@ -106,7 +110,31 @@ class TabCrop_VM(TabCrop_View):
         # TopLeft, TopRight, BottomLeft, BottomRight
         return [(x0, y0), (x1, y0), (x0, y1), (x1, y1)]
 
-    def update_region_from_anchor(self, point: QPoint, anchor_num: int) -> None:
+    @property
+    def drag_anchor_points(self) -> list[QPoint]:
+        return [QPoint(*p) for p in self.drag_anchors_pos]
+
+    def update_region_from_border_dragging(self, point: QPointF):
+        if self.dragging_last_point is None:
+            return
+        diff = point - self.dragging_last_point
+        try:
+            # Validate x and y together after setting
+            old_region = self.crop_region.region
+            with self.crop_region.no_notify():
+                with self.crop_region.delay_validate():
+                    self.crop_region.x += int(diff.x())
+                    self.crop_region.y += int(diff.y())
+            self.flush_overlay()
+        except ValueError:
+            self.crop_region.region = old_region
+        else:
+            self.dragging_last_point = point
+
+    def update_region_from_anchor(
+        self, point: QPointF | QPoint, anchor_num: int
+    ) -> None:
+        point = point.toPoint() if isinstance(point, QPointF) else point
         tl, tr, bl, br = [QPoint(*p) for p in self.drag_anchors_pos]
         match anchor_num:
             case 0:
@@ -131,9 +159,61 @@ class TabCrop_VM(TabCrop_View):
             h - self.line_thickness - 1,
         )
         try:
-            self.crop_region.region = region
+            old_region = self.crop_region.region
+            with self.crop_region.no_notify():
+                self.crop_region.region = region
+            self.flush_overlay()
         except ValueError:
-            pass
+            self.crop_region.region = old_region
+
+    def dragging_the_border(self, pos: QPointF) -> bool:
+        # on the line (the border)
+        anchors = self.drag_anchor_points
+        lines = [
+            QLineF(anchors[i[0]], anchors[i[1]])
+            for i in [(0, 1), (0, 2), (1, 3), (2, 3)]
+        ]
+        for line in lines:
+            if line.angle() == 0:  # Horizontal
+                offset_point = QPointF(
+                    self.drag_anchor_radius * 2, -self.line_thickness * 2
+                )
+            if line.angle() == 270:  # Vertical
+                offset_point = QPointF(
+                    -self.line_thickness * 2, self.drag_anchor_radius * 2
+                )
+            rect = QRectF(
+                line.p1() + offset_point,
+                line.p2() - offset_point,
+            )
+            if rect.contains(pos):
+                return True
+        return False
+
+    def dragging_the_anchor(self, pos: QPointF) -> tuple[bool, int | None]:
+        anchors = self.drag_anchor_points
+        # on the anchor
+        for i, anchor in enumerate(anchors):
+            # The position was after the first movement.
+            # So it would be far from the anchor if the mouse move fast.
+            if QLineF(pos, anchor).length() <= self.drag_anchor_radius * 2:
+                return True, i
+        return False, None
+
+    def handle_hover_moved(self, pos: QPointF) -> None:
+        if self.ImageViewer.imageView.image is None:
+            return
+
+        dragging_anchor, num = self.dragging_the_anchor(pos)
+        if dragging_anchor:
+            if num in [0, 3]:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            else:
+                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+        elif self.dragging_the_border(pos):
+            self.setCursor(Qt.CursorShape.OpenHandCursor)
+        else:
+            self.setCursor(Qt.CursorShape.ArrowCursor)
 
     def handle_region_select(self, rectf: QRectF) -> None:
         rect = rectf.toRect()
@@ -142,27 +222,30 @@ class TabCrop_VM(TabCrop_View):
         except ValueError:
             pass
 
-    def handle_draging_start(self, pos: QPoint) -> None:
-        self.draging_anchor_num = None
-        for i, p in enumerate([QPoint(*p) for p in self.drag_anchors_pos]):
-            if QLineF(pos, p).length() <= self.drag_anchor_radius * 2:
-                self.draging_anchor_num = i
-                break
-        if self.draging_anchor_num is not None:
-            self.viewBox.draging_anchor = True
-            self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+    def handle_draging_start(self, pos: QPointF) -> None:
+        self.viewBox.dragging_anchor, self.dragging_anchor_num = (
+            self.dragging_the_anchor(pos)
+        )
+        if self.dragging_anchor_num is None and self.dragging_the_border(pos):
+            self.viewBox.dragging_anchor = True
+            self.dragging_anchor_num = -1
+            self.dragging_last_point = pos
+            self.setCursor(Qt.CursorShape.ClosedHandCursor)
 
-    def handle_draging_move(self, pos: QPoint) -> None:
-        if self.draging_anchor_num is None:
+    def handle_draging_move(self, pos: QPointF) -> None:
+        if self.dragging_anchor_num is None:
             return
-        self.update_region_from_anchor(pos, self.draging_anchor_num)
+        if self.dragging_anchor_num >= 0:
+            self.update_region_from_anchor(pos, self.dragging_anchor_num)
+        elif self.dragging_anchor_num == -1:
+            self.update_region_from_border_dragging(pos)
 
-    def handle_draging_finish(self, pos: QPoint) -> None:
-        if self.draging_anchor_num is None:
+    def handle_draging_finish(self, pos: QPointF) -> None:
+        if self.dragging_anchor_num is None:
             return
-        self.viewBox.draging_anchor = False
-        self.draging_anchor_num = None
-        self.setCursor(Qt.CursorShape.ArrowCursor)
+        self.viewBox.dragging_anchor = False
+        self.dragging_anchor_num = None
+        self.dragging_last_point = None
 
     async def load_ffmpge(self) -> None:
         if hasattr(self, "ffmpeg") and self.ffmpeg:

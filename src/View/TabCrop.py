@@ -5,8 +5,8 @@ from pyqtgraph import functions as fn
 from pyqtgraph.GraphicsScene.mouseEvents import MouseDragEvent
 from pyqtgraph.Point import Point
 from pyqtgraph.Qt import QtCore
-from PySide6.QtCore import QPoint, QPointF, QRectF
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QPointF, QRectF
+from PySide6.QtWidgets import QGraphicsSceneHoverEvent, QWidget
 
 from .ui.TabCrop_ui import Ui_TabCrop
 
@@ -14,13 +14,19 @@ from .ui.TabCrop_ui import Ui_TabCrop
 class CropViewBox(ViewBox):
     # All points mapped to image data coordinates
     regionSelected = QtCore.Signal(QRectF)
-    dragStarted = QtCore.Signal(QPoint)
-    dragMoved = QtCore.Signal(QPoint)
-    dragFinished = QtCore.Signal(QPoint)
+    dragStarted = QtCore.Signal(QPointF)
+    dragMoved = QtCore.Signal(QPointF)
+    dragFinished = QtCore.Signal(QPointF)
+    hoverMoved = QtCore.Signal(QPointF)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.draging_anchor: bool = False
+        self.dragging_anchor: bool = False
+        self.setAcceptHoverEvents(True)
+
+    def hoverMoveEvent(self, ev: QGraphicsSceneHoverEvent):
+        p = self.childGroup.mapFromParent(ev.pos())
+        self.hoverMoved.emit(p)
 
     def mouseDragEvent(self, ev: MouseDragEvent, axis=None):
         ## if axis is specified, event will only affect that axis.
@@ -36,7 +42,7 @@ class CropViewBox(ViewBox):
             QtCore.Qt.MouseButton.LeftButton,
             QtCore.Qt.MouseButton.MiddleButton,
         ]:
-            point: QPoint = cast(QPointF, self.childGroup.mapFromParent(pos)).toPoint()
+            point: QPointF = cast(QPointF, self.childGroup.mapFromParent(pos))
             if ev.isStart():
                 self.dragStarted.emit(point)
             elif ev.isFinish():
@@ -44,7 +50,7 @@ class CropViewBox(ViewBox):
             else:
                 self.dragMoved.emit(point)
 
-            if self.draging_anchor:
+            if self.dragging_anchor:
                 return  # Event already be handled in TabCrop_VM
 
             tr = self.childGroup.transform()

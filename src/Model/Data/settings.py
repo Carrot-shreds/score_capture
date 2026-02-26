@@ -114,7 +114,7 @@ class LocateSettings(SettingsModel):
     window_auto_close: bool = False
     window_limit_move: bool = True
     live_locate: bool = False
-    region_data: ScreenRegionData = ScreenRegionData(0, 0, 514, 114, 1)
+    region_data: ScreenRegionData = ScreenRegionData(0, 0, 511, 111, 1)
 
 
 class CaptureSettings(SettingsModel):
