@@ -89,7 +89,7 @@ def build_images(
         return
     different_index.append(0)
     if captureSettings.if_keep_last:
-        different_index.append(len(diff_list) + 1)  # 添加最后一组
+        different_index.append(len(diff_list))  # 添加最后一组
     different_index = list(set(different_index))  # 先去重
     different_index.sort()  # 后排序
     image_names_couple = [
