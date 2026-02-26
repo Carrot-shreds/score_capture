@@ -32,9 +32,6 @@ class TabCrop_VM(TabCrop_View):
         self.videoCropSettings = videoCropSettings
 
         self.video_path: Path | None = None
-        self.preview_frame_path: Path = (
-            self.pathSettings.main_out_dir / "preview_frame.jpg"
-        )
         self.preview_frame: ImageArray | None = None
         self.overlay: ImageArray | None = None
         self.crop_region = self.videoCropSettings.crop_region
@@ -95,6 +92,10 @@ class TabCrop_VM(TabCrop_View):
         self.pushButton_start_cropping.pressed.connect(
             lambda: asyncio.ensure_future(self.start_cropping())
         )
+
+    @property
+    def preview_frame_path(self) -> Path:
+        return self.pathSettings.main_out_dir / "preview_frame.jpg"
 
     @property
     def drag_anchors_pos(self) -> list[tuple[int, int]]:
@@ -295,6 +296,8 @@ class TabCrop_VM(TabCrop_View):
         ]
         if self.videoCropSettings.skip_nonkey_frames:
             options.insert(0, "-skip_frame nokey")  # Only keep key frames
+        if not (p := self.preview_frame_path.parent).exists():
+            p.mkdir()
         await asyncio.to_thread(self.ffmpeg.options, " ".join(options))
         self.preview_frame = read_image(self.preview_frame_path)
         self.crop_region.image_shape = self.preview_frame.shape[0:2]

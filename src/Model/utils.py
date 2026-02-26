@@ -147,6 +147,8 @@ def save_image(imagepath: ImagePath, img: ImageArray) -> None:
                 "Saving jpg image failed, image shape exceed the limit of jpg format. Please change your saving format to png.",
             )
         )
+    if not (p := imagepath.parent).exists():
+        p.mkdir()
     cv2.imencode(image_format, np.asarray(img))[1].tofile(imagepath)
 
 
