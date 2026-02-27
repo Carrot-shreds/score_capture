@@ -33,10 +33,12 @@ def get_arch() -> str:
     return arch_name[platform.machine()]
 
 
-def make_folder_name(debug: bool) -> str:
+def make_folder_name(debug: bool, upx: bool) -> str:
     # like "score_capture-0.2.0-windows-x86_64"
     # or "score_capture-0.2.0-windows-x86_64-debug-260226_0221"
     name = f"score_capture-{version}-{get_platform()}-{get_arch()}"
+    if upx:
+        name += "-upx"
     if debug:
         name += "-debug-" + datetime.datetime.now().strftime("%y%m%d_%H%M")
     return name
@@ -99,7 +101,7 @@ def build(
         return
 
     # Rename Folder
-    folder_name = make_folder_name(debug)
+    folder_name = make_folder_name(debug, upx)
     out_path = Path(f"./build/{folder_name}")
     if out_path.exists():
         shutil.rmtree(out_path)
