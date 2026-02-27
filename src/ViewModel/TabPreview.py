@@ -1,0 +1,277 @@
+from copy import deepcopy
+from pathlib import Path
+
+import cv2
+from loguru import logger as log
+from PySide6.QtWidgets import QFileDialog
+
+from src.Model.Data.const import PreviewLines
+from src.Model.Data.settings import (
+    captureSettings,
+    guiSettings,
+    lineDetectorSettings,
+    locateSettings,
+    pathSettings,
+    previewSettings,
+)
+from src.Model.Data.type import ImagePath, Line
+from src.Model.image_process import (
+    detect_horizontal_lines,
+    detect_vertical_lines,
+    image_pre_process,
+    invert_image,
+)
+from src.Model.utils import order_path, read_image, save_image, screenshot
+from src.View import TabPreview_View
+from src.ViewModel.binding.bind_data import bind_data
+
+
+class TabPreview_VM(TabPreview_View):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.mainWindow = parent
+
+        self.pathSettings = pathSettings
+        self.locateSettings = locateSettings
+        self.regionData = self.locateSettings.region_data
+        self.captureSettings = captureSettings
+        self.detectorSettings = lineDetectorSettings
+        self.previewSetting = previewSettings
+
+        bind_data(
+            self.doubleSpinBox_detect_coefficient_horizontal,
+            self.detectorSettings,
+            "coefficient_horizontal",
+        )
+        bind_data(
+            self.doubleSpinBox_detect_coefficient_vertical,
+            self.detectorSettings,
+            "coefficient_vertical",
+        )
+        bind_data(
+            self.spinBox_h_invert_thickness_threshold,
+            self.detectorSettings,
+            "h_invert_thickness_threshold",
+        )
+        bind_data(
+            self.doubleSpinBox_h_invert_pixel_threshold,
+            self.detectorSettings,
+            "h_invert_pixel_threshold",
+        )
+        bind_data(
+            self.checkBox_invert_horizontal,
+            self.previewSetting,
+            "show_inverted_horizontal",
+        )
+        bind_data(
+            self.comboBox_line_type,
+            self.previewSetting,
+            "preview_lines",
+            use_index=True,
+        )
+        bind_data(self.checkBox_save_preview, self.previewSetting, "save_preview")
+        bind_data(self.checkBox_live_preview, self.previewSetting, "live_preview")
+        bind_data(self.checkBox_live_detect, self.previewSetting, "live_detect")
+
+        self.lambda_preview_region = lambda v: self.preview_region()
+        self.lambda_preview_lines = lambda v: self.preview_lines()
+        guiSettings.add_observer_handler(
+            "imageViewer_show_tools", self.ImageViewer.toggle_tools
+        )
+        self.previewSetting.add_observer_handlers(
+            ["preview_lines", "show_inverted_horizontal"],
+            lambda v: self.preview_lines() if self.previewSetting.live_detect else None,
+            False,
+        )
+        self.previewSetting.add_observer_handler(
+            "live_preview", self.toggle_live_preview
+        )
+        self.previewSetting.add_observer_handler("live_detect", self.toggle_live_detect)
+
+        self.pushButton_update_image.clicked.connect(self.preview_region)
+        self.pushButton_open_image.clicked.connect(self.select_image)
+        self.pushButton_invert_image.clicked.connect(self.invert_image)
+        self.pushButton_detect_lines.clicked.connect(self.preview_lines)
+        self.pushButton_clear_lines.clicked.connect(self.clear_lines)
+        self.pushButton_glob_image.clicked.connect(self.glob_image)
+
+    def preview_lines(self) -> None:
+        if self.ImageViewer.current_image is None:
+            return
+        original_image = self.ImageViewer.current_original
+        if original_image is None:
+            return
+        gray_image = cv2.cvtColor(original_image, cv2.COLOR_RGB2GRAY)
+
+        lines: list[Line] = []
+        image_draw = deepcopy(original_image)
+        match self.previewSetting.preview_lines:
+            case PreviewLines.ONLY_H:
+                lines += detect_horizontal_lines(
+                    gray_image,
+                    self.detectorSettings.coefficient_horizontal,
+                    self.previewSetting.show_inverted_horizontal,
+                    self.detectorSettings.h_invert_pixel_threshold,
+                    self.detectorSettings.h_invert_thickness_threshold,
+                )
+            case PreviewLines.ONLY_V:
+                if not self.previewSetting.show_inverted_horizontal:
+                    lines += detect_vertical_lines(
+                        gray_image,
+                        None,
+                        coefficient=self.detectorSettings.coefficient_vertical,
+                    )
+            case PreviewLines.ALL:
+                h_lines = detect_horizontal_lines(
+                    gray_image,
+                    self.detectorSettings.coefficient_horizontal,
+                    self.previewSetting.show_inverted_horizontal,
+                    self.detectorSettings.h_invert_pixel_threshold,
+                    self.detectorSettings.h_invert_thickness_threshold,
+                )
+                if not self.previewSetting.show_inverted_horizontal:
+                    lines += detect_vertical_lines(
+                        gray_image, h_lines, self.detectorSettings.coefficient_vertical
+                    )
+                lines += h_lines
+        for line in lines:
+            line.draw(image_draw)
+
+        if self.previewSetting.live_detect:
+            self.ImageViewer.block_SigImageChanged(True)  # block onImageChanged Signal
+        self.ImageViewer.set_current_image(image_draw)
+        self.ImageViewer.block_SigImageChanged(False)
+        str_inverted, str_detected = self.tr("(inverted)"), self.tr("(detected)")
+        label_text = self.ImageViewer.get_label_text().replace(f" {str_inverted}", "")
+        label_text += f" {str_detected}" if label_text.find(str_detected) >= 0 else ""
+        self.ImageViewer.set_label_text(label_text)
+        if self.previewSetting.save_preview:
+            save_image(
+                self.pathSettings.main_out_dir / "preview_linesDetected.png", image_draw
+            )
+
+    def clear_lines(self) -> None:
+        original = self.ImageViewer.current_original
+        if original is None:
+            return
+        self.ImageViewer.set_current_image(original)
+        self.ImageViewer.set_label_text(
+            self.ImageViewer.get_label_text().replace(" " + self.tr("(detected)"), "")
+        )
+
+    def toggle_live_preview(self, state: bool) -> None:
+        """切换启用实时预览"""
+        if state:
+            self.regionData.add_observer_handler("region", self.lambda_preview_region, False)
+            self.preview_region()
+        else:
+            try:
+                self.regionData.remove_observer_handler(
+                    "region", self.lambda_preview_region
+                )
+            except ValueError:
+                return
+
+    def toggle_live_detect(self, state: bool) -> None:
+        """切换启用实时检测"""
+        if state:
+            self.detectorSettings.add_observer_handlers(
+                [
+                    "coefficient_horizontal",
+                    "coefficient_vertical",
+                    "h_invert_thickness_threshold",
+                    "h_invert_pixel_threshold",
+                ],
+                self.lambda_preview_lines,
+                False,
+            )
+            self.ImageViewer.onImageChanged.connect(self.preview_lines)
+            self.preview_lines()
+        else:
+            try:
+                self.detectorSettings.remove_observer_handlers(
+                    [
+                        "coefficient_horizontal",
+                        "coefficient_vertical",
+                        "h_invert_thickness_threshold",
+                        "h_invert_pixel_threshold",
+                    ],
+                    self.lambda_preview_lines,
+                )
+            except ValueError:
+                return
+            self.ImageViewer.onImageChanged.disconnect(self.preview_lines)
+
+    def preview_region(self) -> None:
+        """显示region区域的预览"""
+        if not self.locateSettings.live_locate:
+            log.debug(self.tr("Preview region: {}").format(self.regionData.region))
+        img = image_pre_process(
+            screenshot.raw_function(  # type:ignore
+                region_data=self.regionData, capture_tool=self.captureSettings.tool
+            ),
+            self.captureSettings.if_invert_image,
+        )
+        if self.previewSetting.save_preview:
+            save_image(self.pathSettings.main_out_dir / "preview.png", img)
+        if self.previewSetting.live_preview:
+            self.ImageViewer.show_images(
+                img,
+                autoHistogramRange=False,
+                autoRange=False,
+                autoLevels=False,
+                levels=(0, 255),
+            )
+        else:
+            self.ImageViewer.show_images(img)
+        self.ImageViewer.set_label_text(
+            self.tr("Preview region: {}").format(self.regionData.region)
+        )
+
+    def open_image(self, image_path: ImagePath) -> None:
+        self.ImageViewer.show_images(read_image(image_path))
+
+    def select_image(self) -> None:
+        path, _ = QFileDialog.getOpenFileNames(
+            dir=self.pathSettings.working_dir.as_posix(), filter="Images (*.png *.jpg)"
+        )
+        if path == "":
+            return
+        self.ImageViewer.show_images(*map(Path, path))
+
+    def invert_image(self) -> None:
+        if self.ImageViewer.current_image is not None:
+            self.ImageViewer.set_current_image(
+                invert_image(self.ImageViewer.current_image)
+            )
+        inverted_str = " " + self.tr("(inverted)")
+        if (current_text := self.ImageViewer.get_label_text()).find(inverted_str) >= 0:
+            self.ImageViewer.set_label_text(current_text.replace(inverted_str, ""))
+        else:
+            self.ImageViewer.set_label_text(current_text + inverted_str)
+
+    def glob_image(self) -> None:
+        def _ok():
+            self.ImageViewer.show_images(
+                *order_path(
+                    list(
+                        Path(dialog.lineEdit_path.text()).glob(
+                            dialog.comboBox_glob.currentText()
+                        )
+                    )
+                )
+            )
+            dialog.close()
+
+        dialog = self.create_glob_dialog()
+        dialog.comboBox_glob.addItem(f"{self.pathSettings.working_dir.name}*[0-9].*")
+        dialog.lineEdit_path.setText(self.pathSettings.working_dir.as_posix())
+        dialog.pushButton_select_path.clicked.connect(
+            lambda: (
+                dialog.lineEdit_path.setText(t)
+                if (t := QFileDialog.getExistingDirectory()) != ""
+                else None
+            )
+        )
+        dialog.pushButton_ok.clicked.connect(_ok)
+        dialog.show()
