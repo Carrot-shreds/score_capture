@@ -473,3 +473,15 @@ def ndarray2qimage(img: ImageArray, format: Literal["RGB", "RGBA"] = "RGB") -> Q
             img.shape[1] * 4,
             QImage.Format.Format_RGBA8888,
         )
+
+
+def find_cmd(cmd_name: str) -> Path | None:
+    if sys.platform == "win32":
+        sys_cmd = "where"
+    else:
+        sys_cmd = "which"
+    result = subprocess.run([sys_cmd, cmd_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    else:
+        return Path(result.stdout.strip())

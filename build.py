@@ -11,6 +11,7 @@ from shutil import rmtree
 from loguru import logger as log
 
 from src import __version__ as version
+from src.Model.utils import find_cmd
 
 delete_files = [
     "qt6network.dll",
@@ -41,13 +42,15 @@ def make_folder_name(debug: bool) -> str:
     return name
 
 
-def build(debug: bool = True, clean_output: bool = False, pack_archive: bool = True):
+def build(
+    debug: bool = True, clean_output: bool = False, pack_archive: bool = True, upx=False
+):
     log.info(f"Building mode: {'debug' if debug else 'release'}")
 
     # get upx path
-    result = subprocess.run(["where", "upx"], capture_output=True, text=True)
-    if result.returncode != 0:
+    if upx and not find_cmd("upx"):
         log.warning("Upx unavailable. Check your system path.")
+        upx = False
 
     command = [
         "cmd",
@@ -56,17 +59,18 @@ def build(debug: bool = True, clean_output: bool = False, pack_archive: bool = T
         "--standalone",
         "--clang",
         "--msvc=latest",
-        "--enable-plugin=pyside6,upx",
-        "--onefile-no-compression",
+        "--enable-plugin=pyside6" + (",upx" if upx else ""),
+        "--onefile-no-compression" if upx else "",
         "--include-qt-plugins=platforminputcontexts",
         "--windows-console-mode=disable" if not debug else "",
         "--lto=yes" if not debug else "",  # Link time optimization
-        "--unstripped" if debug else "--strip",  # keep traceback data for debug
+        "--unstripped" if debug else "",  # keep traceback data for debug
         "--remove-output" if clean_output else "",
         "--output-dir=build",
         "--report=build/build_report.xml",
         "--include-data-files=LICENSE=LICENSE",
         "--include-data-files=README.md=README.md",
+        "--include-data-dir=bin=bin",
         "--include-data-dir=docs=docs",
         "--output-filename=score_capture.exe",
         "--windows-icon-from-ico=./src/resource/media/score_capture.jpg",
@@ -156,16 +160,29 @@ if __name__ == "__main__":
         default=True,
         required=False,
     )
+    parser.add_argument(
+        "--upx",
+        help="Use upx to compress the binary files.",
+        type=bool_arg,
+        default=False,
+        required=False,
+    )
 
     args = parser.parse_args()
     log.debug(args.__repr__().split("(")[1:][0].split(")")[:-1][0])
     if args.mode.lower() == "debug":
         build(
-            debug=True, clean_output=args.clean_output, pack_archive=args.pack_archive
+            debug=True,
+            clean_output=args.clean_output,
+            pack_archive=args.pack_archive,
+            upx=args.upx,
         )
     elif args.mode.lower() == "release":
         build(
-            debug=False, clean_output=args.clean_output, pack_archive=args.pack_archive
+            debug=False,
+            clean_output=args.clean_output,
+            pack_archive=args.pack_archive,
+            upx=args.upx,
         )
     else:
         log.error("Invaild build mode, shuold be 'debug' or 'release'.")
