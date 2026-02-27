@@ -134,14 +134,14 @@ wheels = [
 
 [[package]]
 name = "fast-ssim"
-version = "1.1.0"
+version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/75/92/d8edd3adf42b01ba3214a871a63f19d34341739b9951d2768d0d455e6849/fast_ssim-1.1.0.tar.gz", hash = "sha256:42107ed14f159c42f3656c24a9bf2e31e1cf90eea2544a4a9cd4bca35d432393", size = 86918, upload-time = "2026-01-17T20:43:38.624Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/97/b83c8afacbf5d017300ac4c0f62f0246088bde96551b2eda7d35d2b110ac/fast_ssim-1.3.0.tar.gz", hash = "sha256:2c988b14094bdf46a06a9b0d6c2a655ae123b1b3d9a33e9663e0f54c5715cb9c", size = 177896, upload-time = "2026-02-21T11:52:55.731Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/8e/41f6492e5e6cf9f26f4baf5e54ee32e5d724ec5e463b986eddb7760caa83/fast_ssim-1.1.0-py3-none-any.whl", hash = "sha256:36cc78d406ee5ca45371ef2b1711b58a3096505702949f2cff4efef4d70d7ec8", size = 86363, upload-time = "2026-01-17T20:43:37.661Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/a0/d4413af99ba92272f224384e149686aa9f137c9de24d44d266b83212d86c/fast_ssim-1.3.0-py3-none-any.whl", hash = "sha256:a98ba85a6caa27b5d5b22713992707747590660e7d8b1a2ef26be6a0dc4e5fad", size = 177562, upload-time = "2026-02-21T11:52:54.697Z" },
 ]
 
 [[package]]
@@ -944,7 +944,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fast-ssim", specifier = ">=1.1.0" },
+    { name = "fast-ssim", specifier = ">=1.3.0" },
     { name = "fonttools", specifier = ">=4.59.2" },
     { name = "joblib", specifier = ">=1.5.3" },
     { name = "loguru", specifier = ">=0.7.3" },
