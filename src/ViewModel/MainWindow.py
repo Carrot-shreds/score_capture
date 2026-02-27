@@ -110,7 +110,7 @@ class MainWindow_VM(MainWindow_View):
         self.add_language_switch()
 
         # state bar
-        self.label_version.setText("V" + __version__)
+        self.label_version.setText("v" + __version__)
         self.pathSettings.add_observer_handlers(
             ["main_out_dir", "score_title"],
             lambda v: self.label_working_dir.setText(

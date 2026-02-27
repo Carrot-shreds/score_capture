@@ -45,7 +45,7 @@ def show_main_window() -> None:
     try:
         from ctypes import windll  # Only exists on Windows.
 
-        appid = f"Carrot-shreds.Score_capture.{__version__}"
+        appid = f"Carrot-shreds.score_capture.{__version__}"
         windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
     except ImportError:
         pass
